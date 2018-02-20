@@ -1,80 +1,149 @@
 package views
 
-import ui "github.com/jroimartin/gocui"
+import (
+	"bitbucket.org/cswank/music/internal/source"
+	ui "github.com/jroimartin/gocui"
+)
 
 type screen struct {
-	view string
+	view   string
+	width  int
+	height int
 
-	header *header
-	body   *body
-	volume *volume
-	play   *play
-	buffer *buffer
-	search *search
+	header     *header
+	body       *body
+	volume     *volume
+	play       *play
+	buffer     *buffer
+	searchType *searchType
+	login      *login
+
+	keys []key
+
+	source source.Source
 }
 
-func newScreen() (*screen, error) {
-	return nil, nil
+func newScreen(width, height int) (*screen, error) {
+	s := &screen{
+		view:       "body",
+		width:      width,
+		height:     height,
+		header:     newHeader(width, height),
+		body:       newBody(width, height),
+		play:       newPlay(width, height),
+		buffer:     newBuffer(width, height),
+		volume:     newVolume(width, height),
+		login:      newLogin(width, height),
+		searchType: newSearchType(width, height),
+	}
+
+	//s.footer.setView = func(v string) { s.view = v }
+	s.keys = s.getKeys()
+	return s, nil
+}
+
+func (s *screen) quit(g *ui.Gui, v *ui.View) error {
+	return ui.ErrQuit
+}
+
+func (s *screen) showSearch(g *ui.Gui, v *ui.View) error {
+	s.view = "search"
+	return nil
 }
 
 func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	//ui.DefaultEditor = s.search
 
 	return func(g *ui.Gui) error {
-		v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2)
-		if err != nil && err != ui.ErrUnknownView {
+		if s.source == nil {
+			v, err := g.SetView("login", s.login.coords.x1, s.login.coords.y1, s.login.coords.x2, s.login.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+
+			if err := s.login.render(g, v); err != nil {
+				return err
+			}
+		} else if s.view == "search" {
+			v, err := g.SetView("search", s.searchType.coords.x1, s.searchType.coords.y1, s.searchType.coords.x2, s.searchType.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+
+			if err := s.searchType.render(g, v); err != nil {
+				return err
+			}
+		} else {
+			v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+
+			v.Frame = false
+			if err := s.header.render(g, v); err != nil {
+				return err
+			}
+
+			v, err = g.SetView("body", s.body.coords.x1, s.body.coords.y1, s.body.coords.x2, s.body.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+
+			v.Frame = false
+			if err := s.body.render(g, v); err != nil {
+				return err
+			}
+
+			v, err = g.SetView("play", s.play.coords.x1, s.play.coords.y1, s.play.coords.x2, s.play.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+			v.Frame = false
+			v.Editable = true
+
+			if err := s.play.render(g, v); err != nil {
+				return err
+			}
+
+			v, err = g.SetView("buffer", s.buffer.coords.x1, s.buffer.coords.y1, s.buffer.coords.x2, s.buffer.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+			v.Frame = false
+			v.Editable = true
+
+			if err := s.buffer.render(g, v); err != nil {
+				return err
+			}
+
+			v, err = g.SetView("volume", s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+			v.Frame = false
+			v.Editable = true
+
+			if err := s.volume.render(g, v); err != nil {
+				return err
+			}
+
+			_, err = g.SetCurrentView(s.view)
 			return err
 		}
 
-		v.Frame = false
-		if err := s.header.render(g, v); err != nil {
-			return err
-		}
-
-		v, err = g.SetView("body", s.body.coords.x1, s.body.coords.y1, s.body.coords.x2, s.body.coords.y2)
-		if err != nil && err != ui.ErrUnknownView {
-			return err
-		}
-
-		v.Frame = false
-		if err := s.body.render(g, v); err != nil {
-			return err
-		}
-
-		v, err = g.SetView("play", s.play.coords.x1, s.play.coords.y1, s.play.coords.x2, s.play.coords.y2)
-		if err != nil && err != ui.ErrUnknownView {
-			return err
-		}
-		v.Frame = false
-		v.Editable = true
-
-		if err := s.play.render(g, v); err != nil {
-			return err
-		}
-
-		v, err = g.SetView("buffer", s.buffer.coords.x1, s.buffer.coords.y1, s.buffer.coords.x2, s.buffer.coords.y2)
-		if err != nil && err != ui.ErrUnknownView {
-			return err
-		}
-		v.Frame = false
-		v.Editable = true
-
-		if err := s.buffer.render(g, v); err != nil {
-			return err
-		}
-
-		v, err = g.SetView("volume", s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2)
-		if err != nil && err != ui.ErrUnknownView {
-			return err
-		}
-		v.Frame = false
-		v.Editable = true
-
-		if err := s.volume.render(g, v); err != nil {
-			return err
-		}
-
-		_, err = g.SetCurrentView(s.view)
-		return err
+		return nil
 	}
+}
+
+func (s *screen) keybindings(g *ui.Gui) error {
+	for _, k := range s.keys {
+		for _, view := range k.views {
+			for _, kb := range k.keys {
+				if err := g.SetKeybinding(view, kb, ui.ModNone, k.keybinding); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }

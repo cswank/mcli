@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"bitbucket.org/cswank/music/internal/colors"
@@ -26,28 +27,35 @@ type coords struct {
 	y2 int
 }
 
-type gui struct {
-}
-
-func newGUI() error {
+//Start is what main calls to get the app rolling
+func Start() error {
 	var err error
 	g, err = ui.NewGui(ui.Output256)
 	if err != nil {
 		return fmt.Errorf("could not create gui: %s", err)
 	}
 
-	s, err := newScreen()
+	w, h := g.Size()
+	s, err := newScreen(w, h)
 	if err != nil {
 		return err
 	}
 
-	w, h := g.Size()
 	g.SetManagerFunc(s.getLayout(w, h))
-	return nil
-}
 
-//Start is what main calls to get the app rolling
-func Start() error {
+	if err := s.keybindings(g); err != nil {
+		return err
+	}
+
+	if err := g.MainLoop(); err != nil {
+		if err != ui.ErrQuit {
+			log.SetOutput(os.Stderr)
+			log.Println(err)
+			return err
+		}
+	}
+
+	g.Close()
 	return nil
 }
 
