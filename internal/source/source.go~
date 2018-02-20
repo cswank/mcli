@@ -1,0 +1,8 @@
+package views
+
+type GUI struct {
+}
+
+func Start() error {
+	return nil
+}
