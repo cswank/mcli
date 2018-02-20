@@ -43,8 +43,10 @@ func newGUI() error {
 
 	w, h := g.Size()
 	g.SetManagerFunc(s.getLayout(w, h))
+	return nil
 }
 
+//Start is what main calls to get the app rolling
 func Start() error {
 	return nil
 }

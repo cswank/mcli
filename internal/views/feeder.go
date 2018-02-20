@@ -1,7 +1,7 @@
 package views
 
 import (
-	"github.com/cswank/music/internal/source"
+	"bitbucket.org/cswank/music/internal/source"
 )
 
 //feeder feeds the screen the data that it craves
