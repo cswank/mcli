@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cswank/music/internal/colors"
+	"bitbucket.org/cswank/music/internal/colors"
 	ui "github.com/jroimartin/gocui"
 )
 

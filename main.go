@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/cswank/music/internal/views"
+	"bitbucket.org/cswank/music/internal/views"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/flac"
 	"github.com/faiface/beep/speaker"
