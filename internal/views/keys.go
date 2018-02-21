@@ -20,8 +20,9 @@ type key struct {
 
 func (s *screen) getKeys() []key {
 	return []key{
-		// {views: []string{s.body.name}, keys: []interface{}{'n', ui.KeyArrowDown}, keybinding: s.locked(s.body.next), help: keyHelp{key: "n", body: "(or down arrow) move cursor down"}},
-		// {views: []string{s.body.name}, keys: []interface{}{'p', ui.KeyArrowUp}, keybinding: s.locked(s.body.prev), help: keyHelp{key: "p", body: "(or up arrow) move cursor up"}},
+		{views: []string{"body"}, keys: []interface{}{'n', ui.KeyArrowDown}, keybinding: s.body.next, help: keyHelp{key: "n", body: "(or down arrow) move cursor down"}},
+		{views: []string{"body"}, keys: []interface{}{'p', ui.KeyArrowUp}, keybinding: s.body.prev, help: keyHelp{key: "p", body: "(or up arrow) move cursor up"}},
+		{views: []string{"body"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.body.enter, help: keyHelp{key: "enter", body: "select item at cursor"}},
 		// {views: []string{s.body.name}, keys: []interface{}{'f', ui.KeyArrowRight}, keybinding: s.locked(s.body.forward), help: keyHelp{key: "f", body: "(or right arrow) forward to next page"}},
 		// {views: []string{s.body.name}, keys: []interface{}{'b', ui.KeyArrowLeft}, keybinding: s.locked(s.body.back), help: keyHelp{key: "b", body: "(or left arrow) backward to prev page"}},
 		// {views: []string{s.body.name}, keys: []interface{}{ui.KeyEnter}, keybinding: s.locked(s.enter), help: keyHelp{key: "enter", body: "view item at cursor"}},

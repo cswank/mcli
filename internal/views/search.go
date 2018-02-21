@@ -17,11 +17,10 @@ type search struct {
 	coords coords
 
 	searchType string
-	searchTerm string
-	doSearch   func() error
+	doSearch   func(string, string) error
 }
 
-func newSearch(w, h int, cb func() error) *search {
+func newSearch(w, h int, cb func(string, string) error) *search {
 	maxX, maxY := g.Size()
 	x1 := maxX/2 - searchWidth/2
 	x2 := maxX/2 + searchWidth/2
@@ -37,25 +36,27 @@ func newSearch(w, h int, cb func() error) *search {
 func (s *search) album(g *ui.Gui, v *ui.View) error {
 	s.searchType = "album"
 	v.Clear()
-	return s.doSearch()
+	return s.doSearch(s.searchType, "")
 }
 
 func (s *search) artist(g *ui.Gui, v *ui.View) error {
 	s.searchType = "artist"
 	v.Clear()
-	return s.doSearch()
+	return s.doSearch(s.searchType, "")
 }
 
 func (s *search) track(g *ui.Gui, v *ui.View) error {
 	s.searchType = "track"
 	v.Clear()
-	return s.doSearch()
+	return s.doSearch(s.searchType, "")
 }
 
 func (s *search) exit(g *ui.Gui, v *ui.View) error {
-	s.searchTerm = strings.TrimSpace(v.Buffer())
+	st := s.searchType
+	s.searchType = ""
+	t := strings.TrimSpace(v.Buffer())
 	v.Clear()
-	return s.doSearch()
+	return s.doSearch(st, t)
 }
 
 func (s *search) render(g *ui.Gui, v *ui.View) error {

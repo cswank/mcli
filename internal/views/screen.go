@@ -1,8 +1,6 @@
 package views
 
 import (
-	"log"
-
 	"bitbucket.org/cswank/music/internal/source"
 	ui "github.com/jroimartin/gocui"
 )
@@ -31,33 +29,78 @@ func newScreen(width, height int) (*screen, error) {
 		width:  width,
 		height: height,
 		header: newHeader(width, height),
-		body:   newBody(width, height),
-		play:   newPlay(width, height),
-		buffer: newBuffer(width, height),
 		volume: newVolume(width, height),
 	}
 
 	l := newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
+	s.body = newBody(width, height, s.enter)
+	s.buffer = newBuffer(width, height)
+	s.play = newPlay(width, height, s.buffer.progress)
+
 	s.login = l
 	s.keys = s.getKeys()
+
+	cli, err := source.GetTidal()
+	if err == nil {
+		s.source = cli
+		s.play.source = cli
+	}
+
 	return s, nil
 }
 
-func (s *screen) doLogin(username, passoword string) error {
+func (s *screen) enter(t string, r source.Result) error {
+	switch t {
+	case "album search":
+		results, err := s.source.GetAlbum(r.URL)
+		if err != nil {
+			return err
+		}
+		s.body.results = results
+		s.header.header = results.Header
+	case "album":
+		s.play.ch <- playlist{ids: []string{r.URL}}
+
+	}
+	return nil
+}
+
+func (s *screen) doLogin(username, password string) error {
 	s.view = "search-type"
+	var err error
+	s.source, err = source.NewTidal(username, password)
+	if err != nil {
+		return err
+	}
+
 	return g.DeleteView("login")
 }
 
-func (s *screen) doSearch() error {
-	if s.search.searchType != "" && s.search.searchTerm == "" {
+func (s *screen) doSearch(searchType, term string) error {
+	if searchType != "" && term == "" {
 		s.view = "search"
 		return g.DeleteView("search-type")
 	}
 
-	if s.search.searchTerm != "" {
+	if term != "" {
+		var results *source.Results
+		var err error
 		s.view = "body"
-		log.Printf("searching %s for %s\n", s.search.searchType, s.search.searchTerm)
+		switch searchType {
+		case "album":
+			results, err = s.source.FindAlbum(term, s.body.height)
+		case "artist":
+			results, err = s.source.FindArtist(term, s.body.height)
+		case "track":
+			results, err = s.source.FindTrack(term, s.body.height)
+		}
+		if err != nil {
+			return err
+		}
+
+		s.body.results = results
+		s.header.header = results.Header
 		return g.DeleteView("search")
 	}
 	return nil
@@ -73,22 +116,27 @@ func (s *screen) showSearch(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
-	s.view = "login"
+	if s.source == nil {
+		s.view = "login"
+	} else {
+		s.view = "search-type"
+	}
+
 	return func(g *ui.Gui) error {
+		g.Cursor = true
+		g.InputEsc = true
 		if s.view == "login" {
 			v, err := g.SetView("login", s.login.coords.x1, s.login.coords.y1, s.login.coords.x2, s.login.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
 
-			g.Cursor = true
-			g.InputEsc = true
 			ui.DefaultEditor = s.login
-
 			v.Editable = true
 			v.Frame = true
 			v.Title = s.login.title
 		} else if s.view == "search-type" || s.view == "search" {
+			g.Cursor = false
 			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
@@ -114,6 +162,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			}
 
 			v.Frame = false
+			v.Editable = false
 			if err := s.body.render(g, v); err != nil {
 				return err
 			}
@@ -125,20 +174,12 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			v.Frame = false
 			v.Editable = true
 
-			if err := s.play.render(g, v); err != nil {
-				return err
-			}
-
 			v, err = g.SetView("buffer", s.buffer.coords.x1, s.buffer.coords.y1, s.buffer.coords.x2, s.buffer.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
 			v.Frame = false
 			v.Editable = true
-
-			if err := s.buffer.render(g, v); err != nil {
-				return err
-			}
 
 			v, err = g.SetView("volume", s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {

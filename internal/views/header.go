@@ -4,6 +4,7 @@ import ui "github.com/jroimartin/gocui"
 
 type header struct {
 	coords coords
+	header string
 }
 
 func newHeader(w, h int) *header {
@@ -11,5 +12,6 @@ func newHeader(w, h int) *header {
 }
 
 func (h *header) render(g *ui.Gui, v *ui.View) error {
-	return nil
+	_, err := v.Write([]byte(c2(h.header)))
+	return err
 }

@@ -1,12 +1,24 @@
 package source
 
+import "io"
+
 type Result struct {
-	Value string
-	URL   string
+	Artist string
+	Title  string
+	URL    string
+}
+
+type Results struct {
+	Type    string
+	Header  string
+	Results []Result
+	Print   func(io.Writer, Result) error
 }
 
 type Source interface {
-	FindArtist(string) ([]Result, error)
-	FindAlbum(string) ([]Result, error)
-	FindTrack(string) ([]Result, error)
+	FindArtist(string, int) (*Results, error)
+	FindAlbum(string, int) (*Results, error)
+	FindTrack(string, int) (*Results, error)
+	GetAlbum(string) (*Results, error)
+	GetTrack(string) string
 }

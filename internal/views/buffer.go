@@ -1,15 +1,25 @@
 package views
 
-import ui "github.com/jroimartin/gocui"
+import "log"
 
 type buffer struct {
-	coords coords
+	coords   coords
+	progress chan progress
 }
 
 func newBuffer(w, h int) *buffer {
-	return &buffer{coords: coords{x1: -1, y1: h - 2, x2: w - 1, y2: h}}
+	b := &buffer{
+		coords:   coords{x1: -1, y1: h - 2, x2: w - 1, y2: h},
+		progress: make(chan progress),
+	}
+
+	go b.render(b.progress)
+	return b
 }
 
-func (b *buffer) render(g *ui.Gui, v *ui.View) error {
-	return nil
+func (b *buffer) render(ch <-chan progress) {
+	for {
+		p := <-ch
+		log.Println(p)
+	}
 }
