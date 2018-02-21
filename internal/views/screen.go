@@ -1,6 +1,8 @@
 package views
 
 import (
+	"log"
+
 	"bitbucket.org/cswank/music/internal/source"
 	ui "github.com/jroimartin/gocui"
 )
@@ -10,13 +12,13 @@ type screen struct {
 	width  int
 	height int
 
-	header     *header
-	body       *body
-	volume     *volume
-	play       *play
-	buffer     *buffer
-	searchType *searchType
-	login      *login
+	header *header
+	body   *body
+	volume *volume
+	play   *play
+	buffer *buffer
+	search *search
+	login  *login
 
 	keys []key
 
@@ -25,21 +27,40 @@ type screen struct {
 
 func newScreen(width, height int) (*screen, error) {
 	s := &screen{
-		view:       "body",
-		width:      width,
-		height:     height,
-		header:     newHeader(width, height),
-		body:       newBody(width, height),
-		play:       newPlay(width, height),
-		buffer:     newBuffer(width, height),
-		volume:     newVolume(width, height),
-		login:      newLogin(width, height),
-		searchType: newSearchType(width, height),
+		view:   "body",
+		width:  width,
+		height: height,
+		header: newHeader(width, height),
+		body:   newBody(width, height),
+		play:   newPlay(width, height),
+		buffer: newBuffer(width, height),
+		volume: newVolume(width, height),
 	}
 
-	//s.footer.setView = func(v string) { s.view = v }
+	l := newLogin(width, height, s.doLogin)
+	s.search = newSearch(width, height, s.doSearch)
+	s.login = l
 	s.keys = s.getKeys()
 	return s, nil
+}
+
+func (s *screen) doLogin(username, passoword string) error {
+	s.view = "search-type"
+	return g.DeleteView("login")
+}
+
+func (s *screen) doSearch() error {
+	if s.search.searchType != "" && s.search.searchTerm == "" {
+		s.view = "search"
+		return g.DeleteView("search-type")
+	}
+
+	if s.search.searchTerm != "" {
+		s.view = "body"
+		log.Printf("searching %s for %s\n", s.search.searchType, s.search.searchTerm)
+		return g.DeleteView("search")
+	}
+	return nil
 }
 
 func (s *screen) quit(g *ui.Gui, v *ui.View) error {
@@ -47,30 +68,33 @@ func (s *screen) quit(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) showSearch(g *ui.Gui, v *ui.View) error {
-	s.view = "search"
+	s.view = "search-type"
 	return nil
 }
 
 func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
-	//ui.DefaultEditor = s.search
-
+	s.view = "login"
 	return func(g *ui.Gui) error {
-		if s.source == nil {
+		if s.view == "login" {
 			v, err := g.SetView("login", s.login.coords.x1, s.login.coords.y1, s.login.coords.x2, s.login.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
 
-			if err := s.login.render(g, v); err != nil {
-				return err
-			}
-		} else if s.view == "search" {
-			v, err := g.SetView("search", s.searchType.coords.x1, s.searchType.coords.y1, s.searchType.coords.x2, s.searchType.coords.y2)
+			g.Cursor = true
+			g.InputEsc = true
+			ui.DefaultEditor = s.login
+
+			v.Editable = true
+			v.Frame = true
+			v.Title = s.login.title
+		} else if s.view == "search-type" || s.view == "search" {
+			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
 
-			if err := s.searchType.render(g, v); err != nil {
+			if err := s.search.render(g, v); err != nil {
 				return err
 			}
 		} else {
@@ -127,11 +151,10 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 
-			_, err = g.SetCurrentView(s.view)
-			return err
 		}
 
-		return nil
+		_, err := g.SetCurrentView(s.view)
+		return err
 	}
 }
 
