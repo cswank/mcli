@@ -34,8 +34,7 @@
 [[projects]]
   name = "github.com/jroimartin/gocui"
   packages = ["."]
-  revision = "4e9ce9a8e26f2ef33dfe297dbdfca148733b6b9b"
-  version = "v0.3.0"
+  revision = "4f518eddb04b8f73870836b6d1941e8aa3c06637"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -94,6 +93,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b6cd7866d136bed10cd0fe022d7835d1849ca59e8442e5b797527fd22389a47d"
+  inputs-digest = "5fcafe90a778023f19f8edffdeb1aa9db73be03c4d0af32529b0ec5c10a022b6"
   solver-name = "gps-cdcl"
   solver-version = 1

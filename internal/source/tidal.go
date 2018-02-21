@@ -86,7 +86,7 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 		out[i] = Result{
 			Artist: as,
 			Title:  t.Title,
-			URL:    fmt.Sprintf("%s", t.ID),
+			ID:     fmt.Sprintf("%s", t.ID),
 		}
 	}
 
@@ -118,7 +118,7 @@ func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
 		out[i] = Result{
 			Artist: as,
 			Title:  a.Title,
-			URL:    fmt.Sprintf("%s", a.ID),
+			ID:     fmt.Sprintf("%s", a.ID),
 		}
 	}
 

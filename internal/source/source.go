@@ -5,7 +5,7 @@ import "io"
 type Result struct {
 	Artist string
 	Title  string
-	URL    string
+	ID     string
 }
 
 type Results struct {

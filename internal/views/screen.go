@@ -53,15 +53,14 @@ func newScreen(width, height int) (*screen, error) {
 func (s *screen) enter(t string, r source.Result) error {
 	switch t {
 	case "album search":
-		results, err := s.source.GetAlbum(r.URL)
+		results, err := s.source.GetAlbum(r.ID)
 		if err != nil {
 			return err
 		}
 		s.body.results = results
 		s.header.header = results.Header
 	case "album":
-		s.play.ch <- playlist{ids: []string{r.URL}}
-
+		s.play.ch <- playlist{ids: []string{r.ID}}
 	}
 	return nil
 }
