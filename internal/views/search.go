@@ -2,7 +2,6 @@ package views
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	ui "github.com/jroimartin/gocui"
@@ -53,7 +52,6 @@ func (s *search) track(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *search) escape(g *ui.Gui, v *ui.View) error {
-	log.Println("escape")
 	s.searchType = ""
 	return nil
 }
