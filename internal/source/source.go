@@ -3,9 +3,11 @@ package source
 import "io"
 
 type Result struct {
-	Artist string
-	Title  string
-	ID     string
+	Artist   string
+	Album    string
+	Title    string
+	ID       string
+	Duration int
 }
 
 type Results struct {
@@ -16,6 +18,7 @@ type Results struct {
 }
 
 type Source interface {
+	Name() string
 	FindArtist(string, int) (*Results, error)
 	FindAlbum(string, int) (*Results, error)
 	FindTrack(string, int) (*Results, error)

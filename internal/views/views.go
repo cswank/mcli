@@ -29,7 +29,18 @@ type coords struct {
 
 //Start is what main calls to get the app rolling
 func Start() error {
-	var err error
+	dir := fmt.Sprintf("%s/.music/", os.Getenv("HOME"))
+	e, err := exists(dir)
+	if err != nil {
+		return err
+	}
+
+	if !e {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			return err
+		}
+	}
+
 	g, err = ui.NewGui(ui.Output256)
 	if err != nil {
 		return fmt.Errorf("could not create gui: %s", err)

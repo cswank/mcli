@@ -1,14 +1,21 @@
 package views
 
-import "log"
+import (
+	"fmt"
+	"strings"
+
+	ui "github.com/jroimartin/gocui"
+)
 
 type buffer struct {
+	width    int
 	coords   coords
 	progress chan progress
 }
 
 func newBuffer(w, h int) *buffer {
 	b := &buffer{
+		width:    w - 1,
 		coords:   coords{x1: -1, y1: h - 2, x2: w - 1, y2: h},
 		progress: make(chan progress),
 	}
@@ -18,8 +25,16 @@ func newBuffer(w, h int) *buffer {
 }
 
 func (b *buffer) render(ch <-chan progress) {
+	var v *ui.View
 	for {
 		p := <-ch
-		log.Println(p)
+		g.Update(func(g *ui.Gui) error {
+			if v == nil {
+				v, _ = g.View("buffer")
+			}
+			v.Clear()
+			fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.n/p.total)))
+			return nil
+		})
 	}
 }

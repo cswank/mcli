@@ -1,9 +1,8 @@
 package views
 
 import (
+	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -21,39 +20,37 @@ type progress struct {
 }
 
 type playlist struct {
-	ids []string
+	tracks []source.Result
 }
 
-// type progressRead struct {
-// 	io.Reader
-// 	t, l int
-// }
+type progressRead struct {
+	io.Reader
+	t, l, reads int
+	ch          chan<- progress
+}
 
-// func newProxy(r io.Reader, l int) *progressRead {
-// 	return &progressRead{r, 0, l}
-// }
+func newProgressRead(r io.Reader, l int, ch chan<- progress) *progressRead {
+	return &progressRead{Reader: r, t: 0, l: l, ch: ch}
+}
 
-// func (r *progressRead) Read(p []byte) (n int, err error) {
-// 	n, err = r.Reader.Read(p)
-// 	r.t += n
-// 	ui.Update(func() {
-// 		progress.SetCurrent(r.t)
-// 		progress.SetMax(r.l)
-// 	})
-// 	return
-// }
+func (r *progressRead) Read(p []byte) (int, error) {
+	n, err := r.Reader.Read(p)
+	r.t += n
+	r.reads++
+	if r.reads%100 == 0 {
+		r.ch <- progress{n: r.t, total: r.l}
+	}
+	return n, err
+}
 
-// // Close the reader when it implements io.Closer
-// func (r *progressRead) Close() (err error) {
-// 	ui.Update(func() {
-// 		progress.SetCurrent(0)
-// 		progress.SetMax(1)
-// 	})
-// 	if closer, ok := r.Reader.(io.Closer); ok {
-// 		return closer.Close()
-// 	}
-// 	return
-// }
+// Close the reader when it implements io.Closer
+func (r *progressRead) Close() error {
+	r.ch <- progress{n: r.t, total: r.t}
+	if closer, ok := r.Reader.(io.Closer); ok {
+		return closer.Close()
+	}
+	return nil
+}
 
 type play struct {
 	coords   coords
@@ -79,7 +76,7 @@ func (p *play) play(ch <-chan playlist, cancel <-chan bool) error {
 	for {
 		select {
 		case pl := <-ch:
-			log.Println("playing", pl)
+			p.doPlay(pl.tracks[0])
 		case <-cancel:
 		}
 	}
@@ -89,45 +86,93 @@ func (p *play) render(g *ui.Gui, v *ui.View) {
 
 }
 
-func (p *play) doPlay() error {
-	u := p.source.GetTrack("x")
-	resp, err := http.Get(u)
+func (p *play) doPlay(result source.Result) error {
+	in, f, err := p.getFile(result)
 	if err != nil {
 		return err
 	}
 
-	in, err := ioutil.TempFile("", "")
-	log.Println("flac", in.Name())
-	if err != nil {
-		return err
-	}
+	if f == nil {
+		u := p.source.GetTrack(result.ID)
+		resp, err := http.Get(u)
+		if err != nil {
+			return err
+		}
+		r := newProgressRead(resp.Body, int(resp.ContentLength), p.progress)
 
-	m, err := io.Copy(in, resp.Body)
-	in.Close()
-	log.Println("done writing", in.Name(), m, err)
+		_, err = io.Copy(in, r)
+		if err != nil {
+			return err
+		}
 
-	f, err := os.Open(in.Name())
-	log.Println("open", err)
-	if err != nil {
-		return err
+		in.Close()
+		f, err = os.Open(in.Name())
+		if err != nil {
+			return err
+		}
 	}
 
 	s, format, err := flac.Decode(f)
 	if err != nil {
-		log.Println("decode", err)
 		return err
 	}
 
 	if err := speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10)); err != nil {
-		log.Println("speaker init", err)
 		return err
 	}
 
 	done := make(chan struct{})
-	log.Println("about to play", s, format)
 	speaker.Play(beep.Seq(s, beep.Callback(func() {
 		close(done)
 	})))
-	<-done
-	return s.Close()
+
+	start := int(time.Now().Unix())
+	for {
+		select {
+		case <-time.After(100 * time.Millisecond):
+			n := int(time.Now().Unix())
+			p.progress <- progress{n: n - start, total: result.Duration}
+		case <-done:
+			return s.Close()
+		}
+	}
+}
+
+func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
+	dir := fmt.Sprintf("%s/.music/cache/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), result.Artist, result.Album)
+	e, err := exists(dir)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if !e {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), result.Artist, result.Album, result.ID)
+	e, err = exists(pth)
+	if err != nil {
+		return nil, nil, err
+	}
+	if e {
+		f, err := os.Open(pth)
+		return nil, f, err
+	}
+
+	f, err := os.Create(pth)
+	return f, nil, err
+
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }

@@ -12,6 +12,7 @@ func newHeader(w, h int) *header {
 }
 
 func (h *header) render(g *ui.Gui, v *ui.View) error {
+	v.Clear()
 	_, err := v.Write([]byte(c2(h.header)))
 	return err
 }

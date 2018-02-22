@@ -61,6 +61,10 @@ func NewTidal(username, pw string) (*Tidal, error) {
 	return &Tidal{client: t}, nil
 }
 
+func (t *Tidal) Name() string {
+	return "tidal"
+}
+
 func (t *Tidal) FindArtist(term string, limit int) (*Results, error) {
 	return nil, nil
 }
@@ -83,10 +87,13 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 		if len(t.Title) > maxTitle {
 			maxTitle = len(t.Title)
 		}
+		dur, _ := t.Duration.Int64()
 		out[i] = Result{
-			Artist: as,
-			Title:  t.Title,
-			ID:     fmt.Sprintf("%s", t.ID),
+			Artist:   as,
+			Album:    t.Album.Title,
+			Title:    t.Title,
+			ID:       fmt.Sprintf("%s", t.ID),
+			Duration: int(dur),
 		}
 	}
 

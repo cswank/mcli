@@ -60,7 +60,7 @@ func (s *screen) enter(t string, r source.Result) error {
 		s.body.results = results
 		s.header.header = results.Header
 	case "album":
-		s.play.ch <- playlist{ids: []string{r.ID}}
+		s.play.ch <- playlist{tracks: []source.Result{r}}
 	}
 	return nil
 }
