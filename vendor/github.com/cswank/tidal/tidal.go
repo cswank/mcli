@@ -42,7 +42,6 @@ func (t *Tidal) CheckSession() (bool, error) {
 	//return False
 	var out interface{}
 	err := t.get(fmt.Sprintf("users/%s/subscription", t.UserID), nil, &out)
-	fmt.Println(out)
 	return true, err
 }
 

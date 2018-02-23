@@ -53,6 +53,8 @@ func Start() error {
 	}
 
 	g.SetManagerFunc(s.getLayout(w, h))
+	g.Cursor = true
+	g.InputEsc = true
 
 	if err := s.keybindings(g); err != nil {
 		return err

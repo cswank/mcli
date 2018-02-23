@@ -38,3 +38,8 @@ func (b *buffer) render(ch <-chan progress) {
 		})
 	}
 }
+
+func (b *buffer) clear() {
+	v, _ := g.View("buffer")
+	v.Clear()
+}

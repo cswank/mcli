@@ -1,6 +1,8 @@
 package views
 
 import (
+	"log"
+
 	"bitbucket.org/cswank/music/internal/source"
 	ui "github.com/jroimartin/gocui"
 )
@@ -21,6 +23,7 @@ type screen struct {
 	keys []key
 
 	source source.Source
+	stack  stack
 }
 
 func newScreen(width, height int) (*screen, error) {
@@ -51,6 +54,9 @@ func newScreen(width, height int) (*screen, error) {
 }
 
 func (s *screen) enter(t string, r source.Result) error {
+	c := s.body.cursor
+	s.body.cursor = 0
+	log.Println("enter", c)
 	switch t {
 	case "album search":
 		results, err := s.source.GetAlbum(r.ID)
@@ -59,6 +65,7 @@ func (s *screen) enter(t string, r source.Result) error {
 		}
 		s.body.results = results
 		s.header.header = results.Header
+		s.stack.add(results, c)
 	case "artist search":
 		results, err := s.source.GetArtistAlbums(r.ID, s.height)
 		if err != nil {
@@ -66,6 +73,7 @@ func (s *screen) enter(t string, r source.Result) error {
 		}
 		s.body.results = results
 		s.header.header = results.Header
+		s.stack.add(results, c)
 	case "artist albums":
 		results, err := s.source.GetAlbum(r.ID)
 		if err != nil {
@@ -73,6 +81,7 @@ func (s *screen) enter(t string, r source.Result) error {
 		}
 		s.body.results = results
 		s.header.header = results.Header
+		s.stack.add(results, c)
 	case "album":
 		s.play.ch <- playlist{tracks: []source.Result{r}}
 	}
@@ -114,8 +123,27 @@ func (s *screen) doSearch(searchType, term string) error {
 
 		s.body.results = results
 		s.header.header = results.Header
+		s.stack.add(results, s.body.cursor)
 		return g.DeleteView("search")
 	}
+	return nil
+}
+
+func (s *screen) escape(g *ui.Gui, v *ui.View) error {
+	s.stack.pop()
+	if s.stack.len() == 0 {
+		s.body.clear()
+		s.play.clear()
+		s.buffer.clear()
+		s.header.clear()
+		s.view = "search-type"
+		return nil
+	}
+	r, c := s.stack.top()
+	log.Println("escape", c)
+	s.body.results = r
+	s.body.cursor = c
+	s.header.header = r.Header
 	return nil
 }
 
@@ -137,7 +165,6 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 
 	return func(g *ui.Gui) error {
 		g.Cursor = true
-		g.InputEsc = true
 		if s.view == "login" {
 			v, err := g.SetView("login", s.login.coords.x1, s.login.coords.y1, s.login.coords.x2, s.login.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
@@ -149,7 +176,9 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			v.Frame = true
 			v.Title = s.login.title
 		} else if s.view == "search-type" || s.view == "search" {
-			g.Cursor = false
+			if s.view == "search-type" {
+				g.Cursor = false
+			}
 			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
@@ -204,7 +233,6 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if err := s.volume.render(g, v); err != nil {
 				return err
 			}
-
 		}
 
 		_, err := g.SetCurrentView(s.view)
@@ -223,4 +251,46 @@ func (s *screen) keybindings(g *ui.Gui) error {
 		}
 	}
 	return nil
+}
+
+type stack struct {
+	//current results
+	topR *source.Results
+	//current cursor
+	topC    int
+	stack   []source.Results
+	cursors []int
+}
+
+func (s *stack) len() int {
+	return len(s.stack)
+}
+
+func (s *stack) top() (*source.Results, int) {
+	return s.topR, s.topC
+}
+
+func (s *stack) add(r *source.Results, c int) {
+	s.topR = r
+	s.topC = c
+	s.stack = append(s.stack, *r)
+	s.cursors = append(s.cursors, c)
+}
+
+func (s *stack) pop() {
+	if len(s.stack) == 0 {
+		return
+	}
+
+	i := len(s.stack) - 1
+	s.stack = s.stack[0:i]
+	c := s.cursors[len(s.cursors)-1]
+	s.cursors = s.cursors[0:i]
+	if len(s.stack) == 0 {
+		s.topR = nil
+		s.topC = c
+	} else {
+		s.topR = &s.stack[len(s.stack)-1]
+		s.topC = c
+	}
 }

@@ -16,3 +16,8 @@ func (h *header) render(g *ui.Gui, v *ui.View) error {
 	_, err := v.Write([]byte(c2(h.header)))
 	return err
 }
+
+func (h *header) clear() {
+	v, _ := g.View("header")
+	v.Clear()
+}

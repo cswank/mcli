@@ -3,7 +3,6 @@ package views
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -83,6 +82,11 @@ func (p *play) play(ch <-chan playlist, cancel <-chan bool) error {
 	}
 }
 
+func (p *play) clear() {
+	v, _ := g.View("play")
+	v.Clear()
+}
+
 func (p *play) render(g *ui.Gui, v *ui.View) {
 
 }
@@ -99,7 +103,6 @@ func (p *play) doPlay(result source.Result) error {
 			return err
 		}
 		resp, err := http.Get(u)
-		log.Println("resp", resp, err)
 		if err != nil {
 			return err
 		}
