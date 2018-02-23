@@ -122,6 +122,7 @@ func (s *screen) doSearch(searchType, term string) error {
 		}
 
 		s.stack.clear()
+		s.body.cursor = 0
 		s.body.results = results
 		s.header.header = results.Header
 		s.stack.add(results, s.body.cursor)
