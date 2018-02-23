@@ -56,7 +56,6 @@ func newScreen(width, height int) (*screen, error) {
 func (s *screen) enter(t string, r source.Result) error {
 	c := s.body.cursor
 	s.body.cursor = 0
-	log.Println("enter", c)
 	switch t {
 	case "album search":
 		results, err := s.source.GetAlbum(r.ID)
@@ -128,6 +127,11 @@ func (s *screen) doSearch(searchType, term string) error {
 		s.stack.add(results, s.body.cursor)
 		return g.DeleteView("search")
 	}
+	return nil
+}
+
+func (s *screen) pause(g *ui.Gui, v *ui.View) error {
+	s.play.doPause()
 	return nil
 }
 

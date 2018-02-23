@@ -3,6 +3,7 @@ package views
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -58,6 +59,7 @@ type play struct {
 	ch       chan playlist
 	cancel   chan bool
 	source   source.Source
+	pause    chan bool
 }
 
 func newPlay(w, h int, pr chan<- progress) *play {
@@ -66,10 +68,16 @@ func newPlay(w, h int, pr chan<- progress) *play {
 		progress: pr,
 		ch:       make(chan playlist),
 		cancel:   make(chan bool),
+		pause:    make(chan bool),
 	}
 
 	go p.play(p.ch, p.cancel)
 	return p
+}
+
+func (p *play) doPause() {
+	log.Println("pause")
+	p.pause <- true
 }
 
 func (p *play) play(ch <-chan playlist, cancel <-chan bool) error {
@@ -125,7 +133,7 @@ func (p *play) doPlay(result source.Result) error {
 		return err
 	}
 
-	if err := speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10)); err != nil {
+	if err := speaker.Init(format.SampleRate, format.SampleRate.N(time.Second)); err != nil {
 		return err
 	}
 
@@ -135,6 +143,7 @@ func (p *play) doPlay(result source.Result) error {
 	})))
 
 	start := int(time.Now().Unix())
+	var locked bool
 	for {
 		select {
 		case <-time.After(100 * time.Millisecond):
@@ -142,6 +151,14 @@ func (p *play) doPlay(result source.Result) error {
 			p.progress <- progress{n: n - start, total: result.Duration}
 		case <-done:
 			return s.Close()
+		case <-p.pause:
+			if locked {
+				locked = false
+				speaker.Unlock()
+			} else {
+				locked = true
+				speaker.Lock()
+			}
 		}
 	}
 }

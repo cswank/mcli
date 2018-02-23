@@ -25,6 +25,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"body"}, keys: []interface{}{'s'}, keybinding: s.showSearch, help: keyHelp{key: "s", body: "search"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.body.enter, help: keyHelp{key: "enter", body: "select item at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escape, help: keyHelp{key: "escape", body: "go back to the previous view"}},
+		{views: []string{"body"}, keys: []interface{}{ui.KeySpace}, keybinding: s.pause, help: keyHelp{key: "escape", body: "go back to the previous view"}},
 		{views: []string{"search-type"}, keys: []interface{}{'m'}, keybinding: s.search.album},
 		{views: []string{"search-type"}, keys: []interface{}{'t'}, keybinding: s.search.artist},
 		{views: []string{"search-type"}, keys: []interface{}{'k'}, keybinding: s.search.track},

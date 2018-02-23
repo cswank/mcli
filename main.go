@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -26,6 +27,8 @@ func init() {
 		}
 		logfile = f
 		log.SetOutput(f)
+	} else {
+		log.SetOutput(ioutil.Discard)
 	}
 }
 
