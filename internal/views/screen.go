@@ -121,6 +121,7 @@ func (s *screen) doSearch(searchType, term string) error {
 			return err
 		}
 
+		s.stack.clear()
 		s.body.results = results
 		s.header.header = results.Header
 		s.stack.add(results, s.body.cursor)
@@ -275,6 +276,13 @@ func (s *stack) add(r *source.Results, c int) {
 	s.topC = c
 	s.stack = append(s.stack, *r)
 	s.cursors = append(s.cursors, c)
+}
+
+func (s *stack) clear() {
+	s.topR = nil
+	s.topC = 0
+	s.cursors = []int{}
+	s.stack = []source.Results{}
 }
 
 func (s *stack) pop() {
