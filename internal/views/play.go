@@ -3,6 +3,7 @@ package views
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -93,8 +94,12 @@ func (p *play) doPlay(result source.Result) error {
 	}
 
 	if f == nil {
-		u := p.source.GetTrack(result.ID)
+		u, err := p.source.GetTrack(result.ID)
+		if err != nil {
+			return err
+		}
 		resp, err := http.Get(u)
+		log.Println("resp", resp, err)
 		if err != nil {
 			return err
 		}

@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	ui "github.com/jroimartin/gocui"
@@ -81,6 +82,11 @@ func (s *search) render(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *search) Edit(v *ui.View, key ui.Key, ch rune, mod ui.Modifier) {
+	log.Println("key", key == ui.KeyEsc)
+	if key == ui.KeyEsc {
+		s.searchType = ""
+		return
+	}
 	in := string(ch)
 	buf := strings.TrimSpace(v.Buffer())
 	if key == 127 && len(buf) > 0 {

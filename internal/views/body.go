@@ -56,5 +56,6 @@ func (b *body) prev(g *ui.Gui, v *ui.View) error {
 
 func (b *body) enter(g *ui.Gui, v *ui.View) error {
 	r := b.results.Results[b.cursor]
+	v.SetCursor(0, 0)
 	return b.doEnter(b.results.Type, r)
 }

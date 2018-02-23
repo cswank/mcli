@@ -59,6 +59,20 @@ func (s *screen) enter(t string, r source.Result) error {
 		}
 		s.body.results = results
 		s.header.header = results.Header
+	case "artist search":
+		results, err := s.source.GetArtistAlbums(r.ID, s.height)
+		if err != nil {
+			return err
+		}
+		s.body.results = results
+		s.header.header = results.Header
+	case "artist albums":
+		results, err := s.source.GetAlbum(r.ID)
+		if err != nil {
+			return err
+		}
+		s.body.results = results
+		s.header.header = results.Header
 	case "album":
 		s.play.ch <- playlist{tracks: []source.Result{r}}
 	}

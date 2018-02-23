@@ -23,5 +23,6 @@ type Source interface {
 	FindAlbum(string, int) (*Results, error)
 	FindTrack(string, int) (*Results, error)
 	GetAlbum(string) (*Results, error)
-	GetTrack(string) string
+	GetTrack(string) (string, error)
+	GetArtistAlbums(string, int) (*Results, error)
 }

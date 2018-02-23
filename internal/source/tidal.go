@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/the5heepdev/tidal"
+	"github.com/cswank/tidal"
 )
 
 type Tidal struct {
@@ -47,7 +47,10 @@ func NewTidal(username, pw string) (*Tidal, error) {
 	var t *tidal.Tidal
 	t, err := getTidal()
 	if err != nil {
-		t = tidal.New(username, pw)
+		t, err = tidal.New(username, pw)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if t.SessionID == "" {
@@ -66,15 +69,81 @@ func (t *Tidal) Name() string {
 }
 
 func (t *Tidal) FindArtist(term string, limit int) (*Results, error) {
-	return nil, nil
+	artists, err := t.client.SearchArtists(term, fmt.Sprintf("%d", limit))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Result, len(artists))
+	var max int
+	for i, a := range artists {
+		if len(a.Name) > max {
+			max = len(a.Name)
+		}
+		out[i] = Result{
+			ID:     fmt.Sprintf("%s", a.ID),
+			Artist: a.Name,
+		}
+	}
+
+	f := "%s\n"
+	return &Results{
+		Header: fmt.Sprintf(f, "Artist"),
+		Type:   "artist search",
+		Print: func(w io.Writer, r Result) error {
+			_, err := fmt.Fprintf(w, f, r.Artist)
+			return err
+		},
+		Results: out,
+	}, nil
 }
 
-func (t *Tidal) GetTrack(id string) string {
+func (t *Tidal) GetArtistAlbums(id string, limit int) (*Results, error) {
+	albums, err := t.client.GetArtistAlbums(id, fmt.Sprintf("%d", limit))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Result, len(albums))
+	var max int
+	for i, a := range albums {
+		if len(a.Title) > max {
+			max = len(a.Title)
+		}
+		artists := make([]string, len(a.Artists))
+		for i, a := range a.Artists {
+			artists[i] = a.Name
+		}
+		as := strings.Join(artists, ", ")
+		if len(a.Title) > max {
+			max = len(a.Title)
+		}
+		out[i] = Result{
+			ID:     fmt.Sprintf("%s", a.ID),
+			Title:  a.Title,
+			Artist: as,
+		}
+	}
+
+	f := fmt.Sprintf("%%-%ds%%s\n", max+4)
+	return &Results{
+		Header: fmt.Sprintf(f, "Album", "Artist"),
+		Type:   "album search",
+		Print: func(w io.Writer, r Result) error {
+			_, err := fmt.Fprintf(w, f, r.Title, r.Artist)
+			return err
+		},
+		Results: out,
+	}, nil
+}
+
+func (t *Tidal) GetTrack(id string) (string, error) {
 	return t.client.GetStreamURL(id, "LOSSLESS")
 }
 
 func (t *Tidal) GetAlbum(id string) (*Results, error) {
-	tracks := t.client.GetAlbumTracks(id)
+	tracks, err := t.client.GetAlbumTracks(id)
+	if err != nil {
+		return nil, err
+	}
 	out := make([]Result, len(tracks))
 	var maxTitle int
 
@@ -110,7 +179,10 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 }
 
 func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
-	albums := t.client.SearchAlbums(term, fmt.Sprintf("%d", limit))
+	albums, err := t.client.SearchAlbums(term, fmt.Sprintf("%d", limit))
+	if err != nil {
+		return nil, err
+	}
 	out := make([]Result, len(albums))
 	var maxTitle int
 	for i, a := range albums {
