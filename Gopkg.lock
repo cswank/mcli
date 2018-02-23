@@ -9,6 +9,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/cswank/tidal"
+  packages = ["."]
+  revision = "0cc3ac41e344f9ae636fe75aea0edb882188c97b"
+
+[[projects]]
+  branch = "master"
   name = "github.com/faiface/beep"
   packages = [".","flac","speaker"]
   revision = "19cac87c68f0b2887e26c56f0aa5e1ab70a45ee1"
@@ -74,12 +80,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/the5heepdev/tidal"
-  packages = ["."]
-  revision = "18ac69b42eb0bb552f456df18830f41086cdf651"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "37707fdb30a5b38865cfb95e5aab41707daec7fd"
@@ -93,6 +93,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5fcafe90a778023f19f8edffdeb1aa9db73be03c4d0af32529b0ec5c10a022b6"
+  inputs-digest = "f0e205885ec89806f93bc9ac4af47c869ad666adf4ac45dfb26b4a1529db9d15"
   solver-name = "gps-cdcl"
   solver-version = 1
