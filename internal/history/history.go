@@ -63,22 +63,26 @@ func (f *FileHistory) Fetch(page, pageSize int) (*source.Results, error) {
 	if err != nil {
 		return nil, err
 	}
-	start := page * pageSize
-	if start >= len(rows) {
-		return nil, nil
-	}
-	end := start + pageSize
-	if end >= len(rows) {
-		end = len(rows)
-	}
 
-	rows = rows[start:end]
-	res := make([]source.Result, len(rows))
+	var res []source.Result
 	var maxTitle, maxAlbum int
-	for i, row := range rows {
+	seen := map[string]bool{}
+	for _, row := range rows {
+		if len(res) == pageSize {
+			break
+		}
+
 		if len(row) < 6 {
 			continue
 		}
+
+		id := row[4]
+		if seen[id] {
+			continue
+		} else {
+			seen[id] = true
+		}
+
 		if len(row[1]) > maxTitle {
 			maxTitle = len(row[1])
 		}
@@ -90,13 +94,13 @@ func (f *FileHistory) Fetch(page, pageSize int) (*source.Results, error) {
 		if err != nil {
 			return nil, err
 		}
-		res[i] = source.Result{
-			ID:       row[4],
+		res = append(res, source.Result{
+			ID:       id,
 			Title:    row[1],
 			Album:    row[2],
 			Artist:   row[3],
 			Duration: int(d),
-		}
+		})
 	}
 
 	format := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum)
