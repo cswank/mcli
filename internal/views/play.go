@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"bitbucket.org/cswank/music/internal/history"
 	"bitbucket.org/cswank/music/internal/source"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/flac"
@@ -60,19 +61,25 @@ type play struct {
 	cancel   chan bool
 	source   source.Source
 	pause    chan bool
+	history  history.History
 }
 
-func newPlay(w, h int, pr chan<- progress) *play {
+func newPlay(w, h int, pr chan<- progress) (*play, error) {
+	hist, err := history.NewFileHistory()
+	if err != nil {
+		return nil, err
+	}
 	p := &play{
 		coords:   coords{x1: -1, y1: h - 3, x2: w, y2: h - 1},
 		progress: pr,
 		ch:       make(chan playlist),
 		cancel:   make(chan bool),
 		pause:    make(chan bool),
+		history:  hist,
 	}
 
 	go p.play(p.ch, p.cancel)
-	return p
+	return p, nil
 }
 
 func (p *play) doPause() {
@@ -84,7 +91,9 @@ func (p *play) play(ch <-chan playlist, cancel <-chan bool) error {
 	for {
 		select {
 		case pl := <-ch:
-			p.doPlay(pl.tracks[0])
+			if err := p.doPlay(pl.tracks[0]); err != nil {
+				log.Println("couldn't play track", err)
+			}
 		case <-cancel:
 		}
 	}
@@ -100,6 +109,10 @@ func (p *play) render(g *ui.Gui, v *ui.View) {
 }
 
 func (p *play) doPlay(result source.Result) error {
+	if err := p.history.Save(result); err != nil {
+		return err
+	}
+
 	in, f, err := p.getFile(result)
 	if err != nil {
 		return err
@@ -143,20 +156,27 @@ func (p *play) doPlay(result source.Result) error {
 	})))
 
 	start := int(time.Now().Unix())
-	var locked bool
+	var paused bool
+	var pauseTime time.Duration
 	for {
 		select {
 		case <-time.After(100 * time.Millisecond):
 			n := int(time.Now().Unix())
-			p.progress <- progress{n: n - start, total: result.Duration}
+			if !paused {
+				p.progress <- progress{n: n - start, total: result.Duration}
+			} else {
+				pauseTime += 100 * time.Millisecond
+			}
 		case <-done:
 			return s.Close()
 		case <-p.pause:
-			if locked {
-				locked = false
+			if paused {
+				start += int(pauseTime.Seconds()) + 1 //add 1 because of the 1 second buffer in speaker.Init
+				pauseTime = 0
+				paused = false
 				speaker.Unlock()
 			} else {
-				locked = true
+				paused = true
 				speaker.Lock()
 			}
 		}
@@ -176,7 +196,7 @@ func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
 		}
 	}
 
-	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), result.Artist, result.Album, result.ID)
+	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s.flac", os.Getenv("HOME"), p.source.Name(), result.Artist, result.Album, result.Title)
 	e, err = exists(pth)
 	if err != nil {
 		return nil, nil, err

@@ -39,7 +39,11 @@ func newScreen(width, height int) (*screen, error) {
 	l := newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
 	s.buffer = newBuffer(width, height)
-	s.play = newPlay(width, height, s.buffer.progress)
+	var err error
+	s.play, err = newPlay(width, height, s.buffer.progress)
+	if err != nil {
+		return nil, err
+	}
 
 	s.login = l
 	s.keys = s.getKeys()
@@ -93,6 +97,18 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 	s.view = "search-type"
 	s.search.searchType = ""
+	return nil
+}
+
+func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
+	s.view = "body"
+	res, err := s.play.history.Fetch(0, s.height)
+	if err != nil {
+		return err
+	}
+	s.header.header = res.Header
+	s.body.results = res
+	s.body.cursor = 0
 	return nil
 }
 
