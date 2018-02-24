@@ -98,6 +98,36 @@ func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 	return nil
 }
 
+func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
+	r := s.body.results.Results[s.body.cursor]
+	c := s.body.cursor
+	results, err := s.source.GetAlbum(r.Album.ID)
+	if err != nil {
+		return err
+	}
+	s.body.cursor = 0
+	s.body.results = results
+	s.header.header = results.Header
+	s.stack.clear()
+	s.stack.add(results, c)
+	return nil
+}
+
+func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
+	r := s.body.results.Results[s.body.cursor]
+	c := s.body.cursor
+	results, err := s.source.GetArtistAlbums(r.Artist.ID, s.height)
+	if err != nil {
+		return err
+	}
+	s.body.cursor = 0
+	s.body.results = results
+	s.header.header = results.Header
+	s.stack.clear()
+	s.stack.add(results, c)
+	return nil
+}
+
 func (s *screen) volumeUp(g *ui.Gui, v *ui.View) error {
 	s.play.volume(0.5)
 	return nil
