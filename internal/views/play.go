@@ -11,6 +11,7 @@ import (
 	"bitbucket.org/cswank/music/internal/history"
 	"bitbucket.org/cswank/music/internal/source"
 	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/flac"
 	"github.com/faiface/beep/speaker"
 	ui "github.com/jroimartin/gocui"
@@ -25,35 +26,6 @@ type playlist struct {
 	tracks []source.Result
 }
 
-type progressRead struct {
-	io.Reader
-	t, l, reads int
-	ch          chan<- progress
-}
-
-func newProgressRead(r io.Reader, l int, ch chan<- progress) *progressRead {
-	return &progressRead{Reader: r, t: 0, l: l, ch: ch}
-}
-
-func (r *progressRead) Read(p []byte) (int, error) {
-	n, err := r.Reader.Read(p)
-	r.t += n
-	r.reads++
-	if r.reads%100 == 0 {
-		r.ch <- progress{n: r.t, total: r.l}
-	}
-	return n, err
-}
-
-// Close the reader when it implements io.Closer
-func (r *progressRead) Close() error {
-	r.ch <- progress{n: r.t, total: r.t}
-	if closer, ok := r.Reader.(io.Closer); ok {
-		return closer.Close()
-	}
-	return nil
-}
-
 type play struct {
 	coords   coords
 	progress chan<- progress
@@ -61,6 +33,7 @@ type play struct {
 	cancel   chan bool
 	source   source.Source
 	pause    chan bool
+	vol      chan float64
 	history  history.History
 }
 
@@ -76,6 +49,7 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 		cancel:   make(chan bool),
 		pause:    make(chan bool),
 		history:  hist,
+		vol:      make(chan float64),
 	}
 
 	go p.play(p.ch, p.cancel)
@@ -83,8 +57,11 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 }
 
 func (p *play) doPause() {
-	log.Println("pause")
 	p.pause <- true
+}
+
+func (p *play) volume(v float64) {
+	p.vol <- v
 }
 
 func (p *play) play(ch <-chan playlist, cancel <-chan bool) error {
@@ -119,7 +96,7 @@ func (p *play) doPlay(result source.Result) error {
 	}
 
 	if f == nil {
-		u, err := p.source.GetTrack(result.ID)
+		u, err := p.source.GetTrack(result.Track.ID)
 		if err != nil {
 			return err
 		}
@@ -146,12 +123,20 @@ func (p *play) doPlay(result source.Result) error {
 		return err
 	}
 
-	if err := speaker.Init(format.SampleRate, format.SampleRate.N(time.Second)); err != nil {
+	if err := speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/2)); err != nil {
 		return err
 	}
 
 	done := make(chan struct{})
-	speaker.Play(beep.Seq(s, beep.Callback(func() {
+	vol := &effects.Volume{
+		Streamer: s,
+		Base:     2,
+	}
+
+	ctrl := &beep.Ctrl{
+		Streamer: vol,
+	}
+	speaker.Play(beep.Seq(ctrl, beep.Callback(func() {
 		close(done)
 	})))
 
@@ -163,28 +148,27 @@ func (p *play) doPlay(result source.Result) error {
 		case <-time.After(100 * time.Millisecond):
 			n := int(time.Now().Unix())
 			if !paused {
-				p.progress <- progress{n: n - start, total: result.Duration}
+				p.progress <- progress{n: n - start, total: result.Track.Duration}
 			} else {
 				pauseTime += 100 * time.Millisecond
 			}
 		case <-done:
 			return s.Close()
+		case v := <-p.vol:
+			speaker.Lock()
+			vol.Volume += v
+			speaker.Unlock()
 		case <-p.pause:
-			if paused {
-				start += int(pauseTime.Seconds()) + 1 //add 1 because of the 1 second buffer in speaker.Init
-				pauseTime = 0
-				paused = false
-				speaker.Unlock()
-			} else {
-				paused = true
-				speaker.Lock()
-			}
+			paused = !paused
+			speaker.Lock()
+			ctrl.Paused = paused
+			speaker.Unlock()
 		}
 	}
 }
 
 func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
-	dir := fmt.Sprintf("%s/.music/cache/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), result.Artist, result.Album)
+	dir := fmt.Sprintf("%s/.music/cache/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), result.Artist.Name, result.Album.Title)
 	e, err := exists(dir)
 	if err != nil {
 		return nil, nil, err
@@ -196,7 +180,7 @@ func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
 		}
 	}
 
-	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s.flac", os.Getenv("HOME"), p.source.Name(), result.Artist, result.Album, result.Title)
+	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s.flac", os.Getenv("HOME"), p.source.Name(), result.Artist.Name, result.Album.Title, result.Track.Title)
 	e, err = exists(pth)
 	if err != nil {
 		return nil, nil, err
@@ -220,4 +204,33 @@ func exists(path string) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+type progressRead struct {
+	io.Reader
+	t, l, reads int
+	ch          chan<- progress
+}
+
+func newProgressRead(r io.Reader, l int, ch chan<- progress) *progressRead {
+	return &progressRead{Reader: r, t: 0, l: l, ch: ch}
+}
+
+func (r *progressRead) Read(p []byte) (int, error) {
+	n, err := r.Reader.Read(p)
+	r.t += n
+	r.reads++
+	if r.reads%100 == 0 {
+		r.ch <- progress{n: r.t, total: r.l}
+	}
+	return n, err
+}
+
+// Close the reader when it implements io.Closer
+func (r *progressRead) Close() error {
+	r.ch <- progress{n: r.t, total: r.t}
+	if closer, ok := r.Reader.(io.Closer); ok {
+		return closer.Close()
+	}
+	return nil
 }

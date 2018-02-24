@@ -15,7 +15,7 @@ type body struct {
 func newBody(w, h int) *body {
 	return &body{
 		height: h - 3,
-		coords: coords{x1: -1, y1: 0, x2: w - 1, y2: h - 2},
+		coords: coords{x1: -1, y1: 0, x2: w, y2: h - 2},
 	}
 }
 

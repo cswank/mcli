@@ -14,7 +14,6 @@ type screen struct {
 
 	header *header
 	body   *body
-	volume *volume
 	play   *play
 	buffer *buffer
 	search *search
@@ -33,7 +32,6 @@ func newScreen(width, height int) (*screen, error) {
 		height: height,
 		body:   newBody(width, height),
 		header: newHeader(width, height),
-		volume: newVolume(width, height),
 	}
 
 	l := newLogin(width, height, s.doLogin)
@@ -63,7 +61,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 	switch s.body.results.Type {
 	case "album search":
 		s.body.cursor = 0
-		results, err := s.source.GetAlbum(r.ID)
+		results, err := s.source.GetAlbum(r.Album.ID)
 		if err != nil {
 			return err
 		}
@@ -72,7 +70,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "artist search":
 		s.body.cursor = 0
-		results, err := s.source.GetArtistAlbums(r.ID, s.height)
+		results, err := s.source.GetArtistAlbums(r.Artist.ID, s.height)
 		if err != nil {
 			return err
 		}
@@ -81,7 +79,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "artist albums":
 		s.body.cursor = 0
-		results, err := s.source.GetAlbum(r.ID)
+		results, err := s.source.GetAlbum(r.Album.ID)
 		if err != nil {
 			return err
 		}
@@ -97,6 +95,16 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 	s.view = "search-type"
 	s.search.searchType = ""
+	return nil
+}
+
+func (s *screen) volumeUp(g *ui.Gui, v *ui.View) error {
+	s.play.volume(0.5)
+	return nil
+}
+
+func (s *screen) volumeDown(g *ui.Gui, v *ui.View) error {
+	s.play.volume(-0.5)
 	return nil
 }
 
@@ -253,17 +261,6 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			}
 			v.Frame = false
 			v.Editable = true
-
-			v, err = g.SetView("volume", s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2)
-			if err != nil && err != ui.ErrUnknownView {
-				return err
-			}
-			v.Frame = false
-			v.Editable = true
-
-			if err := s.volume.render(g, v); err != nil {
-				return err
-			}
 		}
 
 		_, err := g.SetCurrentView(s.view)

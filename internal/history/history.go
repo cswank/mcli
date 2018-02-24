@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
-	"time"
 
 	"bitbucket.org/cswank/music/internal/source"
 )
@@ -46,7 +44,7 @@ func (f *FileHistory) Save(r source.Result) error {
 	defer file.Close()
 	w := csv.NewWriter(file)
 
-	if err := w.Write([]string{time.Now().Format(time.RFC3339), r.Title, r.Album, r.Artist, r.ID, strconv.Itoa(r.Duration)}); err != nil {
+	if err := w.Write(r.ToCSV()); err != nil {
 		return err
 	}
 	w.Flush()
@@ -71,44 +69,30 @@ func (f *FileHistory) Fetch(page, pageSize int) (*source.Results, error) {
 		if len(res) == pageSize {
 			break
 		}
-
-		if len(row) < 6 {
-			continue
-		}
-
-		id := row[4]
-		if seen[id] {
-			continue
-		} else {
-			seen[id] = true
-		}
-
-		if len(row[1]) > maxTitle {
-			maxTitle = len(row[1])
-		}
-		if len(row[2]) > maxAlbum {
-			maxAlbum = len(row[2])
-		}
-
-		d, err := strconv.ParseInt(row[5], 10, 64)
-		if err != nil {
+		r := &source.Result{}
+		if err := r.FromCSV(row); err != nil {
 			return nil, err
 		}
-		res = append(res, source.Result{
-			ID:       id,
-			Title:    row[1],
-			Album:    row[2],
-			Artist:   row[3],
-			Duration: int(d),
-		})
+		if seen[r.Track.ID] {
+			continue
+		} else {
+			seen[r.Track.ID] = true
+		}
+		if len(r.Track.Title) > maxTitle {
+			maxTitle = len(r.Track.Title)
+		}
+		if len(r.Album.Title) > maxAlbum {
+			maxAlbum = len(r.Album.Title)
+		}
+		res = append(res, *r)
 	}
 
-	format := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum)
+	format := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
 	return &source.Results{
 		Header: fmt.Sprintf(format, "Title", "Album", "Artist"),
 		Type:   "album",
 		Print: func(w io.Writer, r source.Result) error {
-			_, err := fmt.Fprintf(w, format, r.Title, r.Album, r.Artist)
+			_, err := fmt.Fprintf(w, format, r.Track.Title, r.Album.Title, r.Artist.Name)
 			return err
 		},
 		Results: res,
