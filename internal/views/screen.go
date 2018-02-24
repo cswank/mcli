@@ -31,13 +31,13 @@ func newScreen(width, height int) (*screen, error) {
 		view:   "body",
 		width:  width,
 		height: height,
+		body:   newBody(width, height),
 		header: newHeader(width, height),
 		volume: newVolume(width, height),
 	}
 
 	l := newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
-	s.body = newBody(width, height, s.enter)
 	s.buffer = newBuffer(width, height)
 	s.play = newPlay(width, height, s.buffer.progress)
 
@@ -53,11 +53,12 @@ func newScreen(width, height int) (*screen, error) {
 	return s, nil
 }
 
-func (s *screen) enter(t string, r source.Result) error {
+func (s *screen) enter(g *ui.Gui, v *ui.View) error {
+	r := s.body.results.Results[s.body.cursor]
 	c := s.body.cursor
-	s.body.cursor = 0
-	switch t {
+	switch s.body.results.Type {
 	case "album search":
+		s.body.cursor = 0
 		results, err := s.source.GetAlbum(r.ID)
 		if err != nil {
 			return err
@@ -66,6 +67,7 @@ func (s *screen) enter(t string, r source.Result) error {
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "artist search":
+		s.body.cursor = 0
 		results, err := s.source.GetArtistAlbums(r.ID, s.height)
 		if err != nil {
 			return err
@@ -74,6 +76,7 @@ func (s *screen) enter(t string, r source.Result) error {
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "artist albums":
+		s.body.cursor = 0
 		results, err := s.source.GetAlbum(r.ID)
 		if err != nil {
 			return err
@@ -84,6 +87,12 @@ func (s *screen) enter(t string, r source.Result) error {
 	case "album":
 		s.play.ch <- playlist{tracks: []source.Result{r}}
 	}
+	return nil
+}
+
+func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
+	s.view = "search-type"
+	s.search.searchType = ""
 	return nil
 }
 

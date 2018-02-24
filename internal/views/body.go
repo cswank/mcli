@@ -10,14 +10,12 @@ type body struct {
 	height  int
 	results *source.Results
 	cursor  int
-	doEnter func(string, source.Result) error
 }
 
-func newBody(w, h int, enter func(string, source.Result) error) *body {
+func newBody(w, h int) *body {
 	return &body{
-		doEnter: enter,
-		height:  h - 3,
-		coords:  coords{x1: -1, y1: 0, x2: w - 1, y2: h - 2},
+		height: h - 3,
+		coords: coords{x1: -1, y1: 0, x2: w - 1, y2: h - 2},
 	}
 }
 
@@ -57,9 +55,4 @@ func (b *body) prev(g *ui.Gui, v *ui.View) error {
 	}
 	b.cursor--
 	return nil
-}
-
-func (b *body) enter(g *ui.Gui, v *ui.View) error {
-	r := b.results.Results[b.cursor]
-	return b.doEnter(b.results.Type, r)
 }

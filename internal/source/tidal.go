@@ -214,5 +214,43 @@ func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
 }
 
 func (t *Tidal) FindTrack(term string, limit int) (*Results, error) {
-	return nil, nil
+	tracks, err := t.client.SearchTracks(term, fmt.Sprintf("%d", limit))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Result, len(tracks))
+	var maxTitle int
+	var maxAlbum int
+	for i, t := range tracks {
+		artists := make([]string, len(t.Artists))
+		for i, a := range t.Artists {
+			artists[i] = a.Name
+		}
+		as := strings.Join(artists, ", ")
+		if len(t.Title) > maxTitle {
+			maxTitle = len(t.Title)
+		}
+		if len(t.Album.Title) > maxAlbum {
+			maxAlbum = len(t.Album.Title)
+		}
+		dur, _ := t.Duration.Int64()
+		out[i] = Result{
+			Artist:   as,
+			Album:    t.Album.Title,
+			Title:    t.Title,
+			ID:       fmt.Sprintf("%s", t.ID),
+			Duration: int(dur),
+		}
+	}
+
+	f := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum)
+	return &Results{
+		Header: fmt.Sprintf(f, "Title", "Album", "Artist"),
+		Type:   "album",
+		Print: func(w io.Writer, r Result) error {
+			_, err := fmt.Fprintf(w, f, r.Title, r.Album, r.Artist)
+			return err
+		},
+		Results: out,
+	}, nil
 }

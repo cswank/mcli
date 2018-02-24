@@ -51,11 +51,6 @@ func (s *search) track(g *ui.Gui, v *ui.View) error {
 	return s.doSearch(s.searchType, "")
 }
 
-func (s *search) escape(g *ui.Gui, v *ui.View) error {
-	s.searchType = ""
-	return nil
-}
-
 func (s *search) exit(g *ui.Gui, v *ui.View) error {
 	st := s.searchType
 	s.searchType = ""
