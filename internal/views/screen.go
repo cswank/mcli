@@ -3,7 +3,6 @@ package views
 import (
 	"fmt"
 	"io"
-	"log"
 
 	"bitbucket.org/cswank/music/internal/source"
 	ui "github.com/jroimartin/gocui"
@@ -20,6 +19,7 @@ type screen struct {
 	buffer *buffer
 	search *search
 	login  *login
+	help   *help
 
 	keys []key
 
@@ -34,6 +34,7 @@ func newScreen(width, height int) (*screen, error) {
 		height: height,
 		body:   newBody(width, height),
 		header: newHeader(width, height),
+		help:   newHelp(width, height),
 	}
 
 	l := newLogin(width, height, s.doLogin)
@@ -173,12 +174,23 @@ func (s *screen) volumeDown(g *ui.Gui, v *ui.View) error {
 	return nil
 }
 
-func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
+func (s *screen) showHelp(g *ui.Gui, v *ui.View) error {
+	s.view = "help"
+	return s.help.show(g, v, s.keys)
+}
+
+func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 	s.view = "body"
+	return s.help.hide(g, v)
+}
+
+func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
 	res, err := s.play.history.Fetch(0, s.height)
 	if err != nil {
 		return err
 	}
+
+	s.view = "body"
 	s.header.header = res.Header
 	s.body.results = res
 	s.body.cursor = 0
@@ -244,7 +256,6 @@ func (s *screen) escape(g *ui.Gui, v *ui.View) error {
 		return nil
 	}
 	r, c := s.stack.top()
-	log.Println("escape", c)
 	s.body.results = r
 	s.body.cursor = c
 	s.header.header = r.Header
@@ -264,7 +275,14 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if s.source == nil {
 		s.view = "login"
 	} else {
-		s.view = "search-type"
+		res, err := s.play.history.Fetch(0, s.height)
+		if err == nil && len(res.Results) > 0 {
+			s.header.header = res.Header
+			s.body.results = res
+			s.view = "body"
+		} else {
+			s.view = "search-type"
+		}
 	}
 
 	return func(g *ui.Gui) error {
@@ -292,6 +310,8 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 		} else {
+			g.DeleteView("search")
+			g.DeleteView("search-type")
 			v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err

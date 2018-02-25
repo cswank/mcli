@@ -24,14 +24,16 @@ type Album struct {
 }
 
 type Result struct {
-	Track  Track
-	Artist Artist
-	Album  Album
+	Service string
+	Track   Track
+	Artist  Artist
+	Album   Album
 }
 
 func (r *Result) ToCSV() []string {
 	return []string{
 		time.Now().Format(time.RFC3339),
+		r.Service,
 		r.Track.ID,
 		r.Track.Title,
 		strconv.Itoa(r.Track.Duration),
@@ -43,29 +45,30 @@ func (r *Result) ToCSV() []string {
 }
 
 func (r *Result) FromCSV(row []string) error {
-	if len(row) < 8 {
+	if len(row) < 9 {
 		return fmt.Errorf("invalid history csv row: %v", row)
 	}
 
-	id := row[1]
-	d, err := strconv.ParseInt(row[3], 10, 64)
+	id := row[2]
+	d, err := strconv.ParseInt(row[4], 10, 64)
 	if err != nil {
 		return err
 	}
 
 	*r = Result{
+		Service: row[1],
 		Track: Track{
 			ID:       id,
-			Title:    row[2],
+			Title:    row[3],
 			Duration: int(d),
 		},
 		Album: Album{
-			ID:    row[4],
-			Title: row[5],
+			ID:    row[5],
+			Title: row[6],
 		},
 		Artist: Artist{
-			ID:   row[6],
-			Name: row[7],
+			ID:   row[7],
+			Name: row[8],
 		},
 	}
 	return nil

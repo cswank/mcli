@@ -154,28 +154,29 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 	out := make([]Result, len(tracks))
 	var maxTitle int
 
-	for i, t := range tracks {
-		artists := make([]string, len(t.Artists))
-		for i, a := range t.Artists {
+	for i, tr := range tracks {
+		artists := make([]string, len(tr.Artists))
+		for i, a := range tr.Artists {
 			artists[i] = a.Name
 		}
 		as := strings.Join(artists, ", ")
-		if len(t.Title) > maxTitle {
-			maxTitle = len(t.Title)
+		if len(tr.Title) > maxTitle {
+			maxTitle = len(tr.Title)
 		}
-		dur, _ := t.Duration.Int64()
+		dur, _ := tr.Duration.Int64()
 		out[i] = Result{
+			Service: t.Name(),
 			Artist: Artist{
 				Name: as,
-				ID:   t.Artists[0].ID.String(),
+				ID:   tr.Artists[0].ID.String(),
 			},
 			Album: Album{
-				ID:    t.Album.ID.String(),
-				Title: t.Album.Title,
+				ID:    tr.Album.ID.String(),
+				Title: tr.Album.Title,
 			},
 			Track: Track{
-				ID:       fmt.Sprintf("%s", t.ID),
-				Title:    t.Title,
+				ID:       fmt.Sprintf("%s", tr.ID),
+				Title:    tr.Title,
 				Duration: int(dur),
 			},
 		}

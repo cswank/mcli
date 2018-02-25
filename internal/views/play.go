@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -42,6 +43,7 @@ type play struct {
 	done         chan bool
 	playlist     []source.Result
 	lock         sync.Mutex
+	sep          string
 }
 
 func newPlay(w, h int, pr chan<- progress) (*play, error) {
@@ -49,7 +51,9 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	p := &play{
+		sep:          string(filepath.Separator),
 		width:        w,
 		queue:        make(chan source.Result),
 		coords:       coords{x1: -1, y1: h - 2, x2: w, y2: h},
@@ -224,8 +228,12 @@ func (p *play) doPlay(result source.Result) error {
 	}
 }
 
+func (p *play) clean(s string) string {
+	return strings.Replace(s, p.sep, "", -1)
+}
+
 func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
-	dir := fmt.Sprintf("%s/.music/cache/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), result.Artist.Name, result.Album.Title)
+	dir := fmt.Sprintf("%s/.music/cache/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), p.clean(result.Artist.Name), p.clean(result.Album.Title))
 	e, err := exists(dir)
 	if err != nil {
 		return nil, nil, err
@@ -237,7 +245,7 @@ func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
 		}
 	}
 
-	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s.flac", os.Getenv("HOME"), p.source.Name(), result.Artist.Name, result.Album.Title, result.Track.Title)
+	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s.flac", os.Getenv("HOME"), p.source.Name(), p.clean(result.Artist.Name), p.clean(result.Album.Title), p.clean(result.Track.Title))
 	e, err = exists(pth)
 	if err != nil {
 		return nil, nil, err

@@ -26,12 +26,12 @@ func (s *screen) getKeys() []key {
 		{views: []string{"body"}, keys: []interface{}{'y'}, keybinding: s.showHistory, help: keyHelp{key: "y", body: "history"}},
 		{views: []string{"body"}, keys: []interface{}{'v'}, keybinding: s.volumeDown, help: keyHelp{key: "v", body: "volume down"}},
 		{views: []string{"body"}, keys: []interface{}{'V'}, keybinding: s.volumeUp, help: keyHelp{key: "V", body: "volume up"}},
-		{views: []string{"body"}, keys: []interface{}{'m'}, keybinding: s.goToAlbum, help: keyHelp{key: "m", body: "go to album"}},
-		{views: []string{"body"}, keys: []interface{}{'t'}, keybinding: s.goToArtist, help: keyHelp{key: "m", body: "go to artist"}},
+		{views: []string{"body"}, keys: []interface{}{'m'}, keybinding: s.goToAlbum, help: keyHelp{key: "m", body: "go to album at cursor"}},
+		{views: []string{"body"}, keys: []interface{}{'t'}, keybinding: s.goToArtist, help: keyHelp{key: "t", body: "go to artist at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{'q'}, keybinding: s.queue, help: keyHelp{key: "q", body: "view play queue"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.enter, help: keyHelp{key: "enter", body: "select item at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escape, help: keyHelp{key: "escape", body: "go back to the previous view"}},
-		{views: []string{"body"}, keys: []interface{}{ui.KeySpace}, keybinding: s.pause, help: keyHelp{key: "escape", body: "go back to the previous view"}},
+		{views: []string{"body"}, keys: []interface{}{ui.KeySpace}, keybinding: s.pause, help: keyHelp{key: "space", body: "pause/unpause"}},
 		{views: []string{"search-type"}, keys: []interface{}{'m'}, keybinding: s.search.album},
 		{views: []string{"search-type"}, keys: []interface{}{'t'}, keybinding: s.search.artist},
 		{views: []string{"search-type"}, keys: []interface{}{'k'}, keybinding: s.search.track},
@@ -40,5 +40,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escapeSearch},
 		{views: []string{""}, keys: []interface{}{ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c)", body: "quit"}},
 		{views: []string{"login"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.login.next},
+		{views: []string{"body"}, keys: []interface{}{'h'}, keybinding: s.showHelp, help: keyHelp{key: "h", body: "toggle help menu"}},
+		{views: []string{"help"}, keys: []interface{}{'h'}, keybinding: s.hideHelp},
 	}
 }
