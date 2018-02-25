@@ -95,7 +95,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) queue(g *ui.Gui, v *ui.View) error {
-	items := s.play.queue.queue
+	items := s.play.getQueue()
 	if len(items) == 0 {
 		return nil
 	}

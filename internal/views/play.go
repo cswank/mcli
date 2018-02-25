@@ -38,7 +38,10 @@ type play struct {
 	pause        chan bool
 	vol          chan float64
 	history      history.History
-	queue        *queue
+	queue        chan source.Result
+	done         chan bool
+	playlist     []source.Result
+	lock         sync.Mutex
 }
 
 func newPlay(w, h int, pr chan<- progress) (*play, error) {
@@ -48,7 +51,7 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 	}
 	p := &play{
 		width:        w,
-		queue:        newQueue(),
+		queue:        make(chan source.Result),
 		coords:       coords{x1: -1, y1: h - 2, x2: w, y2: h},
 		progress:     pr,
 		playProgress: make(chan progress),
@@ -56,6 +59,7 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 		pause:        make(chan bool),
 		history:      hist,
 		vol:          make(chan float64),
+		done:         make(chan bool),
 	}
 
 	go p.play(p.ch)
@@ -72,10 +76,35 @@ func (p *play) volume(v float64) {
 	p.vol <- v
 }
 
+func (p *play) getQueue() []source.Result {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	return p.playlist
+}
+
 func (p *play) play(ch <-chan playlist) {
+	var count int
 	for {
-		pl := <-ch
-		p.queue.Put(pl.tracks[0])
+		select {
+		case pl := <-ch:
+			if count == 0 {
+				p.queue <- pl.tracks[0]
+			} else {
+				p.lock.Lock()
+				p.playlist = append(p.playlist, pl.tracks[0])
+				p.lock.Unlock()
+			}
+			count++
+		case <-p.done:
+			count--
+			if len(p.playlist) > 0 {
+				p.lock.Lock()
+				r := p.playlist[0]
+				p.playlist = p.playlist[1:]
+				p.lock.Unlock()
+				p.queue <- r
+			}
+		}
 	}
 }
 
@@ -102,12 +131,13 @@ func (p *play) render() {
 func (p *play) playNext() {
 	for {
 		log.Println("wait for queue")
-		result := p.queue.Pop()
+		result := <-p.queue
 		log.Println("got from queue", result)
 		if err := p.doPlay(result); err != nil {
 			log.Printf("couldn't play %v: %s", result, err)
 		}
 		log.Println("done playing", result)
+		p.done <- true
 	}
 }
 
@@ -259,49 +289,4 @@ func (r *progressRead) Close() error {
 		return closer.Close()
 	}
 	return nil
-}
-
-// queue is a FIFO queue where Pop() operation is blocking if no items exists
-type queue struct {
-	lock       sync.Mutex
-	notifyLock sync.Mutex
-	monitor    *sync.Cond
-	queue      []source.Result
-}
-
-func newQueue() *queue {
-	bq := &queue{}
-	bq.monitor = sync.NewCond(&bq.notifyLock)
-	return bq
-}
-
-// Put any value to queue back. Returns false if queue closed
-func (bq *queue) Put(value source.Result) bool {
-	bq.lock.Lock()
-	bq.queue = append(bq.queue, value)
-	bq.lock.Unlock()
-
-	bq.notifyLock.Lock()
-	bq.monitor.Signal()
-	bq.notifyLock.Unlock()
-	return true
-}
-
-// Pop front value from queue. Returns nil and false if queue closed
-func (bq *queue) Pop() source.Result {
-	for {
-		bq.notifyLock.Lock()
-		bq.monitor.Wait()
-		val := bq.getUnblock()
-		bq.notifyLock.Unlock()
-		return val
-	}
-}
-
-func (bq *queue) getUnblock() source.Result {
-	bq.lock.Lock()
-	defer bq.lock.Unlock()
-	elem := bq.queue[len(bq.queue)-1]
-	bq.queue = bq.queue[0 : len(bq.queue)-1]
-	return elem
 }
