@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"sync"
 	"time"
 
 	"bitbucket.org/cswank/music/internal/history"
@@ -27,14 +29,16 @@ type playlist struct {
 }
 
 type play struct {
-	coords   coords
-	progress chan<- progress
-	ch       chan playlist
-	cancel   chan bool
-	source   source.Source
-	pause    chan bool
-	vol      chan float64
-	history  history.History
+	width        int
+	coords       coords
+	progress     chan<- progress
+	playProgress chan progress
+	ch           chan playlist
+	source       source.Source
+	pause        chan bool
+	vol          chan float64
+	history      history.History
+	queue        *queue
 }
 
 func newPlay(w, h int, pr chan<- progress) (*play, error) {
@@ -43,16 +47,20 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 		return nil, err
 	}
 	p := &play{
-		coords:   coords{x1: -1, y1: h - 3, x2: w, y2: h - 1},
-		progress: pr,
-		ch:       make(chan playlist),
-		cancel:   make(chan bool),
-		pause:    make(chan bool),
-		history:  hist,
-		vol:      make(chan float64),
+		width:        w,
+		queue:        newQueue(),
+		coords:       coords{x1: -1, y1: h - 2, x2: w, y2: h},
+		progress:     pr,
+		playProgress: make(chan progress),
+		ch:           make(chan playlist),
+		pause:        make(chan bool),
+		history:      hist,
+		vol:          make(chan float64),
 	}
 
-	go p.play(p.ch, p.cancel)
+	go p.play(p.ch)
+	go p.playNext()
+	go p.render()
 	return p, nil
 }
 
@@ -64,15 +72,10 @@ func (p *play) volume(v float64) {
 	p.vol <- v
 }
 
-func (p *play) play(ch <-chan playlist, cancel <-chan bool) error {
+func (p *play) play(ch <-chan playlist) {
 	for {
-		select {
-		case pl := <-ch:
-			if err := p.doPlay(pl.tracks[0]); err != nil {
-				log.Println("couldn't play track", err)
-			}
-		case <-cancel:
-		}
+		pl := <-ch
+		p.queue.Put(pl.tracks[0])
 	}
 }
 
@@ -81,8 +84,31 @@ func (p *play) clear() {
 	v.Clear()
 }
 
-func (p *play) render(g *ui.Gui, v *ui.View) {
+func (p *play) render() {
+	var v *ui.View
+	for {
+		prog := <-p.playProgress
+		g.Update(func(g *ui.Gui) error {
+			if v == nil {
+				v, _ = g.View("play")
+			}
+			v.Clear()
+			fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", p.width*prog.n/prog.total)))
+			return nil
+		})
+	}
+}
 
+func (p *play) playNext() {
+	for {
+		log.Println("wait for queue")
+		result := p.queue.Pop()
+		log.Println("got from queue", result)
+		if err := p.doPlay(result); err != nil {
+			log.Printf("couldn't play %v: %s", result, err)
+		}
+		log.Println("done playing", result)
+	}
 }
 
 func (p *play) doPlay(result source.Result) error {
@@ -112,6 +138,7 @@ func (p *play) doPlay(result source.Result) error {
 		}
 
 		in.Close()
+		r.Close()
 		f, err = os.Open(in.Name())
 		if err != nil {
 			return err
@@ -148,7 +175,7 @@ func (p *play) doPlay(result source.Result) error {
 		case <-time.After(100 * time.Millisecond):
 			n := int(time.Now().Unix())
 			if !paused {
-				p.progress <- progress{n: n - start, total: result.Track.Duration}
+				p.playProgress <- progress{n: n - start, total: result.Track.Duration}
 			} else {
 				pauseTime += 100 * time.Millisecond
 			}
@@ -192,7 +219,6 @@ func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
 
 	f, err := os.Create(pth)
 	return f, nil, err
-
 }
 
 func exists(path string) (bool, error) {
@@ -228,9 +254,54 @@ func (r *progressRead) Read(p []byte) (int, error) {
 
 // Close the reader when it implements io.Closer
 func (r *progressRead) Close() error {
-	r.ch <- progress{n: r.t, total: r.t}
+	r.ch <- progress{n: 0, total: r.t}
 	if closer, ok := r.Reader.(io.Closer); ok {
 		return closer.Close()
 	}
 	return nil
+}
+
+// queue is a FIFO queue where Pop() operation is blocking if no items exists
+type queue struct {
+	lock       sync.Mutex
+	notifyLock sync.Mutex
+	monitor    *sync.Cond
+	queue      []source.Result
+}
+
+func newQueue() *queue {
+	bq := &queue{}
+	bq.monitor = sync.NewCond(&bq.notifyLock)
+	return bq
+}
+
+// Put any value to queue back. Returns false if queue closed
+func (bq *queue) Put(value source.Result) bool {
+	bq.lock.Lock()
+	bq.queue = append(bq.queue, value)
+	bq.lock.Unlock()
+
+	bq.notifyLock.Lock()
+	bq.monitor.Signal()
+	bq.notifyLock.Unlock()
+	return true
+}
+
+// Pop front value from queue. Returns nil and false if queue closed
+func (bq *queue) Pop() source.Result {
+	for {
+		bq.notifyLock.Lock()
+		bq.monitor.Wait()
+		val := bq.getUnblock()
+		bq.notifyLock.Unlock()
+		return val
+	}
+}
+
+func (bq *queue) getUnblock() source.Result {
+	bq.lock.Lock()
+	defer bq.lock.Unlock()
+	elem := bq.queue[len(bq.queue)-1]
+	bq.queue = bq.queue[0 : len(bq.queue)-1]
+	return elem
 }

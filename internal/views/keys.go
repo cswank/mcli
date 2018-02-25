@@ -28,6 +28,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"body"}, keys: []interface{}{'V'}, keybinding: s.volumeUp, help: keyHelp{key: "V", body: "volume up"}},
 		{views: []string{"body"}, keys: []interface{}{'m'}, keybinding: s.goToAlbum, help: keyHelp{key: "m", body: "go to album"}},
 		{views: []string{"body"}, keys: []interface{}{'t'}, keybinding: s.goToArtist, help: keyHelp{key: "m", body: "go to artist"}},
+		{views: []string{"body"}, keys: []interface{}{'q'}, keybinding: s.queue, help: keyHelp{key: "q", body: "view play queue"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.enter, help: keyHelp{key: "enter", body: "select item at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escape, help: keyHelp{key: "escape", body: "go back to the previous view"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeySpace}, keybinding: s.pause, help: keyHelp{key: "escape", body: "go back to the previous view"}},

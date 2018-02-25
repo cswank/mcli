@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -20,7 +19,6 @@ var c = &http.Client{
 }
 
 func (t *Tidal) get(dest string, query *url.Values, s interface{}) error {
-	log.Println(baseurl + dest)
 	req, err := http.NewRequest("GET", baseurl+dest, nil)
 	if err != nil {
 		return err

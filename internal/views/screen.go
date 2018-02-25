@@ -1,6 +1,8 @@
 package views
 
 import (
+	"fmt"
+	"io"
 	"log"
 
 	"bitbucket.org/cswank/music/internal/source"
@@ -89,6 +91,39 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 	case "album":
 		s.play.ch <- playlist{tracks: []source.Result{r}}
 	}
+	return nil
+}
+
+func (s *screen) queue(g *ui.Gui, v *ui.View) error {
+	items := s.play.queue.queue
+	if len(items) == 0 {
+		return nil
+	}
+
+	s.body.cursor = 0
+	var maxTitle, maxAlbum int
+	for _, item := range items {
+		if len(item.Track.Title) > maxTitle {
+			maxTitle = len(item.Track.Title)
+		}
+		if len(item.Album.Title) > maxAlbum {
+			maxAlbum = len(item.Album.Title)
+		}
+	}
+
+	f := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
+	results := &source.Results{
+		Header: fmt.Sprintf(f, "Title", "Album", "Artist"),
+		Type:   "qeueue",
+		Print: func(w io.Writer, r source.Result) error {
+			_, err := fmt.Fprintf(w, f, r.Track.Title, r.Album.Title, r.Artist.Name)
+			return err
+		},
+		Results: items,
+	}
+
+	s.body.results = results
+	s.header.header = results.Header
 	return nil
 }
 

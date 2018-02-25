@@ -16,7 +16,7 @@ type buffer struct {
 func newBuffer(w, h int) *buffer {
 	b := &buffer{
 		width:    w - 1,
-		coords:   coords{x1: -1, y1: h - 2, x2: w, y2: h},
+		coords:   coords{x1: -1, y1: h - 3, x2: w, y2: h - 1},
 		progress: make(chan progress),
 	}
 
