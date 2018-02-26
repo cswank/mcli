@@ -155,6 +155,7 @@ func (p *play) doPlay(result source.Result) error {
 		return err
 	}
 
+	var fileSize int64
 	if f == nil {
 		u, err := p.source.GetTrack(result.Track.ID)
 		if err != nil {
@@ -166,7 +167,7 @@ func (p *play) doPlay(result source.Result) error {
 		}
 		r := newProgressRead(resp.Body, int(resp.ContentLength), p.progress)
 
-		_, err = io.Copy(in, r)
+		fileSize, err = io.Copy(in, r)
 		if err != nil {
 			return err
 		}
@@ -201,17 +202,12 @@ func (p *play) doPlay(result source.Result) error {
 		close(done)
 	})))
 
-	start := int(time.Now().Unix())
 	var paused bool
-	var pauseTime time.Duration
 	for {
 		select {
 		case <-time.After(100 * time.Millisecond):
-			n := int(time.Now().Unix())
 			if !paused {
-				p.playProgress <- progress{n: n - start, total: result.Track.Duration}
-			} else {
-				pauseTime += 100 * time.Millisecond
+				p.playProgress <- progress{n: s.Position(), total: int(fileSize)}
 			}
 		case <-done:
 			return s.Close()

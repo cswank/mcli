@@ -42,6 +42,7 @@ type decoder struct {
 	stream *flac.Stream
 	buf    [][2]float64
 	err    error
+	j      int
 }
 
 func (d *decoder) Stream(samples [][2]float64) (n int, ok bool) {
@@ -49,21 +50,20 @@ func (d *decoder) Stream(samples [][2]float64) (n int, ok bool) {
 		return 0, false
 	}
 	// Copy samples from buffer.
-	j := 0
 	for i := range samples {
-		if j >= len(d.buf) {
+		if d.j >= len(d.buf) {
 			// refill buffer.
 			if err := d.refill(); err != nil {
 				d.err = err
 				return n, n > 0
 			}
-			j = 0
+			d.j = 0
 		}
-		samples[i] = d.buf[j]
-		j++
+		samples[i] = d.buf[d.j]
+		d.j++
 		n++
 	}
-	d.buf = d.buf[j:]
+	d.buf = d.buf[d.j:]
 	return n, true
 }
 
@@ -132,7 +132,7 @@ func (d *decoder) Len() int {
 }
 
 func (d *decoder) Position() int {
-	panic("not yet implemented")
+	return d.j
 }
 
 func (d *decoder) Seek(p int) error {
