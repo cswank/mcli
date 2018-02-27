@@ -36,6 +36,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"search-type"}, keys: []interface{}{'t'}, keybinding: s.search.artist},
 		{views: []string{"search-type"}, keys: []interface{}{'k'}, keybinding: s.search.track},
 		{views: []string{"search-type"}, keys: []interface{}{'y'}, keybinding: s.showHistory},
+		{views: []string{"search-type"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escapeSearch},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.search.exit},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escapeSearch},
 		{views: []string{""}, keys: []interface{}{ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c)", body: "quit"}},

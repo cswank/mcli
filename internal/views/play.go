@@ -134,13 +134,10 @@ func (p *play) render() {
 
 func (p *play) playNext() {
 	for {
-		log.Println("wait for queue")
 		result := <-p.queue
-		log.Println("got from queue", result)
 		if err := p.doPlay(result); err != nil {
 			log.Printf("couldn't play %v: %s", result, err)
 		}
-		log.Println("done playing", result)
 		p.done <- true
 	}
 }
@@ -155,7 +152,6 @@ func (p *play) doPlay(result source.Result) error {
 		return err
 	}
 
-	var fileSize int64
 	if f == nil {
 		u, err := p.source.GetTrack(result.Track.ID)
 		if err != nil {
@@ -167,7 +163,7 @@ func (p *play) doPlay(result source.Result) error {
 		}
 		r := newProgressRead(resp.Body, int(resp.ContentLength), p.progress)
 
-		fileSize, err = io.Copy(in, r)
+		_, err = io.Copy(in, r)
 		if err != nil {
 			return err
 		}
@@ -189,7 +185,6 @@ func (p *play) doPlay(result source.Result) error {
 		return err
 	}
 
-	done := make(chan struct{})
 	vol := &effects.Volume{
 		Streamer: s,
 		Base:     2,
@@ -198,19 +193,20 @@ func (p *play) doPlay(result source.Result) error {
 	ctrl := &beep.Ctrl{
 		Streamer: vol,
 	}
-	speaker.Play(beep.Seq(ctrl, beep.Callback(func() {
-		close(done)
-	})))
+	speaker.Play(ctrl)
 
+	var done bool
 	var paused bool
-	for {
+	l := s.Len()
+	var i int
+	for !done {
 		select {
-		case <-time.After(100 * time.Millisecond):
-			if !paused {
-				p.playProgress <- progress{n: s.Position(), total: int(fileSize)}
-			}
-		case <-done:
-			return s.Close()
+		case <-time.After(200 * time.Millisecond):
+			pos := s.Position()
+			done = pos >= l
+			log.Println(pos, l)
+			i++
+			p.playProgress <- progress{n: pos, total: l}
 		case v := <-p.vol:
 			speaker.Lock()
 			vol.Volume += v
@@ -222,6 +218,8 @@ func (p *play) doPlay(result source.Result) error {
 			speaker.Unlock()
 		}
 	}
+
+	return s.Close()
 }
 
 func (p *play) clean(s string) string {

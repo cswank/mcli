@@ -33,13 +33,13 @@ func newScreen(width, height int) (*screen, error) {
 		width:  width,
 		height: height,
 		body:   newBody(width, height),
+		buffer: newBuffer(width, height),
 		header: newHeader(width, height),
 		help:   newHelp(width, height),
 	}
 
 	l := newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
-	s.buffer = newBuffer(width, height)
 	var err error
 	s.play, err = newPlay(width, height, s.buffer.progress)
 	if err != nil {
@@ -129,8 +129,13 @@ func (s *screen) queue(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
-	s.view = "search-type"
 	s.search.searchType = ""
+	if s.view == "search-type" {
+		s.view = "body"
+	} else {
+		s.view = "search-type"
+		s.search.searchType = ""
+	}
 	return nil
 }
 
