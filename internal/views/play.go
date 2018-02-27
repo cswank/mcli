@@ -204,7 +204,6 @@ func (p *play) doPlay(result source.Result) error {
 		case <-time.After(200 * time.Millisecond):
 			pos := s.Position()
 			done = pos >= l
-			log.Println(pos, l)
 			i++
 			p.playProgress <- progress{n: pos, total: l}
 		case v := <-p.vol:
