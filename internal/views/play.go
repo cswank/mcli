@@ -25,16 +25,12 @@ type progress struct {
 	total int
 }
 
-type playlist struct {
-	tracks []source.Result
-}
-
 type play struct {
 	width        int
 	coords       coords
 	progress     chan<- progress
 	playProgress chan progress
-	ch           chan playlist
+	ch           chan source.Result
 	source       source.Source
 	pause        chan bool
 	vol          chan float64
@@ -42,6 +38,7 @@ type play struct {
 	queue        chan source.Result
 	done         chan bool
 	playlist     []source.Result
+	current      *source.Result
 	lock         sync.Mutex
 	sep          string
 }
@@ -59,7 +56,7 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 		coords:       coords{x1: -1, y1: h - 2, x2: w, y2: h},
 		progress:     pr,
 		playProgress: make(chan progress),
-		ch:           make(chan playlist),
+		ch:           make(chan source.Result),
 		pause:        make(chan bool),
 		history:      hist,
 		vol:          make(chan float64),
@@ -80,22 +77,38 @@ func (p *play) volume(v float64) {
 	p.vol <- v
 }
 
+func (p *play) addAlbumToQueue(album []source.Result) {
+	p.ch <- album[0]
+	p.lock.Lock()
+	p.playlist = album[1:]
+	p.lock.Unlock()
+}
+
+func (p *play) removeFromQueue(i int) {
+	if i > len(p.playlist)-1 {
+		return
+	}
+	p.lock.Lock()
+	p.playlist = append(p.playlist[:i], p.playlist[i+1:]...)
+	p.lock.Unlock()
+}
+
 func (p *play) getQueue() []source.Result {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	return p.playlist
 }
 
-func (p *play) play(ch <-chan playlist) {
+func (p *play) play(ch <-chan source.Result) {
 	var count int
 	for {
 		select {
-		case pl := <-ch:
+		case r := <-ch:
 			if count == 0 {
-				p.queue <- pl.tracks[0]
+				p.queue <- r
 			} else {
 				p.lock.Lock()
-				p.playlist = append(p.playlist, pl.tracks[0])
+				p.playlist = append(p.playlist, r)
 				p.lock.Unlock()
 			}
 			count++

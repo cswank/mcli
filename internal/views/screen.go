@@ -58,6 +58,15 @@ func newScreen(width, height int) (*screen, error) {
 	return s, nil
 }
 
+func (s *screen) playAlbum(g *ui.Gui, v *ui.View) error {
+	if s.body.results.Type != "album" || s.body.results == nil || len(s.body.results.Results) == 0 {
+		return nil
+	}
+
+	s.play.addAlbumToQueue(s.body.results.Results)
+	return nil
+}
+
 func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 	r := s.body.results.Results[s.body.cursor]
 	c := s.body.cursor
@@ -90,18 +99,22 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "album":
-		s.play.ch <- playlist{tracks: []source.Result{r}}
+		s.play.ch <- r
 	}
 	return nil
 }
 
 func (s *screen) queue(g *ui.Gui, v *ui.View) error {
+	s.body.cursor = 0
+	return s.queueNoCursor(g, v)
+}
+
+func (s *screen) queueNoCursor(g *ui.Gui, v *ui.View) error {
 	items := s.play.getQueue()
 	if len(items) == 0 {
 		return nil
 	}
 
-	s.body.cursor = 0
 	var maxTitle, maxAlbum int
 	for _, item := range items {
 		if len(item.Track.Title) > maxTitle {
@@ -115,7 +128,7 @@ func (s *screen) queue(g *ui.Gui, v *ui.View) error {
 	f := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
 	results := &source.Results{
 		Header: fmt.Sprintf(f, "Title", "Album", "Artist"),
-		Type:   "qeueue",
+		Type:   "queue",
 		Print: func(w io.Writer, r source.Result) error {
 			_, err := fmt.Fprintf(w, f, r.Track.Title, r.Album.Title, r.Artist.Name)
 			return err
@@ -125,6 +138,21 @@ func (s *screen) queue(g *ui.Gui, v *ui.View) error {
 
 	s.body.results = results
 	s.header.header = results.Header
+	return nil
+}
+
+func (s *screen) removeFromQueue(g *ui.Gui, v *ui.View) error {
+	if s.body.results.Type != "queue" {
+		return nil
+	}
+	s.play.removeFromQueue(s.body.cursor)
+	if err := s.queueNoCursor(g, v); err != nil {
+		return err
+	}
+
+	if len(s.body.results.Results) > 0 && s.body.cursor >= len(s.body.results.Results) {
+		s.body.cursor = len(s.body.results.Results) - 1
+	}
 	return nil
 }
 
