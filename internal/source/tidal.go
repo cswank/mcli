@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/cswank/tidal"
 )
@@ -110,18 +109,14 @@ func (t *Tidal) GetArtistAlbums(id string, limit int) (*Results, error) {
 		if len(a.Title) > max {
 			max = len(a.Title)
 		}
-		artists := make([]string, len(a.Artists))
-		for i, a := range a.Artists {
-			artists[i] = a.Name
-		}
-		as := strings.Join(artists, ", ")
+
 		if len(a.Title) > max {
 			max = len(a.Title)
 		}
 		out[i] = Result{
 			Artist: Artist{
 				ID:   a.Artists[0].ID.String(),
-				Name: as,
+				Name: a.Artists[0].Name,
 			},
 			Album: Album{
 				ID:    fmt.Sprintf("%s", a.ID),
@@ -155,11 +150,6 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 	var maxTitle int
 
 	for i, tr := range tracks {
-		artists := make([]string, len(tr.Artists))
-		for i, a := range tr.Artists {
-			artists[i] = a.Name
-		}
-		as := strings.Join(artists, ", ")
 		if len(tr.Title) > maxTitle {
 			maxTitle = len(tr.Title)
 		}
@@ -167,7 +157,7 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 		out[i] = Result{
 			Service: t.Name(),
 			Artist: Artist{
-				Name: as,
+				Name: tr.Artists[0].Name,
 				ID:   tr.Artists[0].ID.String(),
 			},
 			Album: Album{
@@ -202,18 +192,13 @@ func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
 	out := make([]Result, len(albums))
 	var maxTitle int
 	for i, a := range albums {
-		artists := make([]string, len(a.Artists))
-		for i, a := range a.Artists {
-			artists[i] = a.Name
-		}
-		as := strings.Join(artists, ", ")
 		if len(a.Title) > maxTitle {
 			maxTitle = len(a.Title)
 		}
 		out[i] = Result{
 			Artist: Artist{
 				ID:   a.Artists[0].ID.String(),
-				Name: as,
+				Name: a.Artists[0].Name,
 			},
 			Album: Album{
 				ID:    a.ID.String(),
@@ -243,11 +228,6 @@ func (t *Tidal) FindTrack(term string, limit int) (*Results, error) {
 	var maxTitle int
 	var maxAlbum int
 	for i, t := range tracks {
-		artists := make([]string, len(t.Artists))
-		for i, a := range t.Artists {
-			artists[i] = a.Name
-		}
-		as := strings.Join(artists, ", ")
 		if len(t.Title) > maxTitle {
 			maxTitle = len(t.Title)
 		}
@@ -258,7 +238,7 @@ func (t *Tidal) FindTrack(term string, limit int) (*Results, error) {
 		out[i] = Result{
 			Artist: Artist{
 				ID:   t.Artists[0].ID.String(),
-				Name: as,
+				Name: t.Artists[0].Name,
 			},
 			Album: Album{
 				ID:    t.Album.ID.String(),
