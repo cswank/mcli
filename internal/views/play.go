@@ -23,6 +23,7 @@ import (
 type progress struct {
 	n     int
 	total int
+	msg   string
 }
 
 type play struct {
@@ -207,6 +208,10 @@ func (p *play) doPlay(result source.Result) error {
 		Streamer: vol,
 	}
 	speaker.Play(ctrl)
+
+	song := fmt.Sprintf("%s %s", result.Track.Title, time.Duration(result.Track.Duration)*time.Second)
+	msg := fmt.Sprintf(fmt.Sprintf("%%%ds", (p.width/2)+(len(song)/2)), song)
+	p.progress <- progress{msg: msg}
 
 	var done bool
 	var paused bool

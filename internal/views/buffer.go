@@ -33,7 +33,11 @@ func (b *buffer) render(ch <-chan progress) {
 				v, _ = g.View("buffer")
 			}
 			v.Clear()
-			fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.n/p.total)))
+			if p.msg != "" {
+				fmt.Fprint(v, p.msg)
+			} else {
+				fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.n/p.total)))
+			}
 			return nil
 		})
 	}
