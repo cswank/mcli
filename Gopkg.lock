@@ -9,6 +9,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/atotto/clipboard"
+  packages = ["."]
+  revision = "bc5958e1c8339112fc3347a89f3c482f416a69d3"
+
+[[projects]]
+  branch = "master"
   name = "github.com/cswank/tidal"
   packages = ["."]
   revision = "0cc3ac41e344f9ae636fe75aea0edb882188c97b"
@@ -16,7 +22,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/faiface/beep"
-  packages = [".","flac","speaker"]
+  packages = [".","effects","flac","speaker"]
   revision = "19cac87c68f0b2887e26c56f0aa5e1ab70a45ee1"
 
 [[projects]]
@@ -93,6 +99,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f0e205885ec89806f93bc9ac4af47c869ad666adf4ac45dfb26b4a1529db9d15"
+  inputs-digest = "a985c82d22ca1409421f5aa966ee7ced10c0c2b083110093e34867e6f0d0fd96"
   solver-name = "gps-cdcl"
   solver-version = 1
