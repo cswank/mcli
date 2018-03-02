@@ -83,6 +83,7 @@ type Results struct {
 
 type Source interface {
 	Name() string
+	AlbumLink() string
 	FindArtist(string, int) (*Results, error)
 	FindAlbum(string, int) (*Results, error)
 	FindTrack(string, int) (*Results, error)

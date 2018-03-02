@@ -24,6 +24,7 @@ type progress struct {
 	n     int
 	total int
 	msg   string
+	flash bool
 }
 
 type play struct {

@@ -1,21 +1,29 @@
 package views
 
 import (
+	"fmt"
+	"path"
+
 	"bitbucket.org/cswank/music/internal/source"
+	"github.com/atotto/clipboard"
 	ui "github.com/jroimartin/gocui"
 )
 
 type body struct {
-	coords  coords
-	height  int
-	results *source.Results
-	cursor  int
+	albumURL string
+	progress chan progress
+	coords   coords
+	height   int
+	results  *source.Results
+	cursor   int
 }
 
-func newBody(w, h int) *body {
+func newBody(w, h int, ch chan progress, u string) *body {
 	return &body{
-		height: h - 3,
-		coords: coords{x1: -1, y1: 0, x2: w, y2: h - 2},
+		albumURL: u,
+		progress: ch,
+		height:   h - 3,
+		coords:   coords{x1: -1, y1: 0, x2: w, y2: h - 2},
 	}
 }
 
@@ -34,6 +42,17 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 		}
 	}
 	return nil
+}
+
+func (b *body) albumLink(g *ui.Gui, v *ui.View) error {
+	if b.results == nil {
+		return nil
+	}
+	c, _ := v.Cursor()
+	r := b.results.Results[c]
+	l := path.Join(b.albumURL, r.Album.ID)
+	b.progress <- progress{msg: fmt.Sprintf("copied %s to clipboard", l), flash: true}
+	return clipboard.WriteAll(l)
 }
 
 func (b *body) clear() {

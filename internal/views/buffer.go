@@ -3,6 +3,7 @@ package views
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	ui "github.com/jroimartin/gocui"
 )
@@ -32,10 +33,20 @@ func (b *buffer) render(ch <-chan progress) {
 			if v == nil {
 				v, _ = g.View("buffer")
 			}
-			v.Clear()
+
 			if p.msg != "" {
+				if p.flash {
+					s := v.Buffer()
+					go func() {
+						time.Sleep(2 * time.Second)
+						v.Clear()
+						fmt.Fprint(v, s)
+					}()
+				}
+				v.Clear()
 				fmt.Fprint(v, p.msg)
 			} else {
+				v.Clear()
 				fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.n/p.total)))
 			}
 			return nil

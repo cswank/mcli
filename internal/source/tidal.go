@@ -67,6 +67,10 @@ func (t *Tidal) Name() string {
 	return "tidal"
 }
 
+func (t *Tidal) AlbumLink() string {
+	return "https://listen.tidal.com/album"
+}
+
 func (t *Tidal) FindArtist(term string, limit int) (*Results, error) {
 	artists, err := t.client.SearchArtists(term, fmt.Sprintf("%d", limit))
 	if err != nil {

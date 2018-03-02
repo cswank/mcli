@@ -32,7 +32,6 @@ func newScreen(width, height int) (*screen, error) {
 		view:   "body",
 		width:  width,
 		height: height,
-		body:   newBody(width, height),
 		buffer: newBuffer(width, height),
 		header: newHeader(width, height),
 		help:   newHelp(width, height),
@@ -47,14 +46,14 @@ func newScreen(width, height int) (*screen, error) {
 	}
 
 	s.login = l
-	s.keys = s.getKeys()
-
 	cli, err := source.GetTidal()
 	if err == nil {
 		s.source = cli
 		s.play.source = cli
 	}
 
+	s.body = newBody(width, height, s.buffer.progress, cli.AlbumLink())
+	s.keys = s.getKeys()
 	return s, nil
 }
 
