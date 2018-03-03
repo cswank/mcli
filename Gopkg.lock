@@ -23,7 +23,7 @@
   branch = "master"
   name = "github.com/faiface/beep"
   packages = [".","effects","flac","speaker"]
-  revision = "19cac87c68f0b2887e26c56f0aa5e1ab70a45ee1"
+  revision = "4ec0906f41871d561558e3e0643f71fb8bf08885"
 
 [[projects]]
   name = "github.com/fatih/color"

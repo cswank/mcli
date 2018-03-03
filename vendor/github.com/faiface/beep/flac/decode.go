@@ -41,8 +41,8 @@ type decoder struct {
 	rc     io.ReadCloser
 	stream *flac.Stream
 	buf    [][2]float64
-	err    error
 	pos    int
+	err    error
 }
 
 func (d *decoder) Stream(samples [][2]float64) (n int, ok bool) {
@@ -64,7 +64,6 @@ func (d *decoder) Stream(samples [][2]float64) (n int, ok bool) {
 		samples[i] = d.buf[j]
 		j++
 		n++
-
 	}
 	d.buf = d.buf[j:]
 	d.pos += n
