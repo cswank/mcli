@@ -14,10 +14,10 @@
   revision = "bc5958e1c8339112fc3347a89f3c482f416a69d3"
 
 [[projects]]
-  branch = "master"
+  branch = "playlists"
   name = "github.com/cswank/tidal"
   packages = ["."]
-  revision = "0cc3ac41e344f9ae636fe75aea0edb882188c97b"
+  revision = "6ba1784193af61d37028d039196f8dddd7cb9a55"
 
 [[projects]]
   branch = "master"
@@ -99,6 +99,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a985c82d22ca1409421f5aa966ee7ced10c0c2b083110093e34867e6f0d0fd96"
+  inputs-digest = "69354888d17ccc5d206afc8bee280cc154ed409a243c05e9ed8cac7c020bd9bc"
   solver-name = "gps-cdcl"
   solver-version = 1

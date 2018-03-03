@@ -21,6 +21,7 @@ type Album struct {
 	Artists        []Artist    `json:"artists,omitempty"`
 	Title          string      `json:"title"`
 	ID             json.Number `json:"id"`
+	UUID           string      `json:"uuid"`
 	NumberOfTracks json.Number `json:"numberOfTracks"`
 	Explicit       bool        `json:"explicit,omitempty"`
 	Copyright      string      `json:"copyright,omitempty"`

@@ -33,8 +33,8 @@
   revision = "4f518eddb04b8f73870836b6d1941e8aa3c06637"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/the5heepdev/tidal"
+  branch = "playlists"
+  name = "github.com/cswank/tidal"
 
 [[constraint]]
   name = "gopkg.in/alecthomas/kingpin.v1"
