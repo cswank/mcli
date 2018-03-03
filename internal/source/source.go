@@ -24,10 +24,11 @@ type Album struct {
 }
 
 type Result struct {
-	Service string
-	Track   Track
-	Artist  Artist
-	Album   Album
+	Service  string
+	Track    Track
+	Artist   Artist
+	Album    Album
+	Playlist Album
 }
 
 func (r *Result) ToCSV() []string {
@@ -90,4 +91,6 @@ type Source interface {
 	GetAlbum(string) (*Results, error)
 	GetTrack(string) (string, error)
 	GetArtistAlbums(string, int) (*Results, error)
+	GetPlaylists() (*Results, error)
+	GetPlaylist(string, int) (*Results, error)
 }

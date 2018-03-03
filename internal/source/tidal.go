@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 
 	"github.com/cswank/tidal"
 )
@@ -69,6 +70,41 @@ func (t *Tidal) Name() string {
 
 func (t *Tidal) AlbumLink() string {
 	return "https://listen.tidal.com/album"
+}
+
+func (t *Tidal) GetPlaylists() (*Results, error) {
+	l, err := t.client.GetUserPlaylists()
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Result, len(l))
+	for i, item := range l {
+		out[i] = Result{
+			Album: Album{
+				ID:    item.UUID,
+				Title: item.Title,
+			},
+		}
+	}
+
+	f := "%s\n"
+	return &Results{
+		Header: fmt.Sprintf(f, "Title"),
+		Type:   "playlists",
+		Print: func(w io.Writer, r Result) error {
+			_, err := fmt.Fprintf(w, f, r.Album.Title)
+			return err
+		},
+		Results: out,
+	}, nil
+}
+
+func (t *Tidal) GetPlaylist(id string, limit int) (*Results, error) {
+	tracks, err := t.client.GetPlaylistTracks(id, strconv.Itoa(limit))
+	if err != nil {
+		return nil, err
+	}
+	return t.getTracks(tracks, "playlist")
 }
 
 func (t *Tidal) FindArtist(term string, limit int) (*Results, error) {
@@ -150,6 +186,10 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 	if err != nil {
 		return nil, err
 	}
+	return t.getTracks(tracks, "album")
+}
+
+func (t *Tidal) getTracks(tracks []tidal.Track, tp string) (*Results, error) {
 	out := make([]Result, len(tracks))
 	var maxTitle int
 
@@ -179,7 +219,7 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	return &Results{
 		Header: fmt.Sprintf(f, "Title", "Artist"),
-		Type:   "album",
+		Type:   tp,
 		Print: func(w io.Writer, r Result) error {
 			_, err := fmt.Fprintf(w, f, r.Track.Title, r.Artist.Name)
 			return err

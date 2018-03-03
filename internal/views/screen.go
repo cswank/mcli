@@ -97,9 +97,32 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.body.results = results
 		s.header.header = results.Header
 		s.stack.add(results, c)
+	case "playlists":
+		s.body.cursor = 0
+		results, err := s.source.GetPlaylist(r.Album.ID, s.height)
+		if err != nil {
+			return err
+		}
+		s.body.results = results
+		s.header.header = results.Header
+		s.stack.add(results, c)
 	case "album":
 		s.play.ch <- r
+	case "playlist":
+		s.play.ch <- r
 	}
+	return nil
+}
+
+func (s *screen) playlists(g *ui.Gui, v *ui.View) error {
+	results, err := s.source.GetPlaylists()
+	if err != nil {
+		return err
+	}
+	s.body.results = results
+	s.header.header = results.Header
+	s.stack.clear()
+	s.stack.add(results, s.body.cursor)
 	return nil
 }
 
