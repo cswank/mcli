@@ -35,6 +35,7 @@ type play struct {
 	ch           chan source.Result
 	source       source.Source
 	pause        chan bool
+	fastForward  chan bool
 	vol          chan float64
 	history      history.History
 	queue        chan source.Result
@@ -60,6 +61,7 @@ func newPlay(w, h int, pr chan<- progress) (*play, error) {
 		playProgress: make(chan progress),
 		ch:           make(chan source.Result),
 		pause:        make(chan bool),
+		fastForward:  make(chan bool),
 		history:      hist,
 		vol:          make(chan float64),
 		done:         make(chan bool),
@@ -234,6 +236,8 @@ func (p *play) doPlay(result source.Result) error {
 			speaker.Lock()
 			ctrl.Paused = paused
 			speaker.Unlock()
+		case <-p.fastForward:
+			done = true
 		}
 	}
 
@@ -242,6 +246,11 @@ func (p *play) doPlay(result source.Result) error {
 
 func (p *play) clean(s string) string {
 	return strings.Replace(s, p.sep, "", -1)
+}
+
+func (p *play) next(g *ui.Gui, v *ui.View) error {
+	p.fastForward <- true
+	return nil
 }
 
 func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {

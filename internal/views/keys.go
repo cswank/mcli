@@ -33,6 +33,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"body"}, keys: []interface{}{'P'}, keybinding: s.playlists, help: keyHelp{key: "P", body: "get saved playlists"}},
 		{views: []string{"body"}, keys: []interface{}{'d'}, keybinding: s.removeFromQueue, help: keyHelp{key: "delete", body: "remove track from queue"}},
 		{views: []string{"body"}, keys: []interface{}{'l'}, keybinding: s.body.albumLink, help: keyHelp{key: "l", body: "copy a link to the current album to clipboard"}},
+		{views: []string{"body"}, keys: []interface{}{'f'}, keybinding: s.play.next, help: keyHelp{key: "f", body: "fast forward to next song in queue"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.enter, help: keyHelp{key: "enter", body: "select item at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escape, help: keyHelp{key: "escape", body: "go back to the previous view"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeySpace}, keybinding: s.pause, help: keyHelp{key: "space", body: "pause/unpause"}},
