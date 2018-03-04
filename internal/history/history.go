@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"bitbucket.org/cswank/music/internal/source"
+	"bitbucket.org/cswank/mcli/internal/source"
 )
 
 type History interface {
@@ -23,7 +23,7 @@ type FileHistory struct {
 }
 
 func NewFileHistory() (*FileHistory, error) {
-	pth := fmt.Sprintf("%s/.music/history.csv", os.Getenv("HOME"))
+	pth := fmt.Sprintf("%s/history.csv", os.Getenv("MCLI_HOME"))
 	e, err := exists(pth)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func NewFileHistory() (*FileHistory, error) {
 		f.Close()
 	}
 
-	aPth := fmt.Sprintf("%s/.music/history-archive", os.Getenv("HOME"))
+	aPth := fmt.Sprintf("%s/history-archive", os.Getenv("MCLI_HOME"))
 
 	e, err = exists(aPth)
 	if err != nil {

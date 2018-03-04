@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"bitbucket.org/cswank/music/internal/history"
-	"bitbucket.org/cswank/music/internal/source"
+	"bitbucket.org/cswank/mcli/internal/history"
+	"bitbucket.org/cswank/mcli/internal/source"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/flac"
@@ -254,7 +254,7 @@ func (p *play) next(g *ui.Gui, v *ui.View) error {
 }
 
 func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
-	dir := fmt.Sprintf("%s/.music/cache/%s/%s/%s", os.Getenv("HOME"), p.source.Name(), p.clean(result.Artist.Name), p.clean(result.Album.Title))
+	dir := fmt.Sprintf("%s/cache/%s/%s/%s", os.Getenv("MCLI_HOME"), p.source.Name(), p.clean(result.Artist.Name), p.clean(result.Album.Title))
 	e, err := exists(dir)
 	if err != nil {
 		return nil, nil, err
@@ -266,7 +266,7 @@ func (p *play) getFile(result source.Result) (*os.File, *os.File, error) {
 		}
 	}
 
-	pth := fmt.Sprintf("%s/.music/cache/%s/%s/%s/%s.flac", os.Getenv("HOME"), p.source.Name(), p.clean(result.Artist.Name), p.clean(result.Album.Title), p.clean(result.Track.Title))
+	pth := fmt.Sprintf("%s/cache/%s/%s/%s/%s.flac", os.Getenv("MCLI_HOME"), p.source.Name(), p.clean(result.Artist.Name), p.clean(result.Album.Title), p.clean(result.Track.Title))
 	e, err = exists(pth)
 	if err != nil {
 		return nil, nil, err

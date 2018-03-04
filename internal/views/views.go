@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"bitbucket.org/cswank/music/internal/colors"
+	"bitbucket.org/cswank/mcli/internal/colors"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -29,7 +29,7 @@ type coords struct {
 
 //Start is what main calls to get the app rolling
 func Start() error {
-	dir := fmt.Sprintf("%s/.music/", os.Getenv("HOME"))
+	dir := os.Getenv("MCLI_HOME")
 	e, err := exists(dir)
 	if err != nil {
 		return err
@@ -73,16 +73,16 @@ func Start() error {
 }
 
 func getColors() (ui.Attribute, colors.Colorer, colors.Colorer, colors.Colorer) {
-	bg = colors.GetBackground(os.Getenv("MUSIC_COLOR0"))
-	c1 := colors.Get(os.Getenv("MUSIC_COLOR1"))
+	bg = colors.GetBackground(os.Getenv("MCLI_COLOR0"))
+	c1 := colors.Get(os.Getenv("MCLI_COLOR1"))
 	if c1 == nil {
 		c1 = colors.Get("white")
 	}
-	c2 := colors.Get(os.Getenv("MUSIC_COLOR2"))
+	c2 := colors.Get(os.Getenv("MCLI_COLOR2"))
 	if c2 == nil {
 		c2 = colors.Get("green")
 	}
-	c3 := colors.Get(os.Getenv("MUSIC_COLOR3"))
+	c3 := colors.Get(os.Getenv("MCLI_COLOR3"))
 	if c3 == nil {
 		c3 = colors.Get("yellow")
 	}

@@ -1,15 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 
-	"bitbucket.org/cswank/music/internal/views"
-	"github.com/faiface/beep"
-	"github.com/faiface/beep/flac"
-	"github.com/faiface/beep/speaker"
+	"bitbucket.org/cswank/mcli/internal/views"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
 )
 
@@ -30,6 +27,9 @@ func init() {
 	} else {
 		log.SetOutput(ioutil.Discard)
 	}
+	if os.Getenv("MCLI_HOME") == "" {
+		os.Setenv("MCLI_HOME", fmt.Sprintf("%s/.mcli", os.Getenv("HOME")))
+	}
 }
 
 func cleanup() {
@@ -45,16 +45,4 @@ func main() {
 		log.Fatal(err)
 	}
 
-}
-
-func play() {
-	f, _ := os.Open("Ahmad Jamal - Sometimes I Feel Like A Motherless Child.flac")
-	s, format, _ := flac.Decode(f)
-	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-
-	done := make(chan struct{})
-	speaker.Play(beep.Seq(s, beep.Callback(func() {
-		close(done)
-	})))
-	<-done
 }

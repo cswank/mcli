@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	"bitbucket.org/cswank/music/internal/source"
+	"bitbucket.org/cswank/mcli/internal/source"
 	"github.com/atotto/clipboard"
 	ui "github.com/jroimartin/gocui"
 )

@@ -15,7 +15,7 @@ type Tidal struct {
 }
 
 func getTidalPath() string {
-	return fmt.Sprintf("%s/.music/tidal.json", os.Getenv("HOME"))
+	return fmt.Sprintf("%s/tidal.json", os.Getenv("MCLI_HOME"))
 }
 
 func saveTidal(t *tidal.Tidal) error {
