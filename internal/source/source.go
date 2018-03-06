@@ -29,6 +29,7 @@ type Result struct {
 	Artist   Artist
 	Album    Album
 	Playlist Album
+	Path     string
 }
 
 func (r *Result) ToCSV() []string {

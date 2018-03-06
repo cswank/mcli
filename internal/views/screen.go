@@ -28,7 +28,13 @@ type screen struct {
 }
 
 func newScreen(width, height int) (*screen, error) {
+	cli, err := source.GetTidal()
+	if err != nil {
+		return nil, err
+	}
+
 	s := &screen{
+		source: cli,
 		view:   "body",
 		width:  width,
 		height: height,
@@ -39,19 +45,11 @@ func newScreen(width, height int) (*screen, error) {
 
 	l := newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
-	var err error
-	s.play, err = newPlay(width, height, s.buffer.progress)
+	s.play, err = newPlay(width, height, cli, s.buffer.progress)
 	if err != nil {
 		return nil, err
 	}
-
 	s.login = l
-	cli, err := source.GetTidal()
-	if err == nil {
-		s.source = cli
-		s.play.source = cli
-	}
-
 	s.body = newBody(width, height, s.buffer.progress, cli.AlbumLink())
 	s.keys = s.getKeys()
 	return s, nil
@@ -107,9 +105,9 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "album":
-		s.play.ch <- r
+		s.play.play(r)
 	case "playlist":
-		s.play.ch <- r
+		s.play.play(r)
 	}
 	return nil
 }
