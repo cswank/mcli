@@ -112,6 +112,10 @@ func (p *play) loop() {
 }
 
 func (p *play) doPlay(result source.Result) error {
+	if err := p.history.Save(result); err != nil {
+		return err
+	}
+
 	f, err := os.Open(result.Path)
 	if err != nil {
 		return err
