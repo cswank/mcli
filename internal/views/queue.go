@@ -18,6 +18,7 @@ type queue struct {
 	source     source.Source
 	sourceName string
 	in         []source.Result
+	queue      []source.Result
 	out        chan source.Result
 	buf        chan<- progress
 	lock       sync.Mutex
@@ -41,11 +42,22 @@ func newQueue(s source.Source, buf chan<- progress) *queue {
 func (q *queue) add(r source.Result) {
 	q.lock.Lock()
 	q.in = append(q.in, r)
+	q.queue = append(q.queue, r)
 	q.lock.Unlock()
 }
 
+func (q *queue) playlist() []source.Result {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+	return q.queue
+}
+
 func (q *queue) next() source.Result {
-	return <-q.out
+	r := <-q.out
+	q.lock.Lock()
+	q.queue = q.queue[:len(q.queue)-1]
+	q.lock.Unlock()
+	return r
 }
 
 func (q *queue) download() {

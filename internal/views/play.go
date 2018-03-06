@@ -75,7 +75,7 @@ func (p *play) removeFromQueue(i int) {
 }
 
 func (p *play) getQueue() []source.Result {
-	return nil
+	return p.queue.playlist()
 }
 
 func (p *play) clear() {
