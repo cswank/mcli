@@ -1,4 +1,4 @@
 # mcli
 
-A music player.
+A command line music player.
 
