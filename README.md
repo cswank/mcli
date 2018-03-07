@@ -1,4 +1,4 @@
-# music
+# mcli
 
-A music  player
+A music player.
 
