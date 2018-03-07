@@ -33,6 +33,7 @@ type play struct {
 	vol          chan float64
 	history      history.History
 	queue        *queue
+	playing      bool
 }
 
 func newPlay(w, h int, s source.Source, pr chan<- progress) (*play, error) {
@@ -59,11 +60,15 @@ func newPlay(w, h int, s source.Source, pr chan<- progress) (*play, error) {
 }
 
 func (p *play) doPause() {
-	p.pause <- true
+	if p.playing {
+		p.pause <- true
+	}
 }
 
 func (p *play) volume(v float64) {
-	p.vol <- v
+	if p.playing {
+		p.vol <- v
+	}
 }
 
 func (p *play) addAlbumToQueue(album []source.Result) {
@@ -107,9 +112,11 @@ func (p *play) play(r source.Result) {
 func (p *play) loop() {
 	for {
 		r := p.queue.next()
+		p.playing = true
 		if err := p.doPlay(r); err != nil {
 			log.Fatal(err)
 		}
+		p.playing = false
 	}
 }
 
