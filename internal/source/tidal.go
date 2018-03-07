@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/cswank/tidal"
 )
@@ -218,14 +219,23 @@ func (t *Tidal) getTracks(tracks []tidal.Track, tp string) (*Results, error) {
 
 	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	return &Results{
-		Header: fmt.Sprintf(f, "Title", "Artist"),
+		Header: fmt.Sprintf(f, "Title", "Length"),
 		Type:   tp,
 		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, f, r.Track.Title, r.Artist.Name)
+			d := time.Duration(r.Track.Duration) * time.Second
+			_, err := fmt.Fprintf(w, f, r.Track.Title, fmtDuration(d))
 			return err
 		},
 		Results: out,
 	}, nil
+}
+
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Second)
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+	return fmt.Sprintf("%d:%02d", m, s)
 }
 
 func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {

@@ -46,6 +46,15 @@ func (q *queue) add(r source.Result) {
 	q.lock.Unlock()
 }
 
+func (q *queue) remove(i int) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+	if len(q.queue) == 0 || i >= len(q.queue) {
+		return
+	}
+	q.queue = append(q.queue[:i], q.queue[i+1:]...)
+}
+
 func (q *queue) playlist() []source.Result {
 	q.lock.Lock()
 	defer q.lock.Unlock()
@@ -55,7 +64,9 @@ func (q *queue) playlist() []source.Result {
 func (q *queue) next() source.Result {
 	r := <-q.out
 	q.lock.Lock()
-	q.queue = q.queue[:len(q.queue)-1]
+	if len(q.queue) > 0 {
+		q.queue = q.queue[1:]
+	}
 	q.lock.Unlock()
 	return r
 }

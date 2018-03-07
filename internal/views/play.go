@@ -67,11 +67,13 @@ func (p *play) volume(v float64) {
 }
 
 func (p *play) addAlbumToQueue(album []source.Result) {
-
+	for _, r := range album {
+		p.play(r)
+	}
 }
 
 func (p *play) removeFromQueue(i int) {
-
+	p.queue.remove(i)
 }
 
 func (p *play) getQueue() []source.Result {
