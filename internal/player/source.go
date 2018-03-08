@@ -7,6 +7,19 @@ import (
 	"time"
 )
 
+type Source interface {
+	Name() string
+	AlbumLink() string
+	FindArtist(string, int) (*Results, error)
+	FindAlbum(string, int) (*Results, error)
+	FindTrack(string, int) (*Results, error)
+	GetAlbum(string) (*Results, error)
+	GetTrack(string) (string, error)
+	GetArtistAlbums(string, int) (*Results, error)
+	GetPlaylists() (*Results, error)
+	GetPlaylist(string, int) (*Results, error)
+}
+
 type Track struct {
 	ID       string
 	Title    string
@@ -81,17 +94,4 @@ type Results struct {
 	Header  string
 	Results []Result
 	Print   func(io.Writer, Result) error
-}
-
-type Source interface {
-	Name() string
-	AlbumLink() string
-	FindArtist(string, int) (*Results, error)
-	FindAlbum(string, int) (*Results, error)
-	FindTrack(string, int) (*Results, error)
-	GetAlbum(string) (*Results, error)
-	GetTrack(string) (string, error)
-	GetArtistAlbums(string, int) (*Results, error)
-	GetPlaylists() (*Results, error)
-	GetPlaylist(string, int) (*Results, error)
 }
