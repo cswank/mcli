@@ -1,4 +1,4 @@
-package history
+package player
 
 import (
 	"encoding/csv"
@@ -8,13 +8,11 @@ import (
 	"path/filepath"
 	"sort"
 	"time"
-
-	"bitbucket.org/cswank/mcli/internal/source"
 )
 
 type History interface {
-	Save(source.Result) error
-	Fetch(int, int) (*source.Results, error)
+	Save(Result) error
+	Fetch(int, int) (*Results, error)
 }
 
 type FileHistory struct {
@@ -54,7 +52,7 @@ func NewFileHistory() (*FileHistory, error) {
 	return &FileHistory{pth: pth, archivePth: aPth}, nil
 }
 
-func (f *FileHistory) Save(r source.Result) error {
+func (f *FileHistory) Save(r Result) error {
 	file, err := os.OpenFile(f.pth, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
@@ -69,7 +67,7 @@ func (f *FileHistory) Save(r source.Result) error {
 	return nil
 }
 
-func (f *FileHistory) Fetch(page, pageSize int) (*source.Results, error) {
+func (f *FileHistory) Fetch(page, pageSize int) (*Results, error) {
 	file, err := os.Open(f.pth)
 	if err != nil {
 		return nil, err
@@ -89,7 +87,7 @@ func (f *FileHistory) Fetch(page, pageSize int) (*source.Results, error) {
 		return rows[i][0] > rows[j][0]
 	})
 
-	var res []source.Result
+	var res []Result
 	var maxTitle, maxAlbum int
 	seen := map[string]bool{}
 	var archive int
@@ -98,7 +96,7 @@ func (f *FileHistory) Fetch(page, pageSize int) (*source.Results, error) {
 			archive = i
 			break
 		}
-		r := &source.Result{}
+		r := &Result{}
 		if err := r.FromCSV(row); err != nil {
 			return nil, err
 		}
@@ -123,10 +121,10 @@ func (f *FileHistory) Fetch(page, pageSize int) (*source.Results, error) {
 	}
 
 	format := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
-	return &source.Results{
+	return &Results{
 		Header: fmt.Sprintf(format, "Title", "Album", "Artist"),
 		Type:   "album",
-		Print: func(w io.Writer, r source.Result) error {
+		Print: func(w io.Writer, r Result) error {
 			_, err := fmt.Fprintf(w, format, r.Track.Title, r.Album.Title, r.Artist.Name)
 			return err
 		},

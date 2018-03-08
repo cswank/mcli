@@ -88,3 +88,14 @@ func getColors() (ui.Attribute, colors.Colorer, colors.Colorer, colors.Colorer) 
 	}
 	return bg, c1, c2, c3
 }
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
+}

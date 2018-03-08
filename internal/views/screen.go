@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"bitbucket.org/cswank/mcli/internal/source"
+	"bitbucket.org/cswank/mcli/internal/player"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -23,12 +23,12 @@ type screen struct {
 
 	keys []key
 
-	source source.Source
+	source player.Source
 	stack  stack
 }
 
 func newScreen(width, height int) (*screen, error) {
-	cli, err := source.GetTidal()
+	cli, err := player.GetTidal()
 	if err != nil {
 		return nil, err
 	}
@@ -146,10 +146,10 @@ func (s *screen) queueNoCursor(g *ui.Gui, v *ui.View) error {
 	}
 
 	f := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
-	results := &source.Results{
+	results := &player.Results{
 		Header: fmt.Sprintf(f, "Title", "Album", "Artist"),
 		Type:   "queue",
-		Print: func(w io.Writer, r source.Result) error {
+		Print: func(w io.Writer, r player.Result) error {
 			_, err := fmt.Fprintf(w, f, r.Track.Title, r.Album.Title, r.Artist.Name)
 			return err
 		},
@@ -238,7 +238,7 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
-	res, err := s.play.history.Fetch(0, s.height)
+	res, err := s.play.player.History(0, s.height)
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
 func (s *screen) doLogin(username, password string) error {
 	s.view = "search-type"
 	var err error
-	s.source, err = source.NewTidal(username, password)
+	s.source, err = player.NewTidal(username, password)
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func (s *screen) doSearch(searchType, term string) error {
 	}
 
 	if term != "" {
-		var results *source.Results
+		var results *player.Results
 		var err error
 		s.view = "body"
 		switch searchType {
@@ -328,7 +328,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if s.source == nil {
 		s.view = "login"
 	} else {
-		res, err := s.play.history.Fetch(0, s.height)
+		res, err := s.play.player.History(0, s.height)
 		if err == nil && len(res.Results) > 0 {
 			s.header.header = res.Header
 			s.body.results = res
@@ -421,10 +421,10 @@ func (s *screen) keybindings(g *ui.Gui) error {
 
 type stack struct {
 	//current results
-	topR *source.Results
+	topR *player.Results
 	//current cursor
 	topC    int
-	stack   []source.Results
+	stack   []player.Results
 	cursors []int
 }
 
@@ -432,11 +432,11 @@ func (s *stack) len() int {
 	return len(s.stack)
 }
 
-func (s *stack) top() (*source.Results, int) {
+func (s *stack) top() (*player.Results, int) {
 	return s.topR, s.topC
 }
 
-func (s *stack) add(r *source.Results, c int) {
+func (s *stack) add(r *player.Results, c int) {
 	s.topR = r
 	s.topC = c
 	s.stack = append(s.stack, *r)
@@ -447,7 +447,7 @@ func (s *stack) clear() {
 	s.topR = nil
 	s.topC = 0
 	s.cursors = []int{}
-	s.stack = []source.Results{}
+	s.stack = []player.Results{}
 }
 
 func (s *stack) pop() {

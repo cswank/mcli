@@ -1,24 +1,23 @@
 package views
 
 import (
-	"fmt"
 	"path"
 
-	"bitbucket.org/cswank/mcli/internal/source"
+	"bitbucket.org/cswank/mcli/internal/player"
 	"github.com/atotto/clipboard"
 	ui "github.com/jroimartin/gocui"
 )
 
 type body struct {
 	albumURL string
-	progress chan progress
+	progress chan player.Progress
 	coords   coords
 	height   int
-	results  *source.Results
+	results  *player.Results
 	cursor   int
 }
 
-func newBody(w, h int, ch chan progress, u string) *body {
+func newBody(w, h int, ch chan player.Progress, u string) *body {
 	return &body{
 		albumURL: u,
 		progress: ch,
@@ -51,7 +50,6 @@ func (b *body) albumLink(g *ui.Gui, v *ui.View) error {
 	c, _ := v.Cursor()
 	r := b.results.Results[c]
 	l := path.Join(b.albumURL, r.Album.ID)
-	b.progress <- progress{msg: fmt.Sprintf("copied %s to clipboard", l), flash: true}
 	return clipboard.WriteAll(l)
 }
 

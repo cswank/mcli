@@ -1,4 +1,4 @@
-package views
+package player
 
 import (
 	"fmt"
@@ -10,36 +10,39 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"bitbucket.org/cswank/mcli/internal/source"
 )
 
+type Progress struct {
+	N     int
+	Total int
+}
+
 type queue struct {
-	source     source.Source
+	source     Source
 	sourceName string
-	in         []source.Result
-	queue      []source.Result
-	out        chan source.Result
-	buf        chan<- progress
+	in         []Result
+	queue      []Result
+	out        chan Result
 	lock       sync.Mutex
 	outLock    sync.Mutex
 	sep        string
+	downloadCh chan<- Progress
 }
 
-func newQueue(s source.Source, buf chan<- progress) *queue {
+func newQueue(s Source, buf chan<- Progress) *queue {
 	q := &queue{
 		source:     s,
-		buf:        buf,
+		downloadCh: buf,
 		sourceName: s.Name(),
 		sep:        string(filepath.Separator),
-		out:        make(chan source.Result),
+		out:        make(chan Result),
 	}
 
 	go q.download()
 	return q
 }
 
-func (q *queue) add(r source.Result) {
+func (q *queue) add(r Result) {
 	q.lock.Lock()
 	q.in = append(q.in, r)
 	q.queue = append(q.queue, r)
@@ -55,13 +58,13 @@ func (q *queue) remove(i int) {
 	q.queue = append(q.queue[:i], q.queue[i+1:]...)
 }
 
-func (q *queue) playlist() []source.Result {
+func (q *queue) playlist() []Result {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	return q.queue
 }
 
-func (q *queue) next() source.Result {
+func (q *queue) next() Result {
 	r := <-q.out
 	q.lock.Lock()
 	if len(q.queue) > 0 {
@@ -96,7 +99,7 @@ func (q *queue) download() {
 	}
 }
 
-func (q *queue) doDownload(r source.Result) error {
+func (q *queue) doDownload(r Result) error {
 	f, err := os.Create(r.Path)
 	if err != nil {
 		return fmt.Errorf("could not create file for %+v: %s", r, err)
@@ -112,7 +115,7 @@ func (q *queue) doDownload(r source.Result) error {
 		return fmt.Errorf("could not get stream %+v: %s", r, err)
 	}
 
-	pr := newProgressRead(resp.Body, int(resp.ContentLength), q.buf)
+	pr := newProgressRead(resp.Body, int(resp.ContentLength), q.downloadCh)
 	_, err = io.Copy(f, pr)
 	if err != nil {
 		return err
@@ -123,7 +126,7 @@ func (q *queue) doDownload(r source.Result) error {
 	return nil
 }
 
-func (q *queue) checkCache(result source.Result) (string, bool) {
+func (q *queue) checkCache(result Result) (string, bool) {
 	dir := fmt.Sprintf("%s/cache/%s/%s/%s", os.Getenv("MCLI_HOME"), q.sourceName, q.clean(result.Artist.Name), q.clean(result.Album.Title))
 	e, _ := exists(dir)
 	if !e {
@@ -139,24 +142,13 @@ func (q *queue) clean(s string) string {
 	return strings.Replace(s, q.sep, "", -1)
 }
 
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
-}
-
 type progressRead struct {
 	io.Reader
 	t, l, reads int
-	ch          chan<- progress
+	ch          chan<- Progress
 }
 
-func newProgressRead(r io.Reader, l int, ch chan<- progress) *progressRead {
+func newProgressRead(r io.Reader, l int, ch chan<- Progress) *progressRead {
 	return &progressRead{Reader: r, t: 0, l: l, ch: ch}
 }
 
@@ -165,14 +157,14 @@ func (r *progressRead) Read(p []byte) (int, error) {
 	r.t += n
 	r.reads++
 	if r.reads%100 == 0 {
-		r.ch <- progress{n: r.t, total: r.l}
+		r.ch <- Progress{N: r.t, Total: r.l}
 	}
 	return n, err
 }
 
 // Close the reader when it implements io.Closer
 func (r *progressRead) Close() error {
-	r.ch <- progress{n: 0, total: r.t}
+	r.ch <- Progress{N: 0, Total: r.t}
 	if closer, ok := r.Reader.(io.Closer); ok {
 		return closer.Close()
 	}
