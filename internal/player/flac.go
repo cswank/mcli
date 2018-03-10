@@ -21,6 +21,7 @@ type Flac struct {
 	pause        chan bool
 	vol          chan float64
 	fastForward  chan bool
+	nextSong     func(r Result)
 }
 
 func newFlac(f Fetcher, download chan Progress, play chan Progress) (*Flac, error) {
@@ -46,6 +47,10 @@ func newFlac(f Fetcher, download chan Progress, play chan Progress) (*Flac, erro
 
 	go p.loop()
 	return p, nil
+}
+
+func (p *Flac) NextSong(f func(Result)) {
+	p.nextSong = f
 }
 
 func (p *Flac) Play(r Result) {
@@ -91,6 +96,11 @@ func (p *Flac) FastForward() {
 func (p *Flac) loop() {
 	for {
 		r := p.queue.next()
+		log.Println("loop", r)
+		if p.nextSong != nil {
+			p.nextSong(r)
+		}
+		log.Println("loop 2", r)
 		p.playing = true
 		if err := p.doPlay(r); err != nil {
 			log.Fatal(err)

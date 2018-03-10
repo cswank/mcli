@@ -12,17 +12,20 @@ type play struct {
 	width        int
 	coords       coords
 	playProgress chan player.Progress
+	song         chan player.Result
 	client       player.Client
 }
 
-func newPlay(w, h int, c player.Client, ch chan player.Progress, pr chan player.Progress) *play {
+func newPlay(w, h int, c player.Client, ch chan player.Progress, song chan player.Result) *play {
 	p := &play{
 		width:        w,
 		coords:       coords{x1: -1, y1: h - 2, x2: w, y2: h},
 		client:       c,
 		playProgress: ch,
+		song:         song,
 	}
 
+	c.NextSong(p.nextSong)
 	go p.render()
 	return p
 }
@@ -65,6 +68,12 @@ func (p *play) render() {
 			return nil
 		})
 	}
+}
+
+//nextSong gets called by player.Player whenever the
+//next song begins playing.
+func (p *play) nextSong(r player.Result) {
+	p.song <- r
 }
 
 func (p *play) play(r player.Result) {

@@ -21,6 +21,7 @@ type Player interface {
 	Queue() []Result
 	RemoveFromQueue(int)
 	FastForward()
+	NextSong(func(Result))
 }
 
 type Fetcher interface {
