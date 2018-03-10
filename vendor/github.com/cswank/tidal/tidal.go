@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -36,24 +35,16 @@ func (t *Tidal) get(dest string, query *url.Values, s interface{}) error {
 	}
 
 	defer res.Body.Close()
-	d, _ := ioutil.ReadAll(res.Body)
-	log.Println(string(d))
-
-	return json.Unmarshal(d, &s)
-	//return json.NewDecoder(res.Body).Decode(&s)
+	return json.NewDecoder(res.Body).Decode(&s)
 }
 
 func (t *Tidal) CheckSession() (bool, error) {
-	//if self.user is None or not self.user.id or not self.session_id:
-	//return False
-	//{"validUntil":"2018-03-10T01:10:16.254+0000","status":"ACTIVE","subscription":{"type":"HIFI","offlineGracePeriod":30},"highestSoundQuality":"LOSSLESS","premiumAccess":true,"canGetTrial":false,"paymentType":"ADYEN_CREDIT_CARD"}
-	//2018-03-10T01:10:16.254+0000
 	var out struct {
 		ValidUntil string `json:"validUntil"`
 		Status     string `json:"status"`
 	}
 	err := t.get(fmt.Sprintf("users/%s/subscription", t.UserID), &url.Values{}, &out)
-	return out.ValidUntil > time.Now().Format(time.RFC3339Nano), err
+	return out.Status == "ACTIVE" && out.ValidUntil > time.Now().Format(time.RFC3339Nano), err
 }
 
 // GetStreamURL func

@@ -33,7 +33,7 @@
   revision = "4f518eddb04b8f73870836b6d1941e8aa3c06637"
 
 [[constraint]]
-  branch = "playlists"
+  branch = "master"
   name = "github.com/cswank/tidal"
 
 [[constraint]]

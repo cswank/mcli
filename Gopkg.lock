@@ -14,15 +14,21 @@
   revision = "bc5958e1c8339112fc3347a89f3c482f416a69d3"
 
 [[projects]]
-  branch = "playlists"
+  branch = "master"
+  name = "github.com/cswank/beep"
+  packages = [".","effects","flac","speaker"]
+  revision = "7bb960101a4bdb18e46a1b479a31ca84299d583d"
+
+[[projects]]
+  branch = "master"
   name = "github.com/cswank/tidal"
   packages = ["."]
-  revision = "6ba1784193af61d37028d039196f8dddd7cb9a55"
+  revision = "d9089a8aa63ca15c2c8444d996907f93f8432a2e"
 
 [[projects]]
   branch = "master"
   name = "github.com/faiface/beep"
-  packages = [".","effects","flac","speaker"]
+  packages = ["."]
   revision = "4ec0906f41871d561558e3e0643f71fb8bf08885"
 
 [[projects]]
@@ -99,6 +105,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "69354888d17ccc5d206afc8bee280cc154ed409a243c05e9ed8cac7c020bd9bc"
+  inputs-digest = "06d8d1c5229f619377408fc0d7963ea7f7fcee3fefb81dcf07f61a72d10b0c69"
   solver-name = "gps-cdcl"
   solver-version = 1
