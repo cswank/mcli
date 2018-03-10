@@ -15,6 +15,27 @@ type Tidal struct {
 	client *tidal.Tidal
 }
 
+//NewTidal returns a Client composed of a Flac player and Tidal Fetcher
+func NewTidal(download chan Progress, play chan Progress) (Client, error) {
+	t, err := newTidal()
+	if err != nil {
+		return nil, err
+	}
+	return newFlac(t, download, play)
+}
+
+func newTidal() (*Tidal, error) {
+	f, err := os.Open(getTidalPath())
+	if err != nil {
+		return nil, err
+	}
+
+	defer f.Close()
+	var t tidal.Tidal
+	err = json.NewDecoder(f).Decode(&t)
+	return &Tidal{client: &t}, err
+}
+
 func getTidalPath() string {
 	return fmt.Sprintf("%s/tidal.json", os.Getenv("MCLI_HOME"))
 }
@@ -26,22 +47,6 @@ func saveTidal(t *tidal.Tidal) error {
 	}
 	defer f.Close()
 	return json.NewEncoder(f).Encode(t)
-}
-
-func getTidal() (*tidal.Tidal, error) {
-	f, err := os.Open(getTidalPath())
-	if err != nil {
-		return nil, err
-	}
-
-	defer f.Close()
-	var t tidal.Tidal
-	return &t, json.NewDecoder(f).Decode(&t)
-}
-
-func GetTidal() (*Tidal, error) {
-	t, err := getTidal()
-	return &Tidal{client: t}, err
 }
 
 func (t *Tidal) Login(username, pw string) error {

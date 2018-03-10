@@ -23,24 +23,19 @@ type Flac struct {
 	fastForward  chan bool
 }
 
-func NewFlac(download chan Progress, play chan Progress) (*Flac, error) {
-	t, err := GetTidal()
-	if err != nil {
-		return nil, err
-	}
-
+func newFlac(f Fetcher, download chan Progress, play chan Progress) (*Flac, error) {
 	hist, err := NewFileHistory()
 	if err != nil {
 		return nil, err
 	}
 
-	q, err := newQueue(t.Name(), t.GetTrack, download)
+	q, err := newQueue(f.Name(), f.GetTrack, download)
 	if err != nil {
 		return nil, err
 	}
 
 	p := &Flac{
-		Fetcher:      t,
+		Fetcher:      f,
 		playProgress: play,
 		history:      hist,
 		queue:        q,

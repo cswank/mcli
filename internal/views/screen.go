@@ -30,7 +30,7 @@ type screen struct {
 func newScreen(width, height int) (*screen, error) {
 	dl := make(chan player.Progress)
 	pl := make(chan player.Progress)
-	cli, err := player.NewFlac(dl, pl)
+	cli, err := player.NewTidal(dl, pl)
 	if err != nil {
 		return nil, err
 	}
