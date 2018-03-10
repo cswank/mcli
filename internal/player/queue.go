@@ -18,7 +18,6 @@ type Progress struct {
 }
 
 type queue struct {
-	source     Source
 	sourceName string
 	in         []Result
 	queue      []Result
@@ -27,19 +26,24 @@ type queue struct {
 	outLock    sync.Mutex
 	sep        string
 	downloadCh chan<- Progress
+	getTrack   func(string) (string, error)
 }
 
-func newQueue(s Source, buf chan<- Progress) *queue {
+func newQueue(name string, getTrack func(string) (string, error), buf chan<- Progress) (*queue, error) {
 	q := &queue{
-		source:     s,
+		getTrack:   getTrack,
 		downloadCh: buf,
-		sourceName: s.Name(),
+		sourceName: name,
 		sep:        string(filepath.Separator),
 		out:        make(chan Result),
 	}
 
+	if err := q.ensureCache(); err != nil {
+		return nil, err
+	}
+
 	go q.download()
-	return q
+	return q, nil
 }
 
 func (q *queue) add(r Result) {
@@ -105,7 +109,7 @@ func (q *queue) doDownload(r Result) error {
 		return fmt.Errorf("could not create file for %+v: %s", r, err)
 	}
 
-	u, err := q.source.GetTrack(r.Track.ID)
+	u, err := q.getTrack(r.Track.ID)
 	if err != nil {
 		return fmt.Errorf("could not get track %+v: %s", r, err)
 	}
@@ -124,6 +128,15 @@ func (q *queue) doDownload(r Result) error {
 	f.Close()
 	pr.Close()
 	return nil
+}
+
+func (q *queue) ensureCache() error {
+	dir := fmt.Sprintf("%s/cache/%s", os.Getenv("MCLI_HOME"), q.sourceName)
+	e, _ := exists(dir)
+	if e {
+		return nil
+	}
+	return os.MkdirAll(dir, 0700)
 }
 
 func (q *queue) checkCache(result Result) (string, bool) {

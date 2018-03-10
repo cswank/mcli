@@ -7,8 +7,26 @@ import (
 	"time"
 )
 
-type Source interface {
+type Client interface {
+	Player
+	Fetcher
+}
+
+type Player interface {
+	Play(Result)
+	History(int, int) (*Results, error)
+	PlayAlbum([]Result)
+	Pause()
+	Volume(float64)
+	Queue() []Result
+	RemoveFromQueue(int)
+	FastForward()
+}
+
+type Fetcher interface {
 	Name() string
+	Login(string, string) error
+	Ping() bool
 	AlbumLink() string
 	FindArtist(string, int) (*Results, error)
 	FindAlbum(string, int) (*Results, error)

@@ -23,34 +23,32 @@ type screen struct {
 
 	keys []key
 
-	source player.Source
+	client player.Client
 	stack  stack
 }
 
 func newScreen(width, height int) (*screen, error) {
-	cli, err := player.GetTidal()
+	dl := make(chan player.Progress)
+	pl := make(chan player.Progress)
+	cli, err := player.NewFlac(dl, pl)
 	if err != nil {
 		return nil, err
 	}
 
 	s := &screen{
-		source: cli,
+		client: cli,
 		view:   "body",
 		width:  width,
 		height: height,
-		buffer: newBuffer(width, height),
+		play:   newPlay(width, height, cli, pl, dl),
+		body:   newBody(width, height, dl, cli.AlbumLink()),
+		buffer: newBuffer(width, height, dl),
 		header: newHeader(width, height),
 		help:   newHelp(width, height),
 	}
 
-	l := newLogin(width, height, s.doLogin)
+	s.login = newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
-	s.play, err = newPlay(width, height, cli, s.buffer.progress)
-	if err != nil {
-		return nil, err
-	}
-	s.login = l
-	s.body = newBody(width, height, s.buffer.progress, cli.AlbumLink())
 	s.keys = s.getKeys()
 	return s, nil
 }
@@ -70,7 +68,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 	switch s.body.results.Type {
 	case "album search":
 		s.body.cursor = 0
-		results, err := s.source.GetAlbum(r.Album.ID)
+		results, err := s.client.GetAlbum(r.Album.ID)
 		if err != nil {
 			return err
 		}
@@ -79,7 +77,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "artist search":
 		s.body.cursor = 0
-		results, err := s.source.GetArtistAlbums(r.Artist.ID, s.height)
+		results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height)
 		if err != nil {
 			return err
 		}
@@ -88,7 +86,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "artist albums":
 		s.body.cursor = 0
-		results, err := s.source.GetAlbum(r.Album.ID)
+		results, err := s.client.GetAlbum(r.Album.ID)
 		if err != nil {
 			return err
 		}
@@ -97,7 +95,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "playlists":
 		s.body.cursor = 0
-		results, err := s.source.GetPlaylist(r.Album.ID, s.height)
+		results, err := s.client.GetPlaylist(r.Album.ID, s.height)
 		if err != nil {
 			return err
 		}
@@ -113,7 +111,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) playlists(g *ui.Gui, v *ui.View) error {
-	results, err := s.source.GetPlaylists()
+	results, err := s.client.GetPlaylists()
 	if err != nil {
 		return err
 	}
@@ -190,7 +188,7 @@ func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 	r := s.body.results.Results[s.body.cursor]
 	c := s.body.cursor
-	results, err := s.source.GetAlbum(r.Album.ID)
+	results, err := s.client.GetAlbum(r.Album.ID)
 	if err != nil {
 		return err
 	}
@@ -205,7 +203,7 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 	r := s.body.results.Results[s.body.cursor]
 	c := s.body.cursor
-	results, err := s.source.GetArtistAlbums(r.Artist.ID, s.height)
+	results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height)
 	if err != nil {
 		return err
 	}
@@ -238,7 +236,7 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
-	res, err := s.play.player.History(0, s.height)
+	res, err := s.client.History(0, s.height)
 	if err != nil {
 		return err
 	}
@@ -252,8 +250,7 @@ func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
 
 func (s *screen) doLogin(username, password string) error {
 	s.view = "search-type"
-	var err error
-	s.source, err = player.NewTidal(username, password)
+	err := s.client.Login(username, password)
 	if err != nil {
 		return err
 	}
@@ -273,11 +270,11 @@ func (s *screen) doSearch(searchType, term string) error {
 		s.view = "body"
 		switch searchType {
 		case "album":
-			results, err = s.source.FindAlbum(term, s.body.height)
+			results, err = s.client.FindAlbum(term, s.body.height)
 		case "artist":
-			results, err = s.source.FindArtist(term, s.body.height)
+			results, err = s.client.FindArtist(term, s.body.height)
 		case "track":
-			results, err = s.source.FindTrack(term, s.body.height)
+			results, err = s.client.FindTrack(term, s.body.height)
 		}
 		if err != nil {
 			return err
@@ -325,10 +322,10 @@ func (s *screen) showSearch(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
-	if s.source == nil {
+	if !s.client.Ping() {
 		s.view = "login"
 	} else {
-		res, err := s.play.player.History(0, s.height)
+		res, err := s.client.History(0, s.height)
 		if err == nil && len(res.Results) > 0 {
 			s.header.header = res.Header
 			s.body.results = res

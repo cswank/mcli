@@ -44,25 +44,22 @@ func GetTidal() (*Tidal, error) {
 	return &Tidal{client: t}, err
 }
 
-func NewTidal(username, pw string) (*Tidal, error) {
-	var t *tidal.Tidal
-	t, err := getTidal()
+func (t *Tidal) Login(username, pw string) error {
+	cli, err := tidal.New(username, pw)
 	if err != nil {
-		t, err = tidal.New(username, pw)
-		if err != nil {
-			return nil, err
-		}
+		return err
 	}
 
-	if t.SessionID == "" {
-		return nil, fmt.Errorf("couldn't log into tidal")
+	if cli.SessionID == "" {
+		return fmt.Errorf("couldn't log into tidal")
 	}
 
-	if err := saveTidal(t); err != nil {
-		return nil, err
-	}
+	return saveTidal(cli)
+}
 
-	return &Tidal{client: t}, nil
+func (t *Tidal) Ping() bool {
+	ok, err := t.client.CheckSession()
+	return ok && err == nil
 }
 
 func (t *Tidal) Name() string {

@@ -11,9 +11,10 @@ import (
 	"github.com/cswank/beep/speaker"
 )
 
-type Player struct {
+type Flac struct {
+	Fetcher
 	queue        *queue
-	source       Source
+	source       Fetcher
 	playProgress chan Progress
 	history      History
 	playing      bool
@@ -22,17 +23,27 @@ type Player struct {
 	fastForward  chan bool
 }
 
-func NewPlayer(s Source, download chan Progress, play chan Progress) (*Player, error) {
+func NewFlac(download chan Progress, play chan Progress) (*Flac, error) {
+	t, err := GetTidal()
+	if err != nil {
+		return nil, err
+	}
+
 	hist, err := NewFileHistory()
 	if err != nil {
 		return nil, err
 	}
 
-	p := &Player{
+	q, err := newQueue(t.Name(), t.GetTrack, download)
+	if err != nil {
+		return nil, err
+	}
+
+	p := &Flac{
+		Fetcher:      t,
 		playProgress: play,
-		source:       s,
 		history:      hist,
-		queue:        newQueue(s, download),
+		queue:        q,
 		pause:        make(chan bool),
 		fastForward:  make(chan bool),
 		vol:          make(chan float64),
@@ -42,47 +53,47 @@ func NewPlayer(s Source, download chan Progress, play chan Progress) (*Player, e
 	return p, nil
 }
 
-func (p *Player) Play(r Result) {
+func (p *Flac) Play(r Result) {
 	p.queue.add(r)
 }
 
-func (p *Player) History(page, pageSize int) (*Results, error) {
+func (p *Flac) History(page, pageSize int) (*Results, error) {
 	return p.history.Fetch(page, pageSize)
 }
 
-func (p *Player) PlayAlbum(album []Result) {
+func (p *Flac) PlayAlbum(album []Result) {
 	for _, r := range album {
 		p.Play(r)
 	}
 }
 
-func (p *Player) Pause() {
+func (p *Flac) Pause() {
 	if p.playing {
 		p.pause <- true
 	}
 }
 
-func (p *Player) Volume(v float64) {
+func (p *Flac) Volume(v float64) {
 	if p.playing {
 		p.vol <- v
 	}
 }
 
-func (p *Player) Queue() []Result {
+func (p *Flac) Queue() []Result {
 	return p.queue.playlist()
 }
 
-func (p *Player) RemoveFromQueue(i int) {
+func (p *Flac) RemoveFromQueue(i int) {
 	p.queue.remove(i)
 }
 
-func (p *Player) FastForward() {
+func (p *Flac) FastForward() {
 	if p.playing {
 		p.fastForward <- true
 	}
 }
 
-func (p *Player) loop() {
+func (p *Flac) loop() {
 	for {
 		r := p.queue.next()
 		p.playing = true
@@ -93,7 +104,7 @@ func (p *Player) loop() {
 	}
 }
 
-func (p *Player) doPlay(result Result) error {
+func (p *Flac) doPlay(result Result) error {
 	if err := p.history.Save(result); err != nil {
 		return err
 	}

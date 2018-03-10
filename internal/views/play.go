@@ -12,46 +12,39 @@ type play struct {
 	width        int
 	coords       coords
 	playProgress chan player.Progress
-	source       player.Source
-	player       *player.Player
+	client       player.Client
 }
 
-func newPlay(w, h int, s player.Source, pr chan player.Progress) (*play, error) {
+func newPlay(w, h int, c player.Client, ch chan player.Progress, pr chan player.Progress) *play {
 	p := &play{
 		width:        w,
 		coords:       coords{x1: -1, y1: h - 2, x2: w, y2: h},
-		source:       s,
-		playProgress: make(chan player.Progress),
+		client:       c,
+		playProgress: ch,
 	}
 
-	pl, err := player.NewPlayer(s, pr, p.playProgress)
-	if err != nil {
-		return nil, err
-	}
-
-	p.player = pl
 	go p.render()
-	return p, nil
+	return p
 }
 
 func (p *play) doPause() {
-	p.player.Pause()
+	p.client.Pause()
 }
 
 func (p *play) volume(v float64) {
-	p.player.Volume(v)
+	p.client.Volume(v)
 }
 
 func (p *play) addAlbumToQueue(album []player.Result) {
-	p.player.PlayAlbum(album)
+	p.client.PlayAlbum(album)
 }
 
 func (p *play) removeFromQueue(i int) {
-	p.player.RemoveFromQueue(i)
+	p.client.RemoveFromQueue(i)
 }
 
 func (p *play) getQueue() []player.Result {
-	return p.player.Queue()
+	return p.client.Queue()
 }
 
 func (p *play) clear() {
@@ -75,10 +68,10 @@ func (p *play) render() {
 }
 
 func (p *play) play(r player.Result) {
-	p.player.Play(r)
+	p.client.Play(r)
 }
 
 func (p *play) next(g *ui.Gui, v *ui.View) error {
-	p.player.FastForward()
+	p.client.FastForward()
 	return nil
 }
