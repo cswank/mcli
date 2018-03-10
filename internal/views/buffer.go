@@ -37,7 +37,7 @@ func (b *buffer) render() {
 			if v == nil {
 				v, _ = g.View("buffer")
 			}
-			if text != "" {
+			if text != "" && text != v.Buffer() {
 				g.Update(func(g *ui.Gui) error {
 					v.Clear()
 					fmt.Fprint(v, text)
@@ -45,10 +45,10 @@ func (b *buffer) render() {
 				})
 			}
 		case r := <-b.song:
-			text := fmt.Sprintf("%s %s", r.Track.Title, time.Duration(r.Track.Duration)*time.Second)
+			text = b.center(fmt.Sprintf("%s %s", r.Track.Title, time.Duration(r.Track.Duration)*time.Second))
 			g.Update(func(g *ui.Gui) error {
 				v.Clear()
-				fmt.Fprint(v, b.center(text))
+				fmt.Fprint(v, text)
 				return nil
 			})
 		case p := <-b.progress:
