@@ -20,8 +20,8 @@ type key struct {
 
 func (s *screen) getKeys() []key {
 	return []key{
-		{views: []string{"body"}, keys: []interface{}{'n', ui.KeyArrowDown}, keybinding: s.body.next, help: keyHelp{key: "n", body: "(or down arrow) move cursor down"}},
-		{views: []string{"body"}, keys: []interface{}{'p', ui.KeyArrowUp}, keybinding: s.body.prev, help: keyHelp{key: "p", body: "(or up arrow) move cursor up"}},
+		{views: []string{"body"}, keys: []interface{}{'n', ui.KeyCtrlN, ui.KeyArrowDown}, keybinding: s.body.next, help: keyHelp{key: "n", body: "(or down arrow) move cursor down"}},
+		{views: []string{"body"}, keys: []interface{}{'p', ui.KeyCtrlP, ui.KeyArrowUp}, keybinding: s.body.prev, help: keyHelp{key: "p", body: "(or up arrow) move cursor up"}},
 		{views: []string{"body"}, keys: []interface{}{'s'}, keybinding: s.showSearch, help: keyHelp{key: "s", body: "search"}},
 		{views: []string{"body"}, keys: []interface{}{'y'}, keybinding: s.showHistory, help: keyHelp{key: "y", body: "history"}},
 		{views: []string{"body"}, keys: []interface{}{'v'}, keybinding: s.volumeDown, help: keyHelp{key: "v", body: "volume down"}},

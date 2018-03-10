@@ -25,14 +25,24 @@ func NewTidal(download chan Progress, play chan Progress) (Client, error) {
 }
 
 func newTidal() (*Tidal, error) {
-	f, err := os.Open(getTidalPath())
+	pth := getTidalPath()
+	e, err := exists(pth)
 	if err != nil {
 		return nil, err
 	}
 
+	if !e {
+		return &Tidal{client: &tidal.Tidal{}}, nil
+	}
+
+	f, err := os.Open(pth)
+	if err != nil {
+		return nil, err
+	}
 	defer f.Close()
 	var t tidal.Tidal
 	err = json.NewDecoder(f).Decode(&t)
+
 	return &Tidal{client: &t}, err
 }
 
@@ -40,13 +50,17 @@ func getTidalPath() string {
 	return fmt.Sprintf("%s/tidal.json", os.Getenv("MCLI_HOME"))
 }
 
-func saveTidal(t *tidal.Tidal) error {
+func (t *Tidal) save(cli *tidal.Tidal) error {
 	f, err := os.Create(getTidalPath())
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return json.NewEncoder(f).Encode(t)
+	if err := json.NewEncoder(f).Encode(cli); err != nil {
+		return err
+	}
+	t.client = cli
+	return nil
 }
 
 func (t *Tidal) Login(username, pw string) error {
@@ -59,7 +73,7 @@ func (t *Tidal) Login(username, pw string) error {
 		return fmt.Errorf("couldn't log into tidal")
 	}
 
-	return saveTidal(cli)
+	return t.save(cli)
 }
 
 func (t *Tidal) Ping() bool {
