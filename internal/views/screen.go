@@ -105,6 +105,8 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "album":
 		s.play.play(r)
+	case "history":
+		s.play.play(r)
 	case "playlist":
 		s.play.play(r)
 	}
