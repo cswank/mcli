@@ -9,7 +9,7 @@ import (
 
 var (
 	helpWidth  = 51
-	helpHeight = 21
+	helpHeight = 23
 	tpl        = `%s             C-x means Control x`
 )
 
