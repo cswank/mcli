@@ -73,7 +73,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		s.body.results = results
+		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "artist search":
@@ -82,7 +82,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		s.body.results = results
+		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "artist albums":
@@ -91,7 +91,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		s.body.results = results
+		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "playlists":
@@ -100,7 +100,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		s.body.results = results
+		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "album":
@@ -116,7 +116,7 @@ func (s *screen) playlists(g *ui.Gui, v *ui.View) error {
 	if err != nil {
 		return err
 	}
-	s.body.results = results
+	s.body.newResults(results)
 	s.header.header = results.Header
 	s.stack.clear()
 	s.stack.add(results, s.body.cursor)
@@ -155,7 +155,7 @@ func (s *screen) queueNoCursor(g *ui.Gui, v *ui.View) error {
 		Results: items,
 	}
 
-	s.body.results = results
+	s.body.newResults(results)
 	s.header.header = results.Header
 	return nil
 }
@@ -194,7 +194,7 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 	s.body.cursor = 0
-	s.body.results = results
+	s.body.newResults(results)
 	s.header.header = results.Header
 	s.stack.clear()
 	s.stack.add(results, c)
@@ -209,7 +209,7 @@ func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 	s.body.cursor = 0
-	s.body.results = results
+	s.body.newResults(results)
 	s.header.header = results.Header
 	s.stack.clear()
 	s.stack.add(results, c)
@@ -244,8 +244,48 @@ func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
 
 	s.view = "body"
 	s.header.header = res.Header
-	s.body.results = res
+	s.body.newResults(res)
 	s.body.cursor = 0
+	return nil
+}
+
+func (s *screen) nextPage(g *ui.Gui, v *ui.View) error {
+	if s.body.results.Type == "history" {
+		s.body.page++
+		res, err := s.client.History(s.body.page, s.height)
+		if err != nil {
+			if err.Error() == "no more pages" {
+				s.body.page--
+				return nil
+			}
+			return err
+		}
+
+		s.view = "body"
+		s.header.header = res.Header
+		s.body.results = res
+		s.body.cursor = 0
+	}
+	return nil
+}
+
+func (s *screen) prevPage(g *ui.Gui, v *ui.View) error {
+	if s.body.page == 0 {
+		return nil
+	}
+
+	if s.body.results.Type == "history" {
+		s.body.page--
+		res, err := s.client.History(s.body.page, s.height)
+		if err != nil {
+			return err
+		}
+
+		s.view = "body"
+		s.header.header = res.Header
+		s.body.results = res
+		s.body.cursor = 0
+	}
 	return nil
 }
 
@@ -283,7 +323,7 @@ func (s *screen) doSearch(searchType, term string) error {
 
 		s.stack.clear()
 		s.body.cursor = 0
-		s.body.results = results
+		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, s.body.cursor)
 		return g.DeleteView("search")
@@ -307,7 +347,7 @@ func (s *screen) escape(g *ui.Gui, v *ui.View) error {
 		return nil
 	}
 	r, c := s.stack.top()
-	s.body.results = r
+	s.body.newResults(r)
 	s.body.cursor = c
 	s.header.header = r.Header
 	return nil
@@ -329,7 +369,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 		res, err := s.client.History(0, s.height)
 		if err == nil && len(res.Results) > 0 {
 			s.header.header = res.Header
-			s.body.results = res
+			s.body.newResults(res)
 			s.view = "body"
 		} else {
 			s.view = "search-type"

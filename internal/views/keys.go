@@ -21,7 +21,9 @@ type key struct {
 func (s *screen) getKeys() []key {
 	return []key{
 		{views: []string{"body"}, keys: []interface{}{'n', ui.KeyCtrlN, ui.KeyArrowDown}, keybinding: s.body.next, help: keyHelp{key: "n", body: "(or down arrow) move cursor down"}},
+		{views: []string{"body"}, keys: []interface{}{'N'}, keybinding: s.nextPage, help: keyHelp{key: "N", body: "next page of results"}},
 		{views: []string{"body"}, keys: []interface{}{'p', ui.KeyCtrlP, ui.KeyArrowUp}, keybinding: s.body.prev, help: keyHelp{key: "p", body: "(or up arrow) move cursor up"}},
+		{views: []string{"body"}, keys: []interface{}{'P'}, keybinding: s.prevPage, help: keyHelp{key: "P", body: "previous page of results"}},
 		{views: []string{"body"}, keys: []interface{}{'s'}, keybinding: s.showSearch, help: keyHelp{key: "s", body: "search"}},
 		{views: []string{"body"}, keys: []interface{}{'y'}, keybinding: s.showHistory, help: keyHelp{key: "y", body: "history"}},
 		{views: []string{"body"}, keys: []interface{}{'v'}, keybinding: s.volumeDown, help: keyHelp{key: "v", body: "volume down"}},
@@ -30,7 +32,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"body"}, keys: []interface{}{'t'}, keybinding: s.goToArtist, help: keyHelp{key: "t", body: "go to artist at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{'a'}, keybinding: s.playAlbum, help: keyHelp{key: "a", body: "play entire album"}},
 		{views: []string{"body"}, keys: []interface{}{'q'}, keybinding: s.queue, help: keyHelp{key: "q", body: "view play queue"}},
-		{views: []string{"body"}, keys: []interface{}{'P'}, keybinding: s.playlists, help: keyHelp{key: "P", body: "get saved playlists"}},
+		{views: []string{"body"}, keys: []interface{}{'T'}, keybinding: s.playlists, help: keyHelp{key: "T", body: "get saved playlists"}},
 		{views: []string{"body"}, keys: []interface{}{'d'}, keybinding: s.removeFromQueue, help: keyHelp{key: "d", body: "remove track from queue"}},
 		{views: []string{"body"}, keys: []interface{}{'l'}, keybinding: s.body.albumLink, help: keyHelp{key: "l", body: "copy a link to the current album to clipboard"}},
 		{views: []string{"body"}, keys: []interface{}{'f'}, keybinding: s.play.next, help: keyHelp{key: "f", body: "fast forward to next song in queue"}},

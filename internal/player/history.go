@@ -18,6 +18,8 @@ type History interface {
 type FileHistory struct {
 	pth        string
 	archivePth string
+	cache      []Result
+	format     string
 }
 
 func NewFileHistory() (*FileHistory, error) {
@@ -64,10 +66,15 @@ func (f *FileHistory) Save(r Result) error {
 		return err
 	}
 	w.Flush()
+	f.cache = []Result{}
 	return nil
 }
 
 func (f *FileHistory) Fetch(page, pageSize int) (*Results, error) {
+	if len(f.cache) != 0 {
+		return f.historyFromCache(page, pageSize)
+	}
+
 	file, err := os.Open(f.pth)
 	if err != nil {
 		return nil, err
@@ -90,12 +97,7 @@ func (f *FileHistory) Fetch(page, pageSize int) (*Results, error) {
 	var res []Result
 	var maxTitle, maxAlbum int
 	seen := map[string]bool{}
-	var archive int
-	for i, row := range rows {
-		if len(res) == pageSize {
-			archive = i
-			break
-		}
+	for _, row := range rows {
 		r := &Result{}
 		if err := r.FromCSV(row); err != nil {
 			return nil, err
@@ -113,22 +115,37 @@ func (f *FileHistory) Fetch(page, pageSize int) (*Results, error) {
 		}
 		res = append(res, *r)
 	}
+	f.cache = res
+	f.format = fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
 
-	if archive > pageSize && len(rows) > 5*pageSize {
-		if err := f.archive(rows[0:archive]); err != nil {
+	if len(rows) > 1000 {
+		if err := f.archive(rows[900:]); err != nil {
 			return nil, err
 		}
 	}
+	return f.historyFromCache(page, pageSize)
 
-	format := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
+}
+
+func (f *FileHistory) historyFromCache(page, pageSize int) (*Results, error) {
+	start := page * pageSize
+	if start > len(f.cache) {
+		return nil, fmt.Errorf("no more pages")
+	}
+
+	end := start + pageSize
+	if end > len(f.cache) {
+		end = len(f.cache) - 1
+	}
+
 	return &Results{
-		Header: fmt.Sprintf(format, "Title", "Album", "Artist"),
-		Type:   "album",
+		Header: fmt.Sprintf(f.format, "Title", "Album", "Artist"),
+		Type:   "history",
 		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, format, r.Track.Title, r.Album.Title, r.Artist.Name)
+			_, err := fmt.Fprintf(w, f.format, r.Track.Title, r.Album.Title, r.Artist.Name)
 			return err
 		},
-		Results: res,
+		Results: f.cache[start:end],
 	}, nil
 }
 

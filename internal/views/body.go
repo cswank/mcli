@@ -15,6 +15,7 @@ type body struct {
 	height   int
 	results  *player.Results
 	cursor   int
+	page     int
 }
 
 func newBody(w, h int, ch chan player.Progress, u string) *body {
@@ -41,6 +42,11 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 		}
 	}
 	return nil
+}
+
+func (b *body) newResults(r *player.Results) {
+	b.page = 0
+	b.results = r
 }
 
 func (b *body) albumLink(g *ui.Gui, v *ui.View) error {
