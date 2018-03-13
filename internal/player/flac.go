@@ -53,84 +53,84 @@ func newFlac(f Fetcher) (*Flac, error) {
 	return p, nil
 }
 
-func (p *Flac) NextSong(f func(Result)) {
-	p.nextSong = f
+func (f *Flac) NextSong(fn func(Result)) {
+	f.nextSong = fn
 }
 
-func (p *Flac) Play(r Result) {
-	p.queue.add(r)
+func (f *Flac) Play(r Result) {
+	f.queue.add(r)
 }
 
-func (p *Flac) History(page, pageSize int) (*Results, error) {
-	return p.history.Fetch(page, pageSize)
+func (f *Flac) History(page, pageSize int) (*Results, error) {
+	return f.history.Fetch(page, pageSize)
 }
 
-func (p *Flac) PlayAlbum(album []Result) {
+func (f *Flac) PlayAlbum(album []Result) {
 	for _, r := range album {
-		p.Play(r)
+		f.Play(r)
 	}
 }
 
-func (p *Flac) Pause() {
-	if p.playing {
-		p.pause <- true
+func (f *Flac) Pause() {
+	if f.playing {
+		f.pause <- true
 	}
 }
 
-func (p *Flac) Volume(v float64) {
-	if p.playing {
-		p.vol <- v
+func (f *Flac) Volume(v float64) {
+	if f.playing {
+		f.vol <- v
 	}
 }
 
-func (p *Flac) Queue() []Result {
-	return p.queue.playlist()
+func (f *Flac) Queue() []Result {
+	return f.queue.playlist()
 }
 
-func (p *Flac) RemoveFromQueue(i int) {
-	p.queue.remove(i)
+func (f *Flac) RemoveFromQueue(i int) {
+	f.queue.remove(i)
 }
 
-func (p *Flac) FastForward() {
-	if p.playing {
-		p.fastForward <- true
+func (f *Flac) FastForward() {
+	if f.playing {
+		f.fastForward <- true
 	}
 }
 
-func (p *Flac) downloadLoop() {
+func (f *Flac) downloadLoop() {
 	for {
-		prog := <-p.downloadProgress
-		if p.downloadCB != nil {
-			p.downloadCB(prog)
+		prog := <-f.downloadProgress
+		if f.downloadCB != nil {
+			f.downloadCB(prog)
 		}
 	}
 }
 
-func (p *Flac) loop() {
+func (f *Flac) loop() {
 	for {
-		r := p.queue.next()
-		if p.nextSong != nil {
-			p.nextSong(r)
+		r := f.queue.next()
+		if f.nextSong != nil {
+			f.nextSong(r)
 		}
-		p.playing = true
-		if err := p.doPlay(r); err != nil {
+		f.playing = true
+		if err := f.doPlay(r); err != nil {
 			log.Fatal(err)
 		}
-		p.playing = false
+		f.playing = false
 	}
 }
 
-func (p *Flac) doPlay(result Result) error {
-	if err := p.history.Save(result); err != nil {
+func (f *Flac) doPlay(result Result) error {
+	if err := f.history.Save(result); err != nil {
 		return err
 	}
 
-	f, err := os.Open(result.Path)
+	file, err := os.Open(result.Path)
 	if err != nil {
 		return err
 	}
 
-	s, format, err := flac.Decode(f)
+	s, format, err := flac.Decode(file)
 	if err != nil {
 		return err
 	}
@@ -159,19 +159,19 @@ func (p *Flac) doPlay(result Result) error {
 			pos := s.Position()
 			done = pos >= l
 			i++
-			if p.playCB != nil {
-				p.playCB(Progress{N: pos, Total: l})
+			if f.playCB != nil {
+				f.playCB(Progress{N: pos, Total: l})
 			}
-		case v := <-p.vol:
+		case v := <-f.vol:
 			speaker.Lock()
 			vol.Volume += v
 			speaker.Unlock()
-		case <-p.pause:
+		case <-f.pause:
 			paused = !paused
 			speaker.Lock()
 			ctrl.Paused = paused
 			speaker.Unlock()
-		case <-p.fastForward:
+		case <-f.fastForward:
 			done = true
 		}
 	}
@@ -179,10 +179,10 @@ func (p *Flac) doPlay(result Result) error {
 	return s.Close()
 }
 
-func (p *Flac) DownloadProgress(f func(Progress)) {
-	p.downloadCB = f
+func (f *Flac) DownloadProgress(fn func(Progress)) {
+	f.downloadCB = fn
 }
 
-func (p *Flac) PlayProgress(f func(Progress)) {
-	p.playCB = f
+func (f *Flac) PlayProgress(fn func(Progress)) {
+	f.playCB = fn
 }
