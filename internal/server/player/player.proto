@@ -5,10 +5,37 @@ package player;
 service Player {   
 	rpc Play(Result) returns (Empty) {}
 	rpc PlayAlbum(Result) returns (Empty) {}
+	rpc Volume(Float) returns (Empty) {}
+	rpc Pause(Empty) returns (Empty) {}
+	rpc FastForward(Empty) returns (Empty) {}
+	rpc Queue(Empty) returns (Results) {}
+	rpc RemoveFromQueue(Int) returns (Results) {}
+	rpc NextSong(Empty) returns (stream Result) {}
+	rpc PlayProgress(Empty) returns (stream Progress) {}
+	rpc DownloadProgress(Empty) returns (stream Progress) {}
+	rpc History(Page) returns (Results) {}
 }
 
 message Empty {
+	
+}
 
+message Page {
+	int64 page = 1;
+	int64 pageSize = 2;
+}
+
+message Progress {
+	int64 n = 1;
+	int64 total = 2;
+}
+
+message Float {
+	float value = 1;
+}
+
+message Int {
+	int64 value = 1;
 }
 
 message Result {
@@ -40,4 +67,8 @@ message Result {
 		string id = 1;
 		string title = 2;
 	}
+}
+
+message Results {
+	repeated Result results = 1;
 }
