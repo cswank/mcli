@@ -6,11 +6,13 @@ import (
 	"log"
 	"os"
 
+	"bitbucket.org/cswank/mcli/internal/server"
 	"bitbucket.org/cswank/mcli/internal/views"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
 )
 
 var (
+	srv     = kingpin.Flag("server", "start grpc server").Short('s').Bool()
 	logout  = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 	logfile *os.File
 )
@@ -40,9 +42,21 @@ func cleanup() {
 
 func main() {
 	defer cleanup()
-	err := views.Start()
-	if err != nil {
+	if *srv {
+		doServe()
+	} else {
+		gui()
+	}
+}
+
+func doServe() {
+	if err := server.Start(); err != nil {
 		log.Fatal(err)
 	}
+}
 
+func gui() {
+	if err := views.Start(); err != nil {
+		log.Fatal(err)
+	}
 }
