@@ -9,24 +9,21 @@ import (
 )
 
 type play struct {
-	width        int
-	coords       coords
-	playProgress chan player.Progress
-	song         chan player.Result
-	client       player.Client
+	width  int
+	coords coords
+	ch     chan player.Progress
+	client player.Client
 }
 
-func newPlay(w, h int, c player.Client, ch chan player.Progress, song chan player.Result) *play {
+func newPlay(w, h int, c player.Client) *play {
 	p := &play{
-		width:        w,
-		coords:       coords{x1: -1, y1: h - 2, x2: w, y2: h},
-		client:       c,
-		playProgress: ch,
-		song:         song,
+		width:  w,
+		coords: coords{x1: -1, y1: h - 2, x2: w, y2: h},
+		client: c,
+		ch:     make(chan player.Progress),
 	}
 
-	c.NextSong(p.nextSong)
-	go p.render()
+	c.PlayProgress(p.playProgress)
 	return p
 }
 
@@ -50,30 +47,18 @@ func (p *play) getQueue() []player.Result {
 	return p.client.Queue()
 }
 
+func (p *play) playProgress(prog player.Progress) {
+	g.Update(func(g *ui.Gui) error {
+		v, _ := g.View("play")
+		v.Clear()
+		fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", p.width*prog.N/prog.Total)))
+		return nil
+	})
+}
+
 func (p *play) clear() {
 	v, _ := g.View("play")
 	v.Clear()
-}
-
-func (p *play) render() {
-	var v *ui.View
-	for {
-		prog := <-p.playProgress
-		g.Update(func(g *ui.Gui) error {
-			if v == nil {
-				v, _ = g.View("play")
-			}
-			v.Clear()
-			fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", p.width*prog.N/prog.Total)))
-			return nil
-		})
-	}
-}
-
-//nextSong gets called by player.Player whenever the
-//next song begins playing.
-func (p *play) nextSong(r player.Result) {
-	p.song <- r
 }
 
 func (p *play) play(r player.Result) {

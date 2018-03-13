@@ -14,14 +14,16 @@ type Client interface {
 
 type Player interface {
 	Play(Result)
-	History(int, int) (*Results, error)
 	PlayAlbum([]Result)
-	Pause()
 	Volume(float64)
+	Pause()
+	FastForward()
 	Queue() []Result
 	RemoveFromQueue(int)
-	FastForward()
 	NextSong(func(Result))
+	PlayProgress(func(Progress))
+	DownloadProgress(func(Progress))
+	History(int, int) (*Results, error)
 }
 
 type Fetcher interface {

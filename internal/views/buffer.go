@@ -16,16 +16,27 @@ type buffer struct {
 	song     chan player.Result
 }
 
-func newBuffer(w, h int, ch chan player.Progress, song chan player.Result) *buffer {
+func newBuffer(w, h int, cli player.Player) *buffer {
 	b := &buffer{
 		width:    w - 1,
 		coords:   coords{x1: -1, y1: h - 3, x2: w, y2: h - 1},
-		progress: ch,
-		song:     song,
+		progress: make(chan player.Progress),
+		song:     make(chan player.Result),
 	}
+
+	cli.NextSong(b.nextSong)
+	cli.DownloadProgress(b.downloadProgress)
 
 	go b.render()
 	return b
+}
+
+func (b *buffer) downloadProgress(prog player.Progress) {
+	b.progress <- prog
+}
+
+func (b *buffer) nextSong(r player.Result) {
+	b.song <- r
 }
 
 func (b *buffer) render() {

@@ -10,7 +10,6 @@ import (
 
 type body struct {
 	albumURL string
-	progress chan player.Progress
 	coords   coords
 	height   int
 	results  *player.Results
@@ -18,10 +17,9 @@ type body struct {
 	page     int
 }
 
-func newBody(w, h int, ch chan player.Progress, u string) *body {
+func newBody(w, h int, albumLink string) *body {
 	return &body{
-		albumURL: u,
-		progress: ch,
+		albumURL: albumLink,
 		height:   h - 3,
 		coords:   coords{x1: -1, y1: 0, x2: w, y2: h - 2},
 	}

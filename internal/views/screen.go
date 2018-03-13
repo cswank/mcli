@@ -28,10 +28,7 @@ type screen struct {
 }
 
 func newScreen(width, height int) (*screen, error) {
-	dl := make(chan player.Progress)
-	pl := make(chan player.Progress)
-	song := make(chan player.Result)
-	cli, err := player.NewTidal(dl, pl)
+	cli, err := player.NewTidal()
 	if err != nil {
 		return nil, err
 	}
@@ -41,9 +38,9 @@ func newScreen(width, height int) (*screen, error) {
 		view:   "body",
 		width:  width,
 		height: height,
-		play:   newPlay(width, height, cli, pl, song),
-		body:   newBody(width, height, dl, cli.AlbumLink()),
-		buffer: newBuffer(width, height, dl, song),
+		play:   newPlay(width, height, cli),
+		body:   newBody(width, height, cli.AlbumLink()),
+		buffer: newBuffer(width, height, cli),
 		header: newHeader(width, height),
 		help:   newHelp(width, height),
 	}

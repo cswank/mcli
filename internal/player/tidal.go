@@ -16,12 +16,12 @@ type Tidal struct {
 }
 
 //NewTidal returns a Client composed of a Flac player and Tidal Fetcher
-func NewTidal(download chan Progress, play chan Progress) (Client, error) {
+func NewTidal() (Client, error) {
 	t, err := newTidal()
 	if err != nil {
 		return nil, err
 	}
-	return newFlac(t, download, play)
+	return newFlac(t)
 }
 
 func newTidal() (*Tidal, error) {

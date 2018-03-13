@@ -13,39 +13,43 @@ import (
 
 type Flac struct {
 	Fetcher
-	queue        *queue
-	source       Fetcher
-	playProgress chan Progress
-	history      History
-	playing      bool
-	pause        chan bool
-	vol          chan float64
-	fastForward  chan bool
-	nextSong     func(r Result)
+	queue            *queue
+	source           Fetcher
+	history          History
+	playing          bool
+	pause            chan bool
+	vol              chan float64
+	fastForward      chan bool
+	playCB           func(Progress)
+	downloadProgress chan Progress
+	downloadCB       func(Progress)
+	nextSong         func(r Result)
 }
 
-func newFlac(f Fetcher, download chan Progress, play chan Progress) (*Flac, error) {
+func newFlac(f Fetcher) (*Flac, error) {
 	hist, err := NewFileHistory()
 	if err != nil {
 		return nil, err
 	}
 
-	q, err := newQueue(f.Name(), f.GetTrack, download)
+	dlp := make(chan Progress)
+	q, err := newQueue(f.Name(), f.GetTrack, dlp)
 	if err != nil {
 		return nil, err
 	}
 
 	p := &Flac{
-		Fetcher:      f,
-		playProgress: play,
-		history:      hist,
-		queue:        q,
-		pause:        make(chan bool),
-		fastForward:  make(chan bool),
-		vol:          make(chan float64),
+		Fetcher:          f,
+		history:          hist,
+		queue:            q,
+		pause:            make(chan bool),
+		fastForward:      make(chan bool),
+		vol:              make(chan float64),
+		downloadProgress: dlp,
 	}
 
 	go p.loop()
+	go p.downloadLoop()
 	return p, nil
 }
 
@@ -93,14 +97,21 @@ func (p *Flac) FastForward() {
 	}
 }
 
+func (p *Flac) downloadLoop() {
+	for {
+		prog := <-p.downloadProgress
+		if p.downloadCB != nil {
+			p.downloadCB(prog)
+		}
+	}
+}
+
 func (p *Flac) loop() {
 	for {
 		r := p.queue.next()
-		log.Println("loop", r)
 		if p.nextSong != nil {
 			p.nextSong(r)
 		}
-		log.Println("loop 2", r)
 		p.playing = true
 		if err := p.doPlay(r); err != nil {
 			log.Fatal(err)
@@ -138,10 +149,6 @@ func (p *Flac) doPlay(result Result) error {
 	}
 	speaker.Play(ctrl)
 
-	//song := fmt.Sprintf("%s %s", result.Track.Title, time.Duration(result.Track.Duration)*time.Second)
-	//msg := fmt.Sprintf(fmt.Sprintf("%%%ds", (p.width/2)+(len(song)/2)), song)
-	//p.progress <- progress{msg: msg}
-
 	var done bool
 	var paused bool
 	l := s.Len()
@@ -152,7 +159,9 @@ func (p *Flac) doPlay(result Result) error {
 			pos := s.Position()
 			done = pos >= l
 			i++
-			p.playProgress <- Progress{N: pos, Total: l}
+			if p.playCB != nil {
+				p.playCB(Progress{N: pos, Total: l})
+			}
 		case v := <-p.vol:
 			speaker.Lock()
 			vol.Volume += v
@@ -168,4 +177,12 @@ func (p *Flac) doPlay(result Result) error {
 	}
 
 	return s.Close()
+}
+
+func (p *Flac) DownloadProgress(f func(Progress)) {
+	p.downloadCB = f
+}
+
+func (p *Flac) PlayProgress(f func(Progress)) {
+	p.playCB = f
 }
