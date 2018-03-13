@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package player;
+
+service Player {   
+	rpc Play(Result) returns (Empty) {}
+	rpc PlayAlbum(Result) returns (Empty) {}
+}
+
+message Empty {
+
+}
+
+message Result {
+	string service = 1;
+	string path = 2;
+	Track track = 3;
+	Album album = 4;
+	Artist artist = 5;
+	Playlist playlist = 6;
+	
+	message Track {
+		string id = 1;
+		string title = 2;
+		int64 duration = 3;
+	}
+	
+	message Artist {
+		string id = 1;
+		string title = 2;
+	}
+
+	message Album {
+		string id = 1;
+		string title = 2;
+
+	}
+
+	message Playlist {
+		string id = 1;
+		string title = 2;
+	}
+}

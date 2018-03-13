@@ -13,12 +13,22 @@ import (
 
 var (
 	srv     = kingpin.Flag("server", "start grpc server").Short('s').Bool()
+	cli     = kingpin.Flag("client", "start grpc client").Short('c').Bool()
+	addr    = kingpin.Flag("address", "address of grpc server").Short('a').Default("localhost:50051").String()
 	logout  = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 	logfile *os.File
 )
 
 func init() {
+	if os.Getenv("MCLI_HOME") == "" {
+		os.Setenv("MCLI_HOME", fmt.Sprintf("%s/.mcli", os.Getenv("HOME")))
+	}
+
 	kingpin.Parse()
+	if *srv || *cli {
+		return
+	}
+
 	if *logout != "" {
 		f, err := os.Create(*logout)
 		if err != nil {
@@ -29,9 +39,7 @@ func init() {
 	} else {
 		log.SetOutput(ioutil.Discard)
 	}
-	if os.Getenv("MCLI_HOME") == "" {
-		os.Setenv("MCLI_HOME", fmt.Sprintf("%s/.mcli", os.Getenv("HOME")))
-	}
+
 }
 
 func cleanup() {
@@ -44,6 +52,8 @@ func main() {
 	defer cleanup()
 	if *srv {
 		doServe()
+	} else if *cli {
+		doClient()
 	} else {
 		gui()
 	}
@@ -51,6 +61,12 @@ func main() {
 
 func doServe() {
 	if err := server.Start(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func doClient() {
+	if err := server.StartClient(*addr); err != nil {
 		log.Fatal(err)
 	}
 }
