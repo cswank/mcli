@@ -40,34 +40,37 @@ func (b *buffer) nextSong(r player.Result) {
 }
 
 func (b *buffer) render() {
-	var v *ui.View
 	var text string
 	for {
 		select {
 		case <-time.After(time.Second):
-			if v == nil {
-				v, _ = g.View("buffer")
-			}
-			if text != "" && text != v.Buffer() {
-				g.Update(func(g *ui.Gui) error {
-					v.Clear()
-					fmt.Fprint(v, text)
-					return nil
-				})
+			if g != nil && text != "" {
+				v, _ := g.View("buffer")
+				if text != v.Buffer() {
+					g.Update(func(g *ui.Gui) error {
+						v.Clear()
+						fmt.Fprint(v, text)
+						return nil
+					})
+				}
 			}
 		case r := <-b.song:
 			text = b.center(fmt.Sprintf("%s %s", r.Track.Title, time.Duration(r.Track.Duration)*time.Second))
 			g.Update(func(g *ui.Gui) error {
+				v, _ := g.View("buffer")
 				v.Clear()
 				fmt.Fprint(v, text)
 				return nil
 			})
 		case p := <-b.progress:
-			g.Update(func(g *ui.Gui) error {
-				v.Clear()
-				fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.N/p.Total)))
-				return nil
-			})
+			if p.Total != 0 {
+				g.Update(func(g *ui.Gui) error {
+					v, _ := g.View("buffer")
+					v.Clear()
+					fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.N/p.Total)))
+					return nil
+				})
+			}
 		}
 	}
 }

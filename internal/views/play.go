@@ -48,12 +48,14 @@ func (p *play) getQueue() []player.Result {
 }
 
 func (p *play) playProgress(prog player.Progress) {
-	g.Update(func(g *ui.Gui) error {
-		v, _ := g.View("play")
-		v.Clear()
-		fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", p.width*prog.N/prog.Total)))
-		return nil
-	})
+	if prog.Total > 0 {
+		g.Update(func(g *ui.Gui) error {
+			v, _ := g.View("play")
+			v.Clear()
+			fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", p.width*prog.N/prog.Total)))
+			return nil
+		})
+	}
 }
 
 func (p *play) clear() {

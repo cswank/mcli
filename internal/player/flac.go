@@ -33,7 +33,7 @@ type Flac struct {
 	onDeckResult *Result
 }
 
-func newFlac(f Fetcher) (*Flac, error) {
+func NewFlac(f Fetcher) (*Flac, error) {
 	hist, err := NewFileHistory()
 	if err != nil {
 		return nil, err
@@ -102,6 +102,11 @@ func (f *Flac) RemoveFromQueue(i int) {
 	} else {
 		f.queue.Remove(i - 1)
 	}
+}
+
+func (f *Flac) Done() {
+	f.queue.clear()
+	f.fastForward <- true
 }
 
 func (f *Flac) FastForward() {

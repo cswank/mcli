@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"bitbucket.org/cswank/mcli/internal/player"
 	"bitbucket.org/cswank/mcli/internal/server"
 	"bitbucket.org/cswank/mcli/internal/views"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
@@ -25,7 +26,7 @@ func init() {
 	}
 
 	kingpin.Parse()
-	if *srv || *cli {
+	if *srv {
 		return
 	}
 
@@ -52,8 +53,6 @@ func main() {
 	defer cleanup()
 	if *srv {
 		doServe()
-	} else if *cli {
-		doClient()
 	} else {
 		gui()
 	}
@@ -65,14 +64,21 @@ func doServe() {
 	}
 }
 
-func doClient() {
-	if err := server.StartClient(*addr); err != nil {
+func gui() {
+	var p player.Player
+	if *cli {
+		c, err := server.NewClient(*addr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		p = c
+	}
+	if err := views.Start(p); err != nil {
 		log.Fatal(err)
 	}
-}
 
-func gui() {
-	if err := views.Start(); err != nil {
-		log.Fatal(err)
+	if p != nil {
+		c := p.(*server.Client)
+		c.Done()
 	}
 }
