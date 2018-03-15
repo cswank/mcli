@@ -197,7 +197,6 @@ func (f *Flac) PlayProgress(fn func(Progress)) {
 
 func (f *Flac) download(r *Result) {
 	pth, e := f.checkCache(*r)
-	log.Println("check cache", pth, e)
 	r.Path = pth
 	if !e {
 		err := f.doDownload(*r)
