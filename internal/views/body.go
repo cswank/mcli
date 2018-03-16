@@ -43,6 +43,7 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 }
 
 func (b *body) newResults(r *player.Results) {
+	b.cursor = 0
 	b.page = 0
 	b.results = r
 }
