@@ -69,3 +69,8 @@ func (p *play) next(g *ui.Gui, v *ui.View) error {
 	p.client.FastForward()
 	return nil
 }
+
+func (p *play) rewind(g *ui.Gui, v *ui.View) error {
+	p.client.Rewind()
+	return nil
+}

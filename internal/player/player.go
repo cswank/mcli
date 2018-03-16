@@ -18,6 +18,7 @@ type Player interface {
 	Volume(float64)
 	Pause()
 	FastForward()
+	Rewind()
 	Queue() []Result
 	RemoveFromQueue(int)
 	NextSong(func(Result))

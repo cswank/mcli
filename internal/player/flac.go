@@ -25,6 +25,7 @@ type Flac struct {
 	pause        chan bool
 	vol          chan float64
 	fastForward  chan bool
+	rewind       chan bool
 	playCB       func(Progress)
 	downloadCB   func(Progress)
 	nextSong     func(r Result)
@@ -45,6 +46,7 @@ func newFlac(f Fetcher) (*Flac, error) {
 		queue:       newQueue(),
 		pause:       make(chan bool),
 		fastForward: make(chan bool),
+		rewind:      make(chan bool),
 		vol:         make(chan float64),
 		onDeck:      make(chan Result),
 	}
@@ -101,6 +103,12 @@ func (f *Flac) RemoveFromQueue(i int) {
 func (f *Flac) FastForward() {
 	if f.playing {
 		f.fastForward <- true
+	}
+}
+
+func (f *Flac) Rewind() {
+	if f.playing {
+		f.rewind <- true
 	}
 }
 
@@ -181,6 +189,9 @@ func (f *Flac) doPlay(result Result) error {
 			speaker.Unlock()
 		case <-f.fastForward:
 			done = true
+		case <-f.rewind:
+			s.Close()
+			return f.doPlay(result)
 		}
 	}
 
