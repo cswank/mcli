@@ -42,6 +42,11 @@ type Fetcher interface {
 	GetPlaylist(string, int) (*Results, error)
 }
 
+type Progress struct {
+	N     int
+	Total int
+}
+
 type Track struct {
 	ID       string
 	Title    string
