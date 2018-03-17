@@ -115,6 +115,8 @@ func (s *screen) playlists(g *ui.Gui, v *ui.View) error {
 	if err != nil {
 		return err
 	}
+
+	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
 	s.stack.clear()
