@@ -87,12 +87,13 @@ func (f *Flac) Volume(v float64) {
 }
 
 func (f *Flac) Queue() *Results {
-	var out []Result
+	var r []Result
 	if f.onDeckResult != nil {
-		out = []Result{*f.onDeckResult}
+		r = []Result{*f.onDeckResult}
 	}
-	q := f.queue.Playlist()
-	return &Results{Results: append(out, q...)}
+	return &Results{
+		Results: append(r, f.queue.Playlist()...),
+	}
 }
 
 func (f *Flac) RemoveFromQueue(i int) {

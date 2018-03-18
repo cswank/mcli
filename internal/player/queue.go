@@ -22,7 +22,7 @@ func (q *queue) clear() {
 	q.lock.Unlock()
 }
 
-func (q *queue) add(r Result) {
+func (q *queue) Add(r Result) {
 	q.lock.Lock()
 	q.queue = append(q.queue, r)
 	q.lock.Unlock()
