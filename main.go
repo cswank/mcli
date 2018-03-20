@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"bitbucket.org/cswank/mcli/internal/player"
-	"bitbucket.org/cswank/mcli/internal/server"
+	"bitbucket.org/cswank/mcli/internal/rpc"
 	"bitbucket.org/cswank/mcli/internal/views"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
 )
@@ -59,7 +59,7 @@ func main() {
 }
 
 func doServe() {
-	if err := server.Start(); err != nil {
+	if err := rpc.Start(); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -67,7 +67,7 @@ func doServe() {
 func gui() {
 	var p player.Player
 	if *cli {
-		c, err := server.NewClient(*addr)
+		c, err := rpc.NewClient(*addr)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,7 +78,7 @@ func gui() {
 	}
 
 	if p != nil {
-		c := p.(*server.Client)
+		c := p.(*rpc.Client)
 		c.Done()
 	}
 }
