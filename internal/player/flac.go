@@ -68,8 +68,8 @@ func (f *Flac) History(page, pageSize int) (*Results, error) {
 	return f.history.Fetch(page, pageSize)
 }
 
-func (f *Flac) PlayAlbum(album []Result) {
-	for _, r := range album {
+func (f *Flac) PlayAlbum(album *Results) {
+	for _, r := range album.Results {
 		f.Play(r)
 	}
 }
@@ -86,13 +86,13 @@ func (f *Flac) Volume(v float64) {
 	}
 }
 
-func (f *Flac) Queue() []Result {
+func (f *Flac) Queue() *Results {
 	var out []Result
 	if f.onDeckResult != nil {
 		out = []Result{*f.onDeckResult}
 	}
 	q := f.queue.Playlist()
-	return append(out, q...)
+	return &Results{Results: append(out, q...)}
 }
 
 func (f *Flac) RemoveFromQueue(i int) {

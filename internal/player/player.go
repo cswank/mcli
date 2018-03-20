@@ -14,12 +14,12 @@ type Client interface {
 
 type Player interface {
 	Play(Result)
-	PlayAlbum([]Result)
+	PlayAlbum(*Results)
 	Volume(float64)
 	Pause()
 	FastForward()
 	Rewind()
-	Queue() []Result
+	Queue() *Results
 	RemoveFromQueue(int)
 	NextSong(func(Result))
 	PlayProgress(func(Progress))
