@@ -1,4 +1,4 @@
-package server
+package rpc
 
 import (
 	"log"
@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	"bitbucket.org/cswank/mcli/internal/player"
-	pb "bitbucket.org/cswank/mcli/internal/server/player"
+	pb "bitbucket.org/cswank/mcli/internal/rpc/player"
 	"golang.org/x/net/context"
 )
 
