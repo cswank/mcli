@@ -8,6 +8,7 @@ service Player {
 	rpc Volume(Float) returns (Empty) {}
 	rpc Pause(Empty) returns (Empty) {}
 	rpc FastForward(Empty) returns (Empty) {}
+	rpc Rewind(Empty) returns (Empty) {}
 	rpc Queue(Empty) returns (Results) {}
 	rpc RemoveFromQueue(Int) returns (Results) {}
 	rpc NextSong(Empty) returns (stream Result) {}

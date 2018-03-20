@@ -18,19 +18,20 @@ import (
 
 type Flac struct {
 	Fetcher
-	queue        *queue
-	history      History
-	playing      bool
-	sep          string
-	pause        chan bool
-	vol          chan float64
-	fastForward  chan bool
-	rewind       chan bool
-	playCB       func(Progress)
-	downloadCB   func(Progress)
-	nextSong     func(r Result)
-	onDeck       chan Result
-	onDeckResult *Result
+	queue         *queue
+	history       History
+	playing       bool
+	sep           string
+	pause         chan bool
+	vol           chan float64
+	fastForward   chan bool
+	rewind        chan bool
+	playCB        func(Progress)
+	downloadCB    func(Progress)
+	nextSong      func(r Result)
+	onDeck        chan Result
+	onDeckResult  *Result
+	currentResult *Result
 }
 
 func NewFlac(f Fetcher) (*Flac, error) {
@@ -58,6 +59,9 @@ func NewFlac(f Fetcher) (*Flac, error) {
 
 func (f *Flac) NextSong(fn func(Result)) {
 	f.nextSong = fn
+	if f.nextSong != nil && f.currentResult != nil {
+		f.nextSong(*f.currentResult)
+	}
 }
 
 func (f *Flac) Play(r Result) {
@@ -105,10 +109,7 @@ func (f *Flac) RemoveFromQueue(i int) {
 	}
 }
 
-func (f *Flac) Done() {
-	f.queue.clear()
-	f.fastForward <- true
-}
+func (f *Flac) Done() {}
 
 func (f *Flac) FastForward() {
 	if f.playing {
@@ -135,9 +136,6 @@ func (f *Flac) downloadLoop() {
 func (f *Flac) playLoop() {
 	for {
 		r := <-f.onDeck
-		if f.nextSong != nil {
-			f.nextSong(r)
-		}
 		f.playing = true
 		if err := f.doPlay(r); err != nil {
 			log.Fatal(err)
@@ -147,6 +145,11 @@ func (f *Flac) playLoop() {
 }
 
 func (f *Flac) doPlay(result Result) error {
+	f.currentResult = &result
+	if f.nextSong != nil {
+		f.nextSong(result)
+	}
+
 	if err := f.history.Save(result); err != nil {
 		return err
 	}
@@ -205,6 +208,7 @@ func (f *Flac) doPlay(result Result) error {
 		}
 	}
 
+	f.currentResult = nil
 	return s.Close()
 }
 

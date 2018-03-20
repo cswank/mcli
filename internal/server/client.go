@@ -68,6 +68,13 @@ func (c *Client) FastForward() {
 	}
 }
 
+func (c *Client) Rewind() {
+	_, err := c.client.Rewind(context.Background(), &pb.Empty{})
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (c *Client) Queue() *player.Results {
 	out, err := c.client.Queue(context.Background(), &pb.Empty{})
 	if err != nil {

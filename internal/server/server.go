@@ -55,6 +55,11 @@ func (s *server) FastForward(ctx context.Context, r *pb.Empty) (*pb.Empty, error
 	return &pb.Empty{}, nil
 }
 
+func (s *server) Rewind(ctx context.Context, r *pb.Empty) (*pb.Empty, error) {
+	s.cli.Rewind()
+	return &pb.Empty{}, nil
+}
+
 func (s *server) Queue(ctx context.Context, r *pb.Empty) (*pb.Results, error) {
 	return PBFromResults(s.cli.Queue()), nil
 }
@@ -68,6 +73,7 @@ func (s *server) NextSong(_ *pb.Empty, stream pb.Player_NextSongServer) error {
 	s.nextSongStream = stream
 	s.cli.NextSong(s.nextSong)
 	<-s.done
+	s.cli.NextSong(nil)
 	return nil
 }
 
@@ -75,6 +81,7 @@ func (s *server) PlayProgress(_ *pb.Empty, stream pb.Player_PlayProgressServer) 
 	s.playProgressStream = stream
 	s.cli.PlayProgress(s.playProgress)
 	<-s.done
+	s.cli.PlayProgress(nil)
 	return nil
 }
 
@@ -82,6 +89,7 @@ func (s *server) DownloadProgress(_ *pb.Empty, stream pb.Player_DownloadProgress
 	s.downloadProgressStream = stream
 	s.cli.DownloadProgress(s.downloadProgress)
 	<-s.done
+	s.cli.DownloadProgress(nil)
 	return nil
 }
 
