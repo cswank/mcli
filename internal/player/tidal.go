@@ -3,10 +3,8 @@ package player
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/cswank/tidal"
 )
@@ -16,12 +14,23 @@ type Tidal struct {
 }
 
 //NewTidal returns a Client composed of a Flac player and Tidal Fetcher
-func NewTidal() (Client, error) {
+func NewTidal(p Player) (Client, error) {
 	t, err := newTidal()
 	if err != nil {
 		return nil, err
 	}
-	return newFlac(t)
+
+	if p == nil {
+		return NewFlac(t)
+	}
+
+	return &struct {
+		Player
+		Fetcher
+	}{
+		Player:  p,
+		Fetcher: t,
+	}, nil
 }
 
 func newTidal() (*Tidal, error) {
@@ -106,12 +115,9 @@ func (t *Tidal) GetPlaylists() (*Results, error) {
 
 	f := "%s\n"
 	return &Results{
-		Header: fmt.Sprintf(f, "Title"),
-		Type:   "playlists",
-		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, f, r.Album.Title)
-			return err
-		},
+		Header:  fmt.Sprintf(f, "Title"),
+		Type:    "playlists",
+		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -145,12 +151,9 @@ func (t *Tidal) FindArtist(term string, limit int) (*Results, error) {
 
 	f := "%s\n"
 	return &Results{
-		Header: fmt.Sprintf(f, "Artist"),
-		Type:   "artist search",
-		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, f, r.Artist.Name)
-			return err
-		},
+		Header:  fmt.Sprintf(f, "Artist"),
+		Type:    "artist search",
+		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -184,12 +187,9 @@ func (t *Tidal) GetArtistAlbums(id string, limit int) (*Results, error) {
 
 	f := fmt.Sprintf("%%-%ds%%s\n", max+4)
 	return &Results{
-		Header: fmt.Sprintf(f, "Album", "Artist"),
-		Type:   "album search",
-		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, f, r.Album.Title, r.Artist.Name)
-			return err
-		},
+		Header:  fmt.Sprintf(f, "Album", "Artist"),
+		Type:    "album search",
+		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -235,23 +235,11 @@ func (t *Tidal) getTracks(tracks []tidal.Track, tp string) (*Results, error) {
 
 	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	return &Results{
-		Header: fmt.Sprintf(f, "Title", "Length"),
-		Type:   tp,
-		Print: func(w io.Writer, r Result) error {
-			d := time.Duration(r.Track.Duration) * time.Second
-			_, err := fmt.Fprintf(w, f, r.Track.Title, fmtDuration(d))
-			return err
-		},
+		Header:  fmt.Sprintf(f, "Title", "Length"),
+		Type:    tp,
+		Fmt:     f,
 		Results: out,
 	}, nil
-}
-
-func fmtDuration(d time.Duration) string {
-	d = d.Round(time.Second)
-	m := d / time.Minute
-	d -= m * time.Minute
-	s := d / time.Second
-	return fmt.Sprintf("%d:%02d", m, s)
 }
 
 func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
@@ -279,12 +267,9 @@ func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
 
 	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	return &Results{
-		Header: fmt.Sprintf(f, "Title", "Artist"),
-		Type:   "album search",
-		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, f, r.Album.Title, r.Artist.Name)
-			return err
-		},
+		Header:  fmt.Sprintf(f, "Title", "Artist"),
+		Type:    "album search",
+		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -324,12 +309,9 @@ func (t *Tidal) FindTrack(term string, limit int) (*Results, error) {
 
 	f := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum)
 	return &Results{
-		Header: fmt.Sprintf(f, "Title", "Album", "Artist"),
-		Type:   "album",
-		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, f, r.Track.Title, r.Album.Title, r.Artist.Name)
-			return err
-		},
+		Header:  fmt.Sprintf(f, "Title", "Album", "Artist"),
+		Type:    "album",
+		Fmt:     f,
 		Results: out,
 	}, nil
 }

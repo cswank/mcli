@@ -16,6 +16,12 @@ func newQueue() *queue {
 	}
 }
 
+func (q *queue) clear() {
+	q.lock.Lock()
+	q.queue = []Result{}
+	q.lock.Unlock()
+}
+
 func (q *queue) Add(r Result) {
 	q.lock.Lock()
 	q.queue = append(q.queue, r)

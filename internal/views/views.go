@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"bitbucket.org/cswank/mcli/internal/colors"
+	"bitbucket.org/cswank/mcli/internal/player"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -28,7 +29,7 @@ type coords struct {
 }
 
 //Start is what main calls to get the app rolling
-func Start() error {
+func Start(cli player.Player) error {
 	dir := os.Getenv("MCLI_HOME")
 	e, err := exists(dir)
 	if err != nil {
@@ -47,7 +48,7 @@ func Start() error {
 	}
 
 	w, h := g.Size()
-	s, err := newScreen(w, h)
+	s, err := newScreen(w, h, cli)
 	if err != nil {
 		return err
 	}

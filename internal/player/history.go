@@ -3,7 +3,6 @@ package player
 import (
 	"encoding/csv"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -19,7 +18,7 @@ type FileHistory struct {
 	pth        string
 	archivePth string
 	cache      []Result
-	format     string
+	fmt        string
 }
 
 func NewFileHistory() (*FileHistory, error) {
@@ -116,7 +115,7 @@ func (f *FileHistory) Fetch(page, pageSize int) (*Results, error) {
 		res = append(res, *r)
 	}
 	f.cache = res
-	f.format = fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
+	f.fmt = fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
 
 	if len(rows) > 1000 {
 		if err := f.archive(rows[900:]); err != nil {
@@ -139,12 +138,9 @@ func (f *FileHistory) historyFromCache(page, pageSize int) (*Results, error) {
 	}
 
 	return &Results{
-		Header: fmt.Sprintf(f.format, "Title", "Album", "Artist"),
-		Type:   "history",
-		Print: func(w io.Writer, r Result) error {
-			_, err := fmt.Fprintf(w, f.format, r.Track.Title, r.Album.Title, r.Artist.Name)
-			return err
-		},
+		Header:  fmt.Sprintf(f.fmt, "Title", "Album", "Artist"),
+		Type:    "history",
+		Fmt:     f.fmt,
 		Results: f.cache[start:end],
 	}, nil
 }

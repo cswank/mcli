@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package player;
+
+service Player {   
+	rpc Play(Result) returns (Empty) {}
+	rpc PlayAlbum(Results) returns (Empty) {}
+	rpc Volume(Float) returns (Empty) {}
+	rpc Pause(Empty) returns (Empty) {}
+	rpc FastForward(Empty) returns (Empty) {}
+	rpc Rewind(Empty) returns (Empty) {}
+	rpc Queue(Empty) returns (Results) {}
+	rpc RemoveFromQueue(Int) returns (Results) {}
+	rpc NextSong(Empty) returns (stream Result) {}
+	rpc PlayProgress(Empty) returns (stream Progress) {}
+	rpc DownloadProgress(Empty) returns (stream Progress) {}
+	rpc History(Page) returns (Results) {}
+	rpc Done(Empty) returns (Empty) {}
+}
+
+message Empty {
+	
+}
+
+message Page {
+	int64 page = 1;
+	int64 pageSize = 2;
+}
+
+message Progress {
+	int64 n = 1;
+	int64 total = 2;
+}
+
+message Float {
+	float value = 1;
+}
+
+message Int {
+	int64 value = 1;
+}
+
+message Result {
+	string service = 1;
+	string path = 2;
+	Track track = 3;
+	Album album = 4;
+	Artist artist = 5;
+	Playlist playlist = 6;
+	
+	message Track {
+		string id = 1;
+		string title = 2;
+                int64 duration = 3;
+	}
+	
+	message Artist {
+		string id = 1;
+		string name = 2;
+	}
+
+	message Album {
+		string id = 1;
+		string title = 2;
+
+	}
+
+	message Playlist {
+		string id = 1;
+		string title = 2;
+	}
+}
+
+message Results {
+	string type = 1;
+	string header = 2;
+	string fmt = 3;
+	repeated Result results = 4;
+}

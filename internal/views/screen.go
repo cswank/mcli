@@ -3,6 +3,8 @@ package views
 import (
 	"fmt"
 	"io"
+	"log"
+	"time"
 
 	"bitbucket.org/cswank/mcli/internal/player"
 	ui "github.com/jroimartin/gocui"
@@ -27,8 +29,8 @@ type screen struct {
 	stack  stack
 }
 
-func newScreen(width, height int) (*screen, error) {
-	cli, err := player.NewTidal()
+func newScreen(width, height int, p player.Player) (*screen, error) {
+	cli, err := player.NewTidal(p)
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +70,11 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.body.cursor = 0
 		results, err := s.client.GetAlbum(r.Album.ID)
 		if err != nil {
+			return err
+		}
+		results.Print = func(w io.Writer, r player.Result) error {
+			d := time.Duration(r.Track.Duration) * time.Second
+			_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, fmtDuration(d))
 			return err
 		}
 		s.body.newResults(results)
@@ -194,6 +201,12 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 	if err != nil {
 		return err
 	}
+
+	results.Print = func(w io.Writer, r player.Result) error {
+		d := time.Duration(r.Track.Duration) * time.Second
+		_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, fmtDuration(d))
+		return err
+	}
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
@@ -207,6 +220,11 @@ func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 	c := s.body.cursor
 	results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height)
 	if err != nil {
+		return err
+	}
+
+	results.Print = func(w io.Writer, r player.Result) error {
+		_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title, r.Artist.Name)
 		return err
 	}
 	s.body.cursor = 0
@@ -243,8 +261,14 @@ func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
+	res.Print = func(w io.Writer, r player.Result) error {
+		_, err := fmt.Fprintf(w, res.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
+		return err
+	}
+
 	s.view = "body"
 	s.header.header = res.Header
+
 	s.body.newResults(res)
 	s.body.cursor = 0
 	return nil
@@ -313,10 +337,22 @@ func (s *screen) doSearch(searchType, term string) error {
 		switch searchType {
 		case "album":
 			results, err = s.client.FindAlbum(term, s.body.height)
+			results.Print = func(w io.Writer, r player.Result) error {
+				_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title, r.Artist.Name)
+				return err
+			}
 		case "artist":
 			results, err = s.client.FindArtist(term, s.body.height)
+			results.Print = func(w io.Writer, r player.Result) error {
+				_, err := fmt.Fprintf(w, results.Fmt, r.Artist.Name)
+				return err
+			}
 		case "track":
 			results, err = s.client.FindTrack(term, s.body.height)
+			results.Print = func(w io.Writer, r player.Result) error {
+				_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
+				return err
+			}
 		}
 		if err != nil {
 			return err
@@ -369,6 +405,11 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	} else {
 		res, err := s.client.History(0, s.height)
 		if err == nil && len(res.Results) > 0 {
+			log.Println("fmt", res.Fmt)
+			res.Print = func(w io.Writer, r player.Result) error {
+				_, err := fmt.Fprintf(w, res.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
+				return err
+			}
 			s.header.header = res.Header
 			s.body.newResults(res)
 			s.view = "body"
@@ -505,4 +546,12 @@ func (s *stack) pop() {
 		s.topR = &s.stack[len(s.stack)-1]
 		s.topC = c
 	}
+}
+
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Second)
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+	return fmt.Sprintf("%d:%02d", m, s)
 }

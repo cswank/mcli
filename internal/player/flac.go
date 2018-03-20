@@ -18,22 +18,23 @@ import (
 
 type Flac struct {
 	Fetcher
-	queue        *queue
-	history      History
-	playing      bool
-	sep          string
-	pause        chan bool
-	vol          chan float64
-	fastForward  chan bool
-	rewind       chan bool
-	playCB       func(Progress)
-	downloadCB   func(Progress)
-	nextSong     func(r Result)
-	onDeck       chan Result
-	onDeckResult *Result
+	queue         *queue
+	history       History
+	playing       bool
+	sep           string
+	pause         chan bool
+	vol           chan float64
+	fastForward   chan bool
+	rewind        chan bool
+	playCB        func(Progress)
+	downloadCB    func(Progress)
+	nextSong      func(r Result)
+	onDeck        chan Result
+	onDeckResult  *Result
+	currentResult *Result
 }
 
-func newFlac(f Fetcher) (*Flac, error) {
+func NewFlac(f Fetcher) (*Flac, error) {
 	hist, err := NewFileHistory()
 	if err != nil {
 		return nil, err
@@ -58,6 +59,9 @@ func newFlac(f Fetcher) (*Flac, error) {
 
 func (f *Flac) NextSong(fn func(Result)) {
 	f.nextSong = fn
+	if f.nextSong != nil && f.currentResult != nil {
+		f.nextSong(*f.currentResult)
+	}
 }
 
 func (f *Flac) Play(r Result) {
@@ -87,12 +91,13 @@ func (f *Flac) Volume(v float64) {
 }
 
 func (f *Flac) Queue() *Results {
-	var out []Result
+	var r []Result
 	if f.onDeckResult != nil {
-		out = []Result{*f.onDeckResult}
+		r = []Result{*f.onDeckResult}
 	}
-	q := f.queue.Playlist()
-	return &Results{Results: append(out, q...)}
+	return &Results{
+		Results: append(r, f.queue.Playlist()...),
+	}
 }
 
 func (f *Flac) RemoveFromQueue(i int) {
@@ -102,6 +107,8 @@ func (f *Flac) RemoveFromQueue(i int) {
 		f.queue.Remove(i - 1)
 	}
 }
+
+func (f *Flac) Done() {}
 
 func (f *Flac) FastForward() {
 	if f.playing {
@@ -128,9 +135,6 @@ func (f *Flac) downloadLoop() {
 func (f *Flac) playLoop() {
 	for {
 		r := <-f.onDeck
-		if f.nextSong != nil {
-			f.nextSong(r)
-		}
 		f.playing = true
 		if err := f.doPlay(r); err != nil {
 			log.Fatal(err)
@@ -140,6 +144,11 @@ func (f *Flac) playLoop() {
 }
 
 func (f *Flac) doPlay(result Result) error {
+	f.currentResult = &result
+	if f.nextSong != nil {
+		f.nextSong(result)
+	}
+
 	if err := f.history.Save(result); err != nil {
 		return err
 	}
@@ -198,6 +207,7 @@ func (f *Flac) doPlay(result Result) error {
 		}
 	}
 
+	f.currentResult = nil
 	return s.Close()
 }
 

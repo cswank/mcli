@@ -25,6 +25,7 @@ type Player interface {
 	PlayProgress(func(Progress))
 	DownloadProgress(func(Progress))
 	History(int, int) (*Results, error)
+	Done()
 }
 
 type Fetcher interface {
@@ -65,11 +66,11 @@ type Album struct {
 
 type Result struct {
 	Service  string
+	Path     string
 	Track    Track
 	Artist   Artist
 	Album    Album
 	Playlist Album
-	Path     string
 }
 
 func (r *Result) ToCSV() []string {
@@ -120,5 +121,6 @@ type Results struct {
 	Type    string
 	Header  string
 	Results []Result
+	Fmt     string
 	Print   func(io.Writer, Result) error
 }
