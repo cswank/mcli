@@ -153,8 +153,9 @@ func trackFromPB(t *pb.Result_Track) player.Track {
 		return player.Track{}
 	}
 	return player.Track{
-		ID:    t.GetId(),
-		Title: t.GetTitle(),
+		ID:       t.GetId(),
+		Title:    t.GetTitle(),
+		Duration: int(t.GetDuration()),
 	}
 }
 
@@ -190,8 +191,9 @@ func artistFromPB(a *pb.Result_Artist) player.Artist {
 
 func pbFromTrack(t player.Track) *pb.Result_Track {
 	return &pb.Result_Track{
-		Id:    t.ID,
-		Title: t.Title,
+		Id:       t.ID,
+		Title:    t.Title,
+		Duration: int64(t.Duration),
 	}
 }
 
