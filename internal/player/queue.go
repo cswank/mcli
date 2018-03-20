@@ -4,11 +4,6 @@ import (
 	"sync"
 )
 
-type Progress struct {
-	N     int
-	Total int
-}
-
 type queue struct {
 	queue []Result
 	lock  sync.Mutex

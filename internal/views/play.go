@@ -36,7 +36,7 @@ func (p *play) volume(v float64) {
 }
 
 func (p *play) addAlbumToQueue(album []player.Result) {
-	p.client.PlayAlbum(album)
+	p.client.PlayAlbum(&player.Results{Results: album})
 }
 
 func (p *play) removeFromQueue(i int) {
@@ -44,7 +44,7 @@ func (p *play) removeFromQueue(i int) {
 }
 
 func (p *play) getQueue() []player.Result {
-	return p.client.Queue()
+	return p.client.Queue().Results
 }
 
 func (p *play) playProgress(prog player.Progress) {

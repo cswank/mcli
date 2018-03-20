@@ -14,12 +14,12 @@ type Client interface {
 
 type Player interface {
 	Play(Result)
-	PlayAlbum([]Result)
+	PlayAlbum(*Results)
 	Volume(float64)
 	Pause()
 	FastForward()
 	Rewind()
-	Queue() []Result
+	Queue() *Results
 	RemoveFromQueue(int)
 	NextSong(func(Result))
 	PlayProgress(func(Progress))
@@ -40,6 +40,11 @@ type Fetcher interface {
 	GetArtistAlbums(string, int) (*Results, error)
 	GetPlaylists() (*Results, error)
 	GetPlaylist(string, int) (*Results, error)
+}
+
+type Progress struct {
+	N     int
+	Total int
 }
 
 type Track struct {
