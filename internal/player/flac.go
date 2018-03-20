@@ -296,7 +296,7 @@ func (r *progressRead) Read(p []byte) (int, error) {
 	n, err := r.Reader.Read(p)
 	r.t += n
 	r.reads++
-	if r.reads%100 == 0 {
+	if r.cb != nil && r.reads%100 == 0 {
 		r.cb(Progress{N: r.t, Total: r.l})
 	}
 	return n, err
@@ -304,7 +304,10 @@ func (r *progressRead) Read(p []byte) (int, error) {
 
 // Close the reader when it implements io.Closer
 func (r *progressRead) Close() error {
-	r.cb(Progress{N: 0, Total: r.t})
+	if r.cb != nil {
+		r.cb(Progress{N: 0, Total: r.t})
+	}
+
 	if closer, ok := r.Reader.(io.Closer); ok {
 		return closer.Close()
 	}

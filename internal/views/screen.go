@@ -86,6 +86,10 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
+		results.Print = func(w io.Writer, r player.Result) error {
+			_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title, r.Artist.Name)
+			return err
+		}
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -95,6 +99,11 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
+		results.Print = func(w io.Writer, r player.Result) error {
+			d := time.Duration(r.Track.Duration) * time.Second
+			_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, d)
+			return err
+		}
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -102,6 +111,11 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.body.cursor = 0
 		results, err := s.client.GetPlaylist(r.Album.ID, s.height)
 		if err != nil {
+			return err
+		}
+		results.Print = func(w io.Writer, r player.Result) error {
+			d := time.Duration(r.Track.Duration) * time.Second
+			_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, d)
 			return err
 		}
 		s.body.newResults(results)
