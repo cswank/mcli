@@ -97,7 +97,6 @@ func (f *Flac) Queue() []Result {
 
 func (f *Flac) RemoveFromQueue(i int) {
 	if i == 0 {
-		f.onDeckResult = nil
 		<-f.onDeck
 	} else {
 		f.queue.Remove(i - 1)
