@@ -34,7 +34,12 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 		return nil
 	}
 
-	for _, r := range b.results.Results {
+	start := b.page * b.height
+	end := start + b.height
+	if end >= len(b.results.Results) {
+		end = len(b.results.Results)
+	}
+	for _, r := range b.results.Results[start:end] {
 		if err := b.results.Print(v, r); err != nil {
 			return err
 		}

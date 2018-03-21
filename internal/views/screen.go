@@ -3,7 +3,6 @@ package views
 import (
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	"bitbucket.org/cswank/mcli/internal/player"
@@ -82,7 +81,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "artist search":
 		s.body.cursor = 0
-		results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height)
+		results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height*5)
 		if err != nil {
 			return err
 		}
@@ -270,7 +269,7 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
-	res, err := s.client.History(0, s.height)
+	res, err := s.client.History(0, s.height*10)
 	if err != nil {
 		return err
 	}
@@ -289,22 +288,10 @@ func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) nextPage(g *ui.Gui, v *ui.View) error {
-	if s.body.results.Type == "history" {
-		s.body.page++
-		res, err := s.client.History(s.body.page, s.height)
-		if err != nil {
-			if err.Error() == "no more pages" {
-				s.body.page--
-				return nil
-			}
-			return err
-		}
-
-		s.view = "body"
-		s.header.header = res.Header
-		s.body.results = res
-		s.body.cursor = 0
+	if s.body.page >= len(s.body.results.Results)-s.body.height {
+		return nil
 	}
+	s.body.page++
 	return nil
 }
 
@@ -313,18 +300,7 @@ func (s *screen) prevPage(g *ui.Gui, v *ui.View) error {
 		return nil
 	}
 
-	if s.body.results.Type == "history" {
-		s.body.page--
-		res, err := s.client.History(s.body.page, s.height)
-		if err != nil {
-			return err
-		}
-
-		s.view = "body"
-		s.header.header = res.Header
-		s.body.results = res
-		s.body.cursor = 0
-	}
+	s.body.page--
 	return nil
 }
 
@@ -417,9 +393,8 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if !s.client.Ping() {
 		s.view = "login"
 	} else {
-		res, err := s.client.History(0, s.height)
+		res, err := s.client.History(0, s.height*10)
 		if err == nil && len(res.Results) > 0 {
-			log.Println("fmt", res.Fmt)
 			res.Print = func(w io.Writer, r player.Result) error {
 				_, err := fmt.Fprintf(w, res.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
 				return err
