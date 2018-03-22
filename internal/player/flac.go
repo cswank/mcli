@@ -35,7 +35,7 @@ type Flac struct {
 }
 
 func NewFlac(f Fetcher) (*Flac, error) {
-	hist, err := NewFileHistory()
+	hist, err := NewStormHistory()
 	if err != nil {
 		return nil, err
 	}
