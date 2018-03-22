@@ -139,12 +139,13 @@ func Start() error {
 
 func ResultFromPB(r *pb.Result) player.Result {
 	return player.Result{
-		Service:  r.GetService(),
-		Path:     r.GetPath(),
-		Track:    trackFromPB(r.GetTrack()),
-		Album:    albumFromPB(r.GetAlbum()),
-		Artist:   artistFromPB(r.GetArtist()),
-		Playlist: playlistFromPB(r.GetPlaylist()),
+		Service:   r.GetService(),
+		Path:      r.GetPath(),
+		PlayCount: int(r.GetPlaycount()),
+		Track:     trackFromPB(r.GetTrack()),
+		Album:     albumFromPB(r.GetAlbum()),
+		Artist:    artistFromPB(r.GetArtist()),
+		Playlist:  playlistFromPB(r.GetPlaylist()),
 	}
 }
 
@@ -247,12 +248,13 @@ func PBFromResults(r *player.Results) *pb.Results {
 
 func PBFromResult(r player.Result) *pb.Result {
 	return &pb.Result{
-		Service:  r.Service,
-		Path:     r.Path,
-		Track:    pbFromTrack(r.Track),
-		Album:    pbFromAlbum(r.Album),
-		Artist:   pbFromArtist(r.Artist),
-		Playlist: pbFromPlaylist(r.Playlist),
+		Service:   r.Service,
+		Path:      r.Path,
+		Playcount: int64(r.PlayCount),
+		Track:     pbFromTrack(r.Track),
+		Album:     pbFromAlbum(r.Album),
+		Artist:    pbFromArtist(r.Artist),
+		Playlist:  pbFromPlaylist(r.Playlist),
 	}
 }
 

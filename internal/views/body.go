@@ -1,6 +1,7 @@
 package views
 
 import (
+	"log"
 	"path"
 
 	"bitbucket.org/cswank/mcli/internal/player"
@@ -36,6 +37,7 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 	}
 
 	for _, r := range b.view {
+		log.Println("count", r.Track.Title, r.PlayCount)
 		if err := b.results.Print(v, r); err != nil {
 			return err
 		}

@@ -65,12 +65,13 @@ type Album struct {
 }
 
 type Result struct {
-	Service  string
-	Path     string
-	Track    Track
-	Artist   Artist
-	Album    Album
-	Playlist Album
+	Service   string
+	Path      string
+	PlayCount int
+	Track     Track
+	Artist    Artist
+	Album     Album
+	Playlist  Album
 }
 
 func (r *Result) ToCSV() []string {

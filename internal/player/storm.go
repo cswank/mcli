@@ -59,6 +59,7 @@ func (b *StormHistory) Fetch(page, pageSize int) (*Results, error) {
 		if len(e.Result.Album.Title) > maxAlbum {
 			maxAlbum = len(e.Result.Album.Title)
 		}
+		e.Result.PlayCount = e.Count
 		out[i] = e.Result
 	}
 

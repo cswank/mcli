@@ -43,12 +43,12 @@ message Int {
 message Result {
 	string service = 1;
 	string path = 2;
-	Track track = 3;
-	Album album = 4;
-	Artist artist = 5;
-	Playlist playlist = 6;
-	
-	message Track {
+        int64 playcount = 3;
+        Track track = 4;
+	Album album = 5;
+	Artist artist = 6;
+	Playlist playlist = 7;
+        message Track {
 		string id = 1;
 		string title = 2;
                 int64 duration = 3;

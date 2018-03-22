@@ -208,7 +208,7 @@ func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
-	r := s.body.results.Results[s.body.cursor]
+	r := s.body.view[s.body.cursor]
 	c := s.body.cursor
 	results, err := s.client.GetAlbum(r.Album.ID)
 	if err != nil {
@@ -229,7 +229,7 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
-	r := s.body.results.Results[s.body.cursor]
+	r := s.body.view[s.body.cursor]
 	c := s.body.cursor
 	results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height)
 	if err != nil {
