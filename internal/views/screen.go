@@ -309,19 +309,19 @@ func (s *screen) doSearch(searchType, term string) error {
 		s.view = "body"
 		switch searchType {
 		case "album":
-			results, err = s.client.FindAlbum(term, s.body.height)
+			results, err = s.client.FindAlbum(term, s.body.height*5)
 			results.Print = func(w io.Writer, r player.Result) error {
 				_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title, r.Artist.Name)
 				return err
 			}
 		case "artist":
-			results, err = s.client.FindArtist(term, s.body.height)
+			results, err = s.client.FindArtist(term, s.body.height*5)
 			results.Print = func(w io.Writer, r player.Result) error {
 				_, err := fmt.Fprintf(w, results.Fmt, r.Artist.Name)
 				return err
 			}
 		case "track":
-			results, err = s.client.FindTrack(term, s.body.height)
+			results, err = s.client.FindTrack(term, s.body.height*5)
 			results.Print = func(w io.Writer, r player.Result) error {
 				_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
 				return err
