@@ -62,7 +62,7 @@ func (s *screen) playAlbum(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) enter(g *ui.Gui, v *ui.View) error {
-	r := s.body.results.Results[s.body.cursor]
+	r := s.body.view[s.body.cursor]
 	c := s.body.cursor
 	switch s.body.results.Type {
 	case "album search":
@@ -284,23 +284,6 @@ func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
 
 	s.body.newResults(res)
 	s.body.cursor = 0
-	return nil
-}
-
-func (s *screen) nextPage(g *ui.Gui, v *ui.View) error {
-	if s.body.page >= len(s.body.results.Results)-s.body.height {
-		return nil
-	}
-	s.body.page++
-	return nil
-}
-
-func (s *screen) prevPage(g *ui.Gui, v *ui.View) error {
-	if s.body.page == 0 {
-		return nil
-	}
-
-	s.body.page--
 	return nil
 }
 

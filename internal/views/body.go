@@ -13,6 +13,7 @@ type body struct {
 	coords   coords
 	height   int
 	results  *player.Results
+	view     []player.Result
 	cursor   int
 	page     int
 }
@@ -34,12 +35,7 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 		return nil
 	}
 
-	start := b.page * b.height
-	end := start + b.height
-	if end >= len(b.results.Results) {
-		end = len(b.results.Results)
-	}
-	for _, r := range b.results.Results[start:end] {
+	for _, r := range b.view {
 		if err := b.results.Print(v, r); err != nil {
 			return err
 		}
@@ -50,6 +46,7 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 func (b *body) newResults(r *player.Results) {
 	b.page = 0
 	b.results = r
+	b.makeView()
 }
 
 func (b *body) albumLink(g *ui.Gui, v *ui.View) error {
@@ -65,6 +62,36 @@ func (b *body) albumLink(g *ui.Gui, v *ui.View) error {
 func (b *body) clear() {
 	v, _ := g.View("body")
 	v.Clear()
+}
+
+func (b *body) nextPage(g *ui.Gui, v *ui.View) error {
+	if b.page >= len(b.results.Results)-b.height {
+		return nil
+	}
+
+	b.page++
+	b.makeView()
+	return nil
+}
+
+func (b *body) prevPage(g *ui.Gui, v *ui.View) error {
+	if b.page == 0 {
+		return nil
+	}
+
+	b.page--
+	b.makeView()
+	return nil
+}
+
+func (b *body) makeView() {
+	start := b.page * b.height
+	end := start + b.height
+	if end >= len(b.results.Results) {
+		end = len(b.results.Results)
+	}
+
+	b.view = b.results.Results[start:end]
 }
 
 func (b *body) next(g *ui.Gui, v *ui.View) error {
