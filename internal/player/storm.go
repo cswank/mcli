@@ -8,6 +8,13 @@ import (
 	"github.com/asdine/storm"
 )
 
+type Sort string
+
+const (
+	Time  Sort = "Time"
+	Count Sort = "Count"
+)
+
 type StormEntry struct {
 	ID     string `storm:"id"`
 	Count  int    `storm:"index"`
@@ -43,9 +50,9 @@ func (b *StormHistory) Save(r Result) error {
 	return b.db.Update(&StormEntry{ID: r.Track.ID, Count: entry.Count + 1, Time: time.Now().Format(time.RFC3339), Result: r})
 }
 
-func (b *StormHistory) Fetch(page, pageSize int) (*Results, error) {
+func (b *StormHistory) Fetch(page, pageSize int, sortTerm Sort) (*Results, error) {
 	var entries []StormEntry
-	err := b.db.Select().OrderBy("Time").Reverse().Limit(pageSize).Skip(page * pageSize).Find(&entries)
+	err := b.db.Select().OrderBy(string(sortTerm)).Reverse().Limit(pageSize).Skip(page * pageSize).Find(&entries)
 	if err != nil {
 		return nil, err
 	}

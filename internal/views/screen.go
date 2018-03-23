@@ -14,13 +14,15 @@ type screen struct {
 	width  int
 	height int
 
-	header *header
-	body   *body
-	play   *play
-	buffer *buffer
-	search *search
-	login  *login
-	help   *help
+	header      *header
+	body        *body
+	play        *play
+	buffer      *buffer
+	search      *search
+	history     *history
+	historySort player.Sort
+	login       *login
+	help        *help
 
 	keys []key
 
@@ -35,19 +37,21 @@ func newScreen(width, height int, p player.Player) (*screen, error) {
 	}
 
 	s := &screen{
-		client: cli,
-		view:   "body",
-		width:  width,
-		height: height,
-		play:   newPlay(width, height, cli),
-		body:   newBody(width, height, cli.AlbumLink()),
-		buffer: newBuffer(width, height, cli),
-		header: newHeader(width, height),
-		help:   newHelp(width, height),
+		client:      cli,
+		view:        "body",
+		width:       width,
+		height:      height,
+		historySort: player.Time,
+		play:        newPlay(width, height, cli),
+		body:        newBody(width, height, cli.AlbumLink()),
+		buffer:      newBuffer(width, height, cli),
+		header:      newHeader(width, height),
+		help:        newHelp(width, height),
 	}
 
 	s.login = newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
+	s.history = newHistory(width, height, s.showHistory)
 	s.keys = s.getKeys()
 	return s, nil
 }
@@ -268,8 +272,10 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 	return s.help.hide(g, v)
 }
 
-func (s *screen) showHistory(g *ui.Gui, v *ui.View) error {
-	res, err := s.client.History(0, s.height*10)
+func (s *screen) showHistory(sort player.Sort) error {
+	g.DeleteView("history-type")
+	s.historySort = sort
+	res, err := s.client.History(0, s.height*10, sort)
 	if err != nil {
 		return err
 	}
@@ -367,8 +373,13 @@ func (s *screen) quit(g *ui.Gui, v *ui.View) error {
 	return ui.ErrQuit
 }
 
-func (s *screen) showSearch(g *ui.Gui, v *ui.View) error {
+func (s *screen) showSearchDialog(g *ui.Gui, v *ui.View) error {
 	s.view = "search-type"
+	return nil
+}
+
+func (s *screen) showHistoryDialog(g *ui.Gui, v *ui.View) error {
+	s.view = "history-type"
 	return nil
 }
 
@@ -376,7 +387,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if !s.client.Ping() {
 		s.view = "login"
 	} else {
-		res, err := s.client.History(0, s.height*10)
+		res, err := s.client.History(0, s.height*10, s.historySort)
 		if err == nil && len(res.Results) > 0 {
 			res.Print = func(w io.Writer, r player.Result) error {
 				_, err := fmt.Fprintf(w, res.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
@@ -402,10 +413,21 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			v.Editable = true
 			v.Frame = true
 			v.Title = s.login.title
+		} else if s.view == "history-type" {
+			g.Cursor = false
+			v, err := g.SetView(s.view, s.history.coords.x1, s.history.coords.y1, s.history.coords.x2, s.history.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+
+			if err := s.history.render(g, v); err != nil {
+				return err
+			}
 		} else if s.view == "search-type" || s.view == "search" {
 			if s.view == "search-type" {
 				g.Cursor = false
 			}
+
 			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err

@@ -11,7 +11,7 @@ import (
 
 type History interface {
 	Save(Result) error
-	Fetch(int, int) (*Results, error)
+	Fetch(int, int, Sort) (*Results, error)
 }
 
 type FileHistory struct {
@@ -69,7 +69,7 @@ func (f *FileHistory) Save(r Result) error {
 	return nil
 }
 
-func (f *FileHistory) Fetch(page, pageSize int) (*Results, error) {
+func (f *FileHistory) Fetch(page, pageSize int, sortTerm Sort) (*Results, error) {
 	if len(f.cache) != 0 {
 		return f.historyFromCache(page, pageSize)
 	}

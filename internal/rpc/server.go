@@ -94,7 +94,7 @@ func (s *server) DownloadProgress(_ *pb.Empty, stream pb.Player_DownloadProgress
 }
 
 func (s *server) History(ctx context.Context, p *pb.Page) (*pb.Results, error) {
-	r, err := s.cli.History(int(p.Page), int(p.PageSize))
+	r, err := s.cli.History(int(p.Page), int(p.PageSize), player.Sort(p.Sort))
 	return PBFromResults(r), err
 }
 

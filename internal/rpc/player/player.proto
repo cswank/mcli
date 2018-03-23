@@ -25,6 +25,7 @@ message Empty {
 message Page {
 	int64 page = 1;
 	int64 pageSize = 2;
+	string sort = 3;
 }
 
 message Progress {
@@ -43,15 +44,16 @@ message Int {
 message Result {
 	string service = 1;
 	string path = 2;
-        int64 playcount = 3;
-        Track track = 4;
+	int64 playcount = 3;
+	Track track = 4;
 	Album album = 5;
 	Artist artist = 6;
 	Playlist playlist = 7;
-        message Track {
+	
+	message Track {
 		string id = 1;
 		string title = 2;
-                int64 duration = 3;
+		int64 duration = 3;
 	}
 	
 	message Artist {

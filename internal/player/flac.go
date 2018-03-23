@@ -68,8 +68,8 @@ func (f *Flac) Play(r Result) {
 	f.queue.Add(r)
 }
 
-func (f *Flac) History(page, pageSize int) (*Results, error) {
-	return f.history.Fetch(page, pageSize)
+func (f *Flac) History(page, pageSize int, sort Sort) (*Results, error) {
+	return f.history.Fetch(page, pageSize, sort)
 }
 
 func (f *Flac) PlayAlbum(album *Results) {

@@ -148,7 +148,7 @@ func (c *Client) DownloadProgress(f func(player.Progress)) {
 	}()
 }
 
-func (c *Client) History(page, pageSize int) (*player.Results, error) {
-	out, err := c.client.History(context.Background(), &pb.Page{Page: int64(page), PageSize: int64(pageSize)})
+func (c *Client) History(page, pageSize int, sort player.Sort) (*player.Results, error) {
+	out, err := c.client.History(context.Background(), &pb.Page{Page: int64(page), PageSize: int64(pageSize), Sort: string(sort)})
 	return ResultsFromPB(out), err
 }

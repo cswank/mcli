@@ -24,7 +24,7 @@ type Player interface {
 	NextSong(func(Result))
 	PlayProgress(func(Progress))
 	DownloadProgress(func(Progress))
-	History(int, int) (*Results, error)
+	History(int, int, Sort) (*Results, error)
 	Done()
 }
 
