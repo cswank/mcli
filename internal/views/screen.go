@@ -140,6 +140,11 @@ func (s *screen) playlists(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
+	results.Print = func(w io.Writer, r player.Result) error {
+		_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title)
+		return err
+	}
+
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
