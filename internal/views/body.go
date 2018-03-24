@@ -65,11 +65,13 @@ func (b *body) clear() {
 }
 
 func (b *body) nextPage(g *ui.Gui, v *ui.View) error {
+
 	nPages := ((len(b.results.Results) + b.height - 1) / b.height) - 1
 	if b.page >= nPages {
 		return nil
 	}
 
+	b.cursor = 0
 	b.page++
 	b.makeView()
 	return nil
@@ -80,6 +82,7 @@ func (b *body) prevPage(g *ui.Gui, v *ui.View) error {
 		return nil
 	}
 
+	b.cursor = 0
 	b.page--
 	b.makeView()
 	return nil
@@ -96,7 +99,7 @@ func (b *body) makeView() {
 }
 
 func (b *body) next(g *ui.Gui, v *ui.View) error {
-	if b.cursor == b.height-1 || (b.results != nil && b.cursor == len(b.results.Results)-1) {
+	if b.cursor == b.height-1 || (b.results != nil && b.cursor == len(b.view)-1) {
 		return nil
 	}
 	b.cursor++
