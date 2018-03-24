@@ -3,7 +3,6 @@ package views
 import (
 	"fmt"
 	"io"
-	"time"
 
 	"bitbucket.org/cswank/mcli/internal/player"
 	ui "github.com/jroimartin/gocui"
@@ -75,11 +74,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = func(w io.Writer, r player.Result) error {
-			d := time.Duration(r.Track.Duration) * time.Second
-			_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, fmtDuration(d))
-			return err
-		}
+		results.Print = results.PrintAlbumTracks
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -89,10 +84,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = func(w io.Writer, r player.Result) error {
-			_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title, r.Artist.Name)
-			return err
-		}
+		results.Print = results.PrintAlbum
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -102,11 +94,8 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = func(w io.Writer, r player.Result) error {
-			d := time.Duration(r.Track.Duration) * time.Second
-			_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, d)
-			return err
-		}
+
+		results.Print = results.PrintAlbum
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -116,11 +105,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = func(w io.Writer, r player.Result) error {
-			d := time.Duration(r.Track.Duration) * time.Second
-			_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, d)
-			return err
-		}
+		results.Print = results.PrintAlbum
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -140,11 +125,7 @@ func (s *screen) playlists(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
-	results.Print = func(w io.Writer, r player.Result) error {
-		_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title)
-		return err
-	}
-
+	results.Print = results.PrintPlaylists
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
@@ -224,11 +205,7 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
-	results.Print = func(w io.Writer, r player.Result) error {
-		d := time.Duration(r.Track.Duration) * time.Second
-		_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, fmtDuration(d))
-		return err
-	}
+	results.Print = results.PrintAlbumTracks
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
@@ -245,10 +222,7 @@ func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
-	results.Print = func(w io.Writer, r player.Result) error {
-		_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title, r.Artist.Name)
-		return err
-	}
+	results.Print = results.PrintArtist
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
@@ -321,22 +295,13 @@ func (s *screen) doSearch(searchType, term string) error {
 		switch searchType {
 		case "album":
 			results, err = s.client.FindAlbum(term, s.body.height*5)
-			results.Print = func(w io.Writer, r player.Result) error {
-				_, err := fmt.Fprintf(w, results.Fmt, r.Album.Title, r.Artist.Name)
-				return err
-			}
+			results.Print = results.PrintArtist
 		case "artist":
 			results, err = s.client.FindArtist(term, s.body.height*5)
-			results.Print = func(w io.Writer, r player.Result) error {
-				_, err := fmt.Fprintf(w, results.Fmt, r.Artist.Name)
-				return err
-			}
+			results.Print = results.PrintArtists
 		case "track":
 			results, err = s.client.FindTrack(term, s.body.height*5)
-			results.Print = func(w io.Writer, r player.Result) error {
-				_, err := fmt.Fprintf(w, results.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
-				return err
-			}
+			results.Print = results.PrintTracks
 		}
 		if err != nil {
 			return err
@@ -545,12 +510,4 @@ func (s *stack) pop() {
 		s.topR = &s.stack[len(s.stack)-1]
 		s.topC = c
 	}
-}
-
-func fmtDuration(d time.Duration) string {
-	d = d.Round(time.Second)
-	m := d / time.Minute
-	d -= m * time.Minute
-	s := d / time.Second
-	return fmt.Sprintf("%d:%02d", m, s)
 }

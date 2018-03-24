@@ -3,7 +3,7 @@ package player
 import (
 	"fmt"
 	"io"
-	"strconv"
+	"os"
 	"time"
 )
 
@@ -74,54 +74,61 @@ type Result struct {
 	Playlist  Album
 }
 
-func (r *Result) ToCSV() []string {
-	return []string{
-		time.Now().Format(time.RFC3339),
-		r.Service,
-		r.Track.ID,
-		r.Track.Title,
-		strconv.Itoa(r.Track.Duration),
-		r.Album.ID,
-		r.Album.Title,
-		r.Artist.ID,
-		r.Artist.Name,
-	}
-}
-
-func (r *Result) FromCSV(row []string) error {
-	if len(row) < 9 {
-		return fmt.Errorf("invalid history csv row: %v", row)
-	}
-
-	id := row[2]
-	d, err := strconv.ParseInt(row[4], 10, 64)
-	if err != nil {
-		return err
-	}
-
-	*r = Result{
-		Service: row[1],
-		Track: Track{
-			ID:       id,
-			Title:    row[3],
-			Duration: int(d),
-		},
-		Album: Album{
-			ID:    row[5],
-			Title: row[6],
-		},
-		Artist: Artist{
-			ID:   row[7],
-			Name: row[8],
-		},
-	}
-	return nil
-}
-
 type Results struct {
 	Type    string
 	Header  string
 	Results []Result
 	Fmt     string
 	Print   func(io.Writer, Result) error
+}
+
+func (r *Results) PrintPlaylists(w io.Writer, res Result) error {
+	_, err := fmt.Fprintf(w, r.Fmt, res.Album.Title)
+	return err
+}
+
+func (r *Results) PrintAlbum(w io.Writer, res Result) error {
+	d := time.Duration(res.Track.Duration) * time.Second
+	_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, d)
+	return err
+}
+
+func (r *Results) PrintArtist(w io.Writer, res Result) error {
+	_, err := fmt.Fprintf(w, r.Fmt, res.Album.Title, res.Artist.Name)
+	return err
+}
+
+func (r *Results) PrintAlbumTracks(w io.Writer, res Result) error {
+	d := time.Duration(res.Track.Duration) * time.Second
+	_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, fmtDuration(d))
+	return err
+}
+
+func (r *Results) PrintArtists(w io.Writer, res Result) error {
+	_, err := fmt.Fprintf(w, r.Fmt, res.Artist.Name)
+	return err
+}
+
+func (r *Results) PrintTracks(w io.Writer, res Result) error {
+	_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, res.Album.Title, res.Artist.Name)
+	return err
+}
+
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Second)
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+	return fmt.Sprintf("%d:%02d", m, s)
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }
