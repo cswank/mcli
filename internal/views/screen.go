@@ -74,7 +74,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = results.PrintAlbumTracks
+		results.Print = results.PrintAlbumTracks()
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -84,7 +84,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = results.PrintAlbum
+		results.Print = results.PrintAlbum()
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -95,7 +95,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 			return err
 		}
 
-		results.Print = results.PrintAlbum
+		results.Print = results.PrintAlbum()
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -105,7 +105,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = results.PrintAlbum
+		results.Print = results.PrintAlbum()
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -125,7 +125,7 @@ func (s *screen) playlists(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
-	results.Print = results.PrintPlaylists
+	results.Print = results.PrintPlaylists()
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
@@ -205,7 +205,7 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
-	results.Print = results.PrintAlbumTracks
+	results.Print = results.PrintAlbumTracks()
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
@@ -222,7 +222,7 @@ func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 		return err
 	}
 
-	results.Print = results.PrintArtist
+	results.Print = results.PrintArtist()
 	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
@@ -259,14 +259,9 @@ func (s *screen) showHistory(sort player.Sort) error {
 		return err
 	}
 
-	res.Print = func(w io.Writer, r player.Result) error {
-		_, err := fmt.Fprintf(w, res.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
-		return err
-	}
-
 	s.view = "body"
+	res.Print = res.PrintHistory()
 	s.header.header = res.Header
-
 	s.body.newResults(res)
 	s.body.cursor = 0
 	return nil
@@ -295,13 +290,13 @@ func (s *screen) doSearch(searchType, term string) error {
 		switch searchType {
 		case "album":
 			results, err = s.client.FindAlbum(term, s.body.height*5)
-			results.Print = results.PrintArtist
+			results.Print = results.PrintArtist()
 		case "artist":
 			results, err = s.client.FindArtist(term, s.body.height*5)
-			results.Print = results.PrintArtists
+			results.Print = results.PrintArtists()
 		case "track":
 			results, err = s.client.FindTrack(term, s.body.height*5)
-			results.Print = results.PrintTracks
+			results.Print = results.PrintTracks()
 		}
 		if err != nil {
 			return err
@@ -359,10 +354,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	} else {
 		res, err := s.client.History(0, s.height*10, s.historySort)
 		if err == nil && len(res.Results) > 0 {
-			res.Print = func(w io.Writer, r player.Result) error {
-				_, err := fmt.Fprintf(w, res.Fmt, r.Track.Title, r.Album.Title, r.Artist.Name)
-				return err
-			}
+			res.Print = res.PrintHistory()
 			s.header.header = res.Header
 			s.body.newResults(res)
 			s.view = "body"

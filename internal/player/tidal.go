@@ -113,11 +113,8 @@ func (t *Tidal) GetPlaylists() (*Results, error) {
 		}
 	}
 
-	f := "%s\n"
 	return &Results{
-		Header:  fmt.Sprintf(f, "Title"),
 		Type:    "playlists",
-		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -136,11 +133,7 @@ func (t *Tidal) FindArtist(term string, limit int) (*Results, error) {
 		return nil, err
 	}
 	out := make([]Result, len(artists))
-	var max int
 	for i, a := range artists {
-		if len(a.Name) > max {
-			max = len(a.Name)
-		}
 		out[i] = Result{
 			Artist: Artist{
 				ID:   fmt.Sprintf("%s", a.ID),
@@ -149,11 +142,8 @@ func (t *Tidal) FindArtist(term string, limit int) (*Results, error) {
 		}
 	}
 
-	f := "%s\n"
 	return &Results{
-		Header:  fmt.Sprintf(f, "Artist"),
 		Type:    "artist search",
-		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -208,12 +198,8 @@ func (t *Tidal) GetAlbum(id string) (*Results, error) {
 
 func (t *Tidal) getTracks(tracks []tidal.Track, tp string) (*Results, error) {
 	out := make([]Result, len(tracks))
-	var maxTitle int
 
 	for i, tr := range tracks {
-		if len(tr.Title) > maxTitle {
-			maxTitle = len(tr.Title)
-		}
 		dur, _ := tr.Duration.Int64()
 		out[i] = Result{
 			Service: t.Name(),
@@ -233,11 +219,8 @@ func (t *Tidal) getTracks(tracks []tidal.Track, tp string) (*Results, error) {
 		}
 	}
 
-	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	return &Results{
-		Header:  fmt.Sprintf(f, "Title", "Length"),
 		Type:    tp,
-		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -248,11 +231,8 @@ func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
 		return nil, err
 	}
 	out := make([]Result, len(albums))
-	var maxTitle int
+
 	for i, a := range albums {
-		if len(a.Title) > maxTitle {
-			maxTitle = len(a.Title)
-		}
 		out[i] = Result{
 			Artist: Artist{
 				ID:   a.Artists[0].ID.String(),
@@ -265,11 +245,8 @@ func (t *Tidal) FindAlbum(term string, limit int) (*Results, error) {
 		}
 	}
 
-	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	return &Results{
-		Header:  fmt.Sprintf(f, "Title", "Artist"),
 		Type:    "album search",
-		Fmt:     f,
 		Results: out,
 	}, nil
 }
@@ -280,15 +257,8 @@ func (t *Tidal) FindTrack(term string, limit int) (*Results, error) {
 		return nil, err
 	}
 	out := make([]Result, len(tracks))
-	var maxTitle int
-	var maxAlbum int
+
 	for i, t := range tracks {
-		if len(t.Title) > maxTitle {
-			maxTitle = len(t.Title)
-		}
-		if len(t.Album.Title) > maxAlbum {
-			maxAlbum = len(t.Album.Title)
-		}
 		dur, _ := t.Duration.Int64()
 		out[i] = Result{
 			Artist: Artist{
@@ -307,11 +277,8 @@ func (t *Tidal) FindTrack(term string, limit int) (*Results, error) {
 		}
 	}
 
-	f := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum)
 	return &Results{
-		Header:  fmt.Sprintf(f, "Title", "Album", "Artist"),
 		Type:    "album",
-		Fmt:     f,
 		Results: out,
 	}, nil
 }

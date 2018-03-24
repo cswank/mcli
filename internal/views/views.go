@@ -48,6 +48,7 @@ func Start(cli player.Player) error {
 	}
 
 	w, h := g.Size()
+	log.Println("w h", w, h)
 	s, err := newScreen(w, h, cli)
 	if err != nil {
 		return err
