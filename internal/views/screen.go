@@ -84,7 +84,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		if err != nil {
 			return err
 		}
-		results.Print = results.PrintAlbum()
+		results.Print = results.PrintArtist()
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)

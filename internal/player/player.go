@@ -87,6 +87,7 @@ func (r *Results) PrintPlaylists() func(w io.Writer, res Result) error {
 	r.Fmt = "%s\n"
 	r.Header = fmt.Sprintf(r.Fmt, "Title")
 	return func(w io.Writer, res Result) error {
+
 		_, err := fmt.Fprintf(w, r.Fmt, res.Album.Title)
 		return err
 	}
