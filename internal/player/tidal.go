@@ -200,6 +200,10 @@ func (t *Tidal) GetArtistTracks(id string, limit int) (*Results, error) {
 				ID:    fmt.Sprintf("%s", tr.Album.ID),
 				Title: tr.Album.Title,
 			},
+			Artist: Artist{
+				ID:   fmt.Sprintf("%s", tr.Artists[0].ID),
+				Name: tr.Artists[0].Name,
+			},
 		}
 	}
 
