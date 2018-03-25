@@ -40,6 +40,7 @@ type Fetcher interface {
 	GetAlbum(string) (*Results, error)
 	GetTrack(string) (string, error)
 	GetArtistAlbums(string, int) (*Results, error)
+	GetArtistTracks(string, int) (*Results, error)
 	GetPlaylists() (*Results, error)
 	GetPlaylist(string, int) (*Results, error)
 }
@@ -178,6 +179,23 @@ func (r *Results) PrintTracks() func(w io.Writer, res Result) error {
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Album", "Artist")
 	return func(w io.Writer, res Result) error {
 		_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, res.Album.Title, res.Artist.Name)
+		return err
+	}
+}
+
+func (r *Results) PrintArtistTracks() func(w io.Writer, res Result) error {
+	var maxTitle int
+
+	for _, res := range r.Results {
+		if len(res.Track.Title) > maxTitle {
+			maxTitle = len(res.Track.Title)
+		}
+	}
+
+	r.Fmt = fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
+	r.Header = fmt.Sprintf(r.Fmt, "Title", "Album")
+	return func(w io.Writer, res Result) error {
+		_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, res.Album.Title)
 		return err
 	}
 }

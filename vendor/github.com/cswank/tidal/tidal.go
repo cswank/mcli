@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -21,7 +20,6 @@ var c = &http.Client{
 }
 
 func (t *Tidal) get(dest string, query *url.Values, s interface{}) error {
-	log.Println(baseurl + dest)
 	req, err := http.NewRequest("GET", baseurl+dest, nil)
 	if err != nil {
 		return err
@@ -110,6 +108,15 @@ func (t *Tidal) GetArtistAlbums(artist, l string) ([]Album, error) {
 	return s.Items, t.get(fmt.Sprintf("artists/%s/albums", artist), &url.Values{
 		"limit": {l},
 	}, &s)
+}
+
+// SearchArtistTracks func
+func (t *Tidal) GetArtistTracks(artist, l string) ([]Track, error) {
+	var s Search
+	return s.Tracks.Items, t.get(fmt.Sprintf("artists/%s/toptracks", artist), &url.Values{
+		"limit":  {l},
+		"filter": {"ALL"},
+	}, &s.Tracks)
 }
 
 func (t *Tidal) GetUserPlaylists() ([]Album, error) {

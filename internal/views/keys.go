@@ -30,6 +30,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"body"}, keys: []interface{}{'V'}, keybinding: s.volumeUp, help: keyHelp{key: "V", body: "volume up"}},
 		{views: []string{"body"}, keys: []interface{}{'m'}, keybinding: s.goToAlbum, help: keyHelp{key: "m", body: "go to album at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{'t'}, keybinding: s.goToArtist, help: keyHelp{key: "t", body: "go to artist at cursor"}},
+		{views: []string{"body"}, keys: []interface{}{'k'}, keybinding: s.goToArtistTracks, help: keyHelp{key: "k", body: "view the tracks of the artist at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{'a'}, keybinding: s.playAlbum, help: keyHelp{key: "a", body: "play entire album"}},
 		{views: []string{"body"}, keys: []interface{}{'q'}, keybinding: s.queue, help: keyHelp{key: "q", body: "view play queue"}},
 		{views: []string{"body"}, keys: []interface{}{'T'}, keybinding: s.playlists, help: keyHelp{key: "T", body: "get saved playlists"}},

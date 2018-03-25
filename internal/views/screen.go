@@ -206,11 +206,10 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 	}
 
 	results.Print = results.PrintAlbumTracks()
-	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
-	s.stack.clear()
 	s.stack.add(results, c)
+	s.body.cursor = 0
 	return nil
 }
 
@@ -223,11 +222,26 @@ func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 	}
 
 	results.Print = results.PrintArtist()
-	s.body.cursor = 0
 	s.body.newResults(results)
 	s.header.header = results.Header
-	s.stack.clear()
 	s.stack.add(results, c)
+	s.body.cursor = 0
+	return nil
+}
+
+func (s *screen) goToArtistTracks(g *ui.Gui, v *ui.View) error {
+	r := s.body.view[s.body.cursor]
+	c := s.body.cursor
+	results, err := s.client.GetArtistTracks(r.Artist.ID, s.height)
+	if err != nil {
+		return err
+	}
+
+	results.Print = results.PrintArtistTracks()
+	s.body.newResults(results)
+	s.header.header = results.Header
+	s.stack.add(results, c)
+	s.body.cursor = 0
 	return nil
 }
 

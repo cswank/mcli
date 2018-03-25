@@ -35,7 +35,7 @@
   branch = "master"
   name = "github.com/cswank/tidal"
   packages = ["."]
-  revision = "d9089a8aa63ca15c2c8444d996907f93f8432a2e"
+  revision = "c9e020041ea919f68d45ab9c6e2f20d617b8a717"
 
 [[projects]]
   branch = "master"
