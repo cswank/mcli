@@ -10,17 +10,20 @@ import (
 var (
 	helpWidth  = 51
 	helpHeight = 25
-	tpl        = `%s             C-x means Control x`
 )
 
 type help struct {
 	name   string
 	coords coords
 	body   []byte
+	tpl    string
 }
 
 func newHelp(w, h int) *help {
+	s := "C-x means Control x"
+	f := fmt.Sprintf(fmt.Sprintf("%%%ds", helpWidth/2+len(s)/2), s)
 	return &help{
+		tpl:  fmt.Sprintf(`%%s%s`, f),
 		name: "help",
 	}
 }
@@ -34,21 +37,18 @@ func getHelpCoords(g *ui.Gui) coords {
 	return coords{x1: x1, y1: y1, x2: x2, y2: y2}
 }
 
-func (h *help) show(g *ui.Gui, v *ui.View, keys []key) error {
-	v.Editable = false
-	if h.body == nil {
-		h.body = h.getBody(keys)
-	}
-
+func (h *help) show(g *ui.Gui, keys []key) error {
 	coords := getHelpCoords(g)
-	var err error
-	v, err = g.SetView("help", coords.x1, coords.y1, coords.x2, coords.y2)
+	v, err := g.SetView("help", coords.x1, coords.y1, coords.x2, coords.y2)
 	if err != ui.ErrUnknownView {
 		return err
 	}
 
+	v.Editable = false
+	if h.body == nil {
+		h.body = h.getBody(keys)
+	}
 	v.Title = h.name
-
 	v.Write([]byte(h.body))
 	_, err = g.SetCurrentView("help")
 	return err
@@ -67,5 +67,5 @@ func (h *help) getBody(keys []key) []byte {
 			fmt.Fprintf(out, fmt.Sprintf("%s %s\n", c3(h.key), c1(fmt.Sprintf(fmt.Sprintf("%%%ds", helpWidth-len(h.key)-4), h.body))))
 		}
 	}
-	return []byte(fmt.Sprintf(tpl, out.String()))
+	return []byte(fmt.Sprintf(h.tpl, out.String()))
 }

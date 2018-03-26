@@ -257,7 +257,7 @@ func (s *screen) volumeDown(g *ui.Gui, v *ui.View) error {
 
 func (s *screen) showHelp(g *ui.Gui, v *ui.View) error {
 	s.view = "help"
-	return s.help.show(g, v, s.keys)
+	return nil
 }
 
 func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
@@ -277,6 +277,7 @@ func (s *screen) showHistory(sort player.Sort) error {
 	res.Print = res.PrintHistory()
 	s.header.header = res.Header
 	s.body.newResults(res)
+	s.stack.add(res, s.body.cursor)
 	s.body.cursor = 0
 	return nil
 }
@@ -371,6 +372,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			res.Print = res.PrintHistory()
 			s.header.header = res.Header
 			s.body.newResults(res)
+			s.stack.add(res, 0)
 			s.view = "body"
 		} else {
 			s.view = "search-type"
@@ -389,6 +391,11 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			v.Editable = true
 			v.Frame = true
 			v.Title = s.login.title
+		} else if s.view == "help" {
+			g.Cursor = false
+			if err := s.help.show(g, s.keys); err != nil {
+				return err
+			}
 		} else if s.view == "history-type" {
 			g.Cursor = false
 			v, err := g.SetView(s.view, s.history.coords.x1, s.history.coords.y1, s.history.coords.x2, s.history.coords.y2)
