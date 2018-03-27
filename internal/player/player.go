@@ -2,7 +2,6 @@ package player
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strconv"
 	"time"
@@ -81,20 +80,18 @@ type Results struct {
 	Header  string
 	Results []Result
 	Fmt     string
-	Print   func(io.Writer, Result) error
+	Print   func(Result) string
 }
 
-func (r *Results) PrintPlaylists() func(w io.Writer, res Result) error {
+func (r *Results) PrintPlaylists() func(res Result) string {
 	r.Fmt = "%s\n"
 	r.Header = fmt.Sprintf(r.Fmt, "Title")
-	return func(w io.Writer, res Result) error {
-
-		_, err := fmt.Fprintf(w, r.Fmt, res.Album.Title)
-		return err
+	return func(res Result) string {
+		return fmt.Sprintf(r.Fmt, res.Album.Title)
 	}
 }
 
-func (r *Results) PrintAlbum() func(w io.Writer, res Result) error {
+func (r *Results) PrintAlbum() func(res Result) string {
 	var maxTitle int
 	for _, res := range r.Results {
 		if len(res.Track.Title) > maxTitle {
@@ -105,14 +102,13 @@ func (r *Results) PrintAlbum() func(w io.Writer, res Result) error {
 	r.Fmt = fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Length")
 
-	return func(w io.Writer, res Result) error {
+	return func(res Result) string {
 		d := time.Duration(res.Track.Duration) * time.Second
-		_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, d)
-		return err
+		return fmt.Sprintf(r.Fmt, res.Track.Title, d)
 	}
 }
 
-func (r *Results) PrintArtist() func(w io.Writer, res Result) error {
+func (r *Results) PrintArtist() func(res Result) string {
 	var maxTitle int
 
 	for _, res := range r.Results {
@@ -123,13 +119,12 @@ func (r *Results) PrintArtist() func(w io.Writer, res Result) error {
 
 	r.Fmt = fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Artist")
-	return func(w io.Writer, res Result) error {
-		_, err := fmt.Fprintf(w, r.Fmt, res.Album.Title, res.Artist.Name)
-		return err
+	return func(res Result) string {
+		return fmt.Sprintf(r.Fmt, res.Album.Title, res.Artist.Name)
 	}
 }
 
-func (r *Results) PrintAlbumTracks() func(w io.Writer, res Result) error {
+func (r *Results) PrintAlbumTracks() func(res Result) string {
 	var maxTitle int
 	for _, res := range r.Results {
 		if len(res.Track.Title) > maxTitle {
@@ -139,14 +134,13 @@ func (r *Results) PrintAlbumTracks() func(w io.Writer, res Result) error {
 
 	r.Fmt = fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Length")
-	return func(w io.Writer, res Result) error {
+	return func(res Result) string {
 		d := time.Duration(res.Track.Duration) * time.Second
-		_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, fmtDuration(d))
-		return err
+		return fmt.Sprintf(r.Fmt, res.Track.Title, fmtDuration(d))
 	}
 }
 
-func (r *Results) PrintArtists() func(w io.Writer, res Result) error {
+func (r *Results) PrintArtists() func(res Result) string {
 	var max int
 	for _, res := range r.Results {
 		if len(res.Artist.Name) > max {
@@ -156,13 +150,12 @@ func (r *Results) PrintArtists() func(w io.Writer, res Result) error {
 
 	r.Fmt = "%s\n"
 	r.Header = fmt.Sprintf(r.Fmt, "Artist")
-	return func(w io.Writer, res Result) error {
-		_, err := fmt.Fprintf(w, r.Fmt, res.Artist.Name)
-		return err
+	return func(res Result) string {
+		return fmt.Sprintf(r.Fmt, res.Artist.Name)
 	}
 }
 
-func (r *Results) PrintTracks() func(w io.Writer, res Result) error {
+func (r *Results) PrintTracks() func(res Result) string {
 	var maxTitle int
 	var maxAlbum int
 
@@ -177,13 +170,12 @@ func (r *Results) PrintTracks() func(w io.Writer, res Result) error {
 
 	r.Fmt = fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum)
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Album", "Artist")
-	return func(w io.Writer, res Result) error {
-		_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, res.Album.Title, res.Artist.Name)
-		return err
+	return func(res Result) string {
+		return fmt.Sprintf(r.Fmt, res.Track.Title, res.Album.Title, res.Artist.Name)
 	}
 }
 
-func (r *Results) PrintArtistTracks() func(w io.Writer, res Result) error {
+func (r *Results) PrintArtistTracks() func(res Result) string {
 	var maxTitle int
 
 	for _, res := range r.Results {
@@ -194,20 +186,18 @@ func (r *Results) PrintArtistTracks() func(w io.Writer, res Result) error {
 
 	r.Fmt = fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Album")
-	return func(w io.Writer, res Result) error {
-		_, err := fmt.Fprintf(w, r.Fmt, res.Track.Title, res.Album.Title)
-		return err
+	return func(res Result) string {
+		return fmt.Sprintf(r.Fmt, res.Track.Title, res.Album.Title)
 	}
 }
 
-func (r *Results) PrintHistory() func(w io.Writer, res Result) error {
+func (r *Results) PrintHistory() func(res Result) string {
 	col := 40
 	r.Fmt = fmt.Sprintf("%%-%ds%%-%ds%%-%ds%%s\n", col+4, col+4, col+4)
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Album", "Artist", "Played")
 
-	return func(w io.Writer, res Result) error {
-		_, err := fmt.Fprintf(w, r.Fmt, truncate(res.Track.Title, col), truncate(res.Album.Title, col), truncate(res.Artist.Name, col), strconv.Itoa(res.PlayCount))
-		return err
+	return func(res Result) string {
+		return fmt.Sprintf(r.Fmt, truncate(res.Track.Title, col), truncate(res.Album.Title, col), truncate(res.Artist.Name, col), strconv.Itoa(res.PlayCount))
 	}
 }
 

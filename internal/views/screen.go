@@ -2,7 +2,6 @@ package views
 
 import (
 	"fmt"
-	"io"
 
 	"bitbucket.org/cswank/mcli/internal/player"
 	ui "github.com/jroimartin/gocui"
@@ -159,9 +158,8 @@ func (s *screen) queueNoCursor(g *ui.Gui, v *ui.View) error {
 	results := &player.Results{
 		Header: fmt.Sprintf(f, "Title", "Album", "Artist"),
 		Type:   "queue",
-		Print: func(w io.Writer, r player.Result) error {
-			_, err := fmt.Fprintf(w, f, r.Track.Title, r.Album.Title, r.Artist.Name)
-			return err
+		Print: func(r player.Result) string {
+			return fmt.Sprintf(f, r.Track.Title, r.Album.Title, r.Artist.Name)
 		},
 		Results: items,
 	}
@@ -380,7 +378,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	}
 
 	return func(g *ui.Gui) error {
-		g.Cursor = true
+		g.Cursor = false
 		if s.view == "login" {
 			v, err := g.SetView("login", s.login.coords.x1, s.login.coords.y1, s.login.coords.x2, s.login.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
@@ -392,12 +390,10 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			v.Frame = true
 			v.Title = s.login.title
 		} else if s.view == "help" {
-			g.Cursor = false
 			if err := s.help.show(g, s.keys); err != nil {
 				return err
 			}
 		} else if s.view == "history-type" {
-			g.Cursor = false
 			v, err := g.SetView(s.view, s.history.coords.x1, s.history.coords.y1, s.history.coords.x2, s.history.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
@@ -407,10 +403,6 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 		} else if s.view == "search-type" || s.view == "search" {
-			if s.view == "search-type" {
-				g.Cursor = false
-			}
-
 			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err

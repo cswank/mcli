@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"path"
 
 	"bitbucket.org/cswank/mcli/internal/player"
@@ -35,8 +36,14 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 		return nil
 	}
 
-	for _, r := range b.view {
-		if err := b.results.Print(v, r); err != nil {
+	for i, r := range b.view {
+		s := b.results.Print(r)
+		if i == b.cursor {
+			s = c2(s)
+		} else {
+			s = c1(s)
+		}
+		if _, err := fmt.Fprint(v, s); err != nil {
 			return err
 		}
 	}

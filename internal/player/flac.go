@@ -183,7 +183,7 @@ func (f *Flac) doPlay(result Result) error {
 	var i int
 	for !done {
 		select {
-		case <-time.After(200 * time.Millisecond):
+		case <-time.After(500 * time.Millisecond):
 			pos := s.Position()
 			done = pos >= l
 			i++
