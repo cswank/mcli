@@ -403,6 +403,9 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 		} else if s.view == "search-type" || s.view == "search" {
+			if s.view == "search" {
+				g.Cursor = true
+			}
 			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
