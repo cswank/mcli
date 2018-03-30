@@ -20,6 +20,12 @@
   revision = "bc5958e1c8339112fc3347a89f3c482f416a69d3"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/aybabtme/rgbterm"
+  packages = ["."]
+  revision = "cc83f3b3ce5911279513a46d6d3316d67bedaa54"
+
+[[projects]]
   name = "github.com/coreos/bbolt"
   packages = ["."]
   revision = "583e8937c61f1af6513608ccc75c97b6abdf4ff9"
@@ -147,6 +153,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b38c61afe459c05ffdb42965a61c8d5741fe0bac8eaca32a4c8fcf80f74e1a79"
+  inputs-digest = "875305d7e1bb1da57a6098a39c116296eec0a92741055590d538e5b255310c29"
   solver-name = "gps-cdcl"
   solver-version = 1

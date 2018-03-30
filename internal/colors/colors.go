@@ -2,7 +2,10 @@ package colors
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
+	"github.com/aybabtme/rgbterm"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -71,5 +74,38 @@ type Colorer func(string) string
 
 //Get fetches the colorer func for the given color
 func Get(s string) Colorer {
+	if strings.Contains(s, ",") {
+		return getRGB(s)
+	}
 	return lookup[s]
+}
+
+func getRGB(c string) Colorer {
+	parts := strings.Split(c, ",")
+	r, g, b := rgbFromStrings(parts)
+	return func(s string) string {
+		return rgbterm.FgString(s, r, g, b)
+	}
+}
+
+func rgbFromStrings(s []string) (uint8, uint8, uint8) {
+	if len(s) != 3 {
+		s = []string{"255", "255", "255"}
+	}
+	r, err := strconv.ParseUint(s[0], 10, 8)
+	if err != nil {
+		return rgbFromStrings([]string{})
+	}
+
+	g, err := strconv.ParseUint(s[1], 10, 8)
+	if err != nil {
+		return rgbFromStrings([]string{})
+	}
+
+	b, err := strconv.ParseUint(s[2], 10, 8)
+	if err != nil {
+		return rgbFromStrings([]string{})
+	}
+
+	return uint8(r), uint8(g), uint8(b)
 }
