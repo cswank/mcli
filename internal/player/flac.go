@@ -24,6 +24,7 @@ type Flac struct {
 	sep           string
 	pause         chan bool
 	vol           chan float64
+	volume        float64
 	fastForward   chan bool
 	rewind        chan bool
 	playCB        func(Progress)
@@ -170,6 +171,7 @@ func (f *Flac) doPlay(result Result) error {
 	vol := &effects.Volume{
 		Streamer: s,
 		Base:     2,
+		Volume:   f.volume,
 	}
 
 	ctrl := &beep.Ctrl{
@@ -193,6 +195,7 @@ func (f *Flac) doPlay(result Result) error {
 		case v := <-f.vol:
 			speaker.Lock()
 			vol.Volume += v
+			f.volume = vol.Volume
 			speaker.Unlock()
 		case <-f.pause:
 			paused = !paused
