@@ -16,6 +16,7 @@ service Player {
 	rpc DownloadProgress(Empty) returns (stream Progress) {}
 	rpc History(Page) returns (Results) {}
 	rpc Done(Empty) returns (Empty) {}
+        rpc Close(Empty) returns (Empty) {}
 }
 
 message Empty {

@@ -152,6 +152,10 @@ func (f *Flac) RemoveFromQueue(i int) {
 }
 
 func (f *Flac) Done() {
+
+}
+
+func (f *Flac) Close() {
 	file, err := os.Create(getFlacPath())
 	if err != nil {
 		log.Fatal(err)

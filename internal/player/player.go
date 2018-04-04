@@ -26,6 +26,7 @@ type Player interface {
 	DownloadProgress(func(Progress))
 	History(int, int, Sort) (*Results, error)
 	Done()
+	Close()
 }
 
 type Fetcher interface {

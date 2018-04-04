@@ -1,8 +1,12 @@
 package rpc
 
 import (
+	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"google.golang.org/grpc"
 
@@ -27,6 +31,10 @@ func (s *server) Done(ctx context.Context, _ *pb.Empty) (*pb.Empty, error) {
 	s.cli.Done()
 	close(s.done)
 	s.done = make(chan bool)
+	return &pb.Empty{}, nil
+}
+
+func (s *server) Close(ctx context.Context, _ *pb.Empty) (*pb.Empty, error) {
 	return &pb.Empty{}, nil
 }
 
@@ -133,7 +141,16 @@ func Start() error {
 		cli:  cli,
 		done: make(chan bool),
 	})
-	s.Serve(lis)
+
+	stop := make(chan os.Signal)
+	signal.Notify(stop, syscall.SIGTERM)
+	signal.Notify(stop, syscall.SIGINT)
+	go s.Serve(lis)
+
+	<-stop
+	fmt.Println("graceful stop")
+	s.GracefulStop()
+	cli.Close()
 	return nil
 }
 

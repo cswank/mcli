@@ -33,6 +33,8 @@ func (c *Client) Done() {
 	c.conn.Close()
 }
 
+func (c *Client) Close() {}
+
 func (c *Client) Play(r player.Result) {
 	_, err := c.client.Play(context.Background(), PBFromResult(r))
 	if err != nil {
