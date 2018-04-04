@@ -31,8 +31,8 @@ func (p *play) doPause() {
 	p.client.Pause()
 }
 
-func (p *play) volume(v float64) {
-	p.client.Volume(v)
+func (p *play) volume(v float64) float64 {
+	return p.client.Volume(v)
 }
 
 func (p *play) addAlbumToQueue(album []player.Result) {

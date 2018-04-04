@@ -47,11 +47,12 @@ func (c *Client) PlayAlbum(r *player.Results) {
 	}
 }
 
-func (c *Client) Volume(v float64) {
-	_, err := c.client.Volume(context.Background(), &pb.Float{Value: float32(v)})
+func (c *Client) Volume(v float64) float64 {
+	f, err := c.client.Volume(context.Background(), &pb.Float{Value: float32(v)})
 	if err != nil {
 		log.Println(err)
 	}
+	return float64(f.Value)
 }
 
 func (c *Client) Pause() {

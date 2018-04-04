@@ -1,6 +1,7 @@
 package player
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -24,6 +25,7 @@ type Flac struct {
 	sep           string
 	pause         chan bool
 	vol           chan float64
+	volOut        chan float64
 	volume        float64
 	fastForward   chan bool
 	rewind        chan bool
@@ -35,10 +37,41 @@ type Flac struct {
 	currentResult *Result
 }
 
+type flacSettings struct {
+	Volume float64 `json:"volume"`
+}
+
+func getFlacPath() string {
+	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
+}
+
 func NewFlac(f Fetcher) (*Flac, error) {
 	hist, err := NewStormHistory()
 	if err != nil {
 		return nil, err
+	}
+
+	pth := getFlacPath()
+	e, err := exists(pth)
+	if err != nil {
+		return nil, err
+	}
+
+	var s flacSettings
+	if e {
+		f, err := os.Open(pth)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		err = json.NewDecoder(f).Decode(&s)
+	} else {
+		f, err := os.Create(pth)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		json.NewEncoder(f).Encode(s)
 	}
 
 	p := &Flac{
@@ -50,7 +83,9 @@ func NewFlac(f Fetcher) (*Flac, error) {
 		fastForward: make(chan bool),
 		rewind:      make(chan bool),
 		vol:         make(chan float64),
+		volOut:      make(chan float64),
 		onDeck:      make(chan Result),
+		volume:      s.Volume,
 	}
 
 	go p.playLoop()
@@ -85,10 +120,17 @@ func (f *Flac) Pause() {
 	}
 }
 
-func (f *Flac) Volume(v float64) {
+func (f *Flac) Volume(v float64) float64 {
+	var out float64
 	if f.playing {
 		f.vol <- v
+		out = <-f.volOut
+	} else {
+		f.volume += v
+		out = f.volume
 	}
+
+	return out
 }
 
 func (f *Flac) Queue() *Results {
@@ -109,7 +151,14 @@ func (f *Flac) RemoveFromQueue(i int) {
 	}
 }
 
-func (f *Flac) Done() {}
+func (f *Flac) Done() {
+	file, err := os.Create(getFlacPath())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	json.NewEncoder(file).Encode(flacSettings{Volume: f.volume})
+}
 
 func (f *Flac) FastForward() {
 	if f.playing {
@@ -194,9 +243,12 @@ func (f *Flac) doPlay(result Result) error {
 			}
 		case v := <-f.vol:
 			speaker.Lock()
-			vol.Volume += v
-			f.volume = vol.Volume
+			if (f.volume < 2.0 && v > 0.0) || (f.volume > -5.0 && v < 0.0) {
+				vol.Volume += v
+				f.volume = vol.Volume
+			}
 			speaker.Unlock()
+			f.volOut <- f.volume
 		case <-f.pause:
 			paused = !paused
 			speaker.Lock()

@@ -40,9 +40,9 @@ func (s *server) PlayAlbum(ctx context.Context, in *pb.Results) (*pb.Empty, erro
 	return &pb.Empty{}, nil
 }
 
-func (s *server) Volume(ctx context.Context, r *pb.Float) (*pb.Empty, error) {
-	s.cli.Volume(float64(r.Value))
-	return &pb.Empty{}, nil
+func (s *server) Volume(ctx context.Context, r *pb.Float) (*pb.Float, error) {
+	v := s.cli.Volume(float64(r.Value))
+	return &pb.Float{Value: float32(v)}, nil
 }
 
 func (s *server) Pause(ctx context.Context, r *pb.Empty) (*pb.Empty, error) {

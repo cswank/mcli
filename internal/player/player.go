@@ -15,7 +15,7 @@ type Client interface {
 type Player interface {
 	Play(Result)
 	PlayAlbum(*Results)
-	Volume(float64)
+	Volume(float64) float64
 	Pause()
 	FastForward()
 	Rewind()

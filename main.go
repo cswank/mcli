@@ -76,9 +76,4 @@ func gui() {
 	if err := views.Start(p); err != nil {
 		log.Fatal(err)
 	}
-
-	if p != nil {
-		c := p.(*rpc.Client)
-		c.Done()
-	}
 }

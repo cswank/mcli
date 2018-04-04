@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"time"
 
 	"bitbucket.org/cswank/mcli/internal/player"
 	ui "github.com/jroimartin/gocui"
@@ -18,6 +19,7 @@ type screen struct {
 	buffer      *buffer
 	search      *search
 	history     *history
+	volume      *volume
 	historySort player.Sort
 	login       *login
 	help        *help
@@ -26,14 +28,11 @@ type screen struct {
 
 	client player.Client
 	stack  stack
+
+	volumeEvent chan bool
 }
 
-func newScreen(width, height int, p player.Player) (*screen, error) {
-	cli, err := player.NewTidal(p)
-	if err != nil {
-		return nil, err
-	}
-
+func newScreen(width, height int, cli player.Client) (*screen, error) {
 	s := &screen{
 		client:      cli,
 		view:        "body",
@@ -45,8 +44,11 @@ func newScreen(width, height int, p player.Player) (*screen, error) {
 		buffer:      newBuffer(width, height, cli),
 		header:      newHeader(width, height),
 		help:        newHelp(width, height),
+		volume:      newVolume(width, height, cli.Volume(0.0)),
+		volumeEvent: make(chan bool),
 	}
 
+	go s.clearVolume()
 	s.login = newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
 	s.history = newHistory(width, height, s.showHistory)
@@ -244,13 +246,31 @@ func (s *screen) goToArtistTracks(g *ui.Gui, v *ui.View) error {
 }
 
 func (s *screen) volumeUp(g *ui.Gui, v *ui.View) error {
-	s.play.volume(0.5)
+	s.volume.vol = s.play.volume(0.5)
+	s.view = "volume"
+	s.volumeEvent <- true
 	return nil
 }
 
 func (s *screen) volumeDown(g *ui.Gui, v *ui.View) error {
-	s.play.volume(-0.5)
+	s.volume.vol = s.play.volume(-0.5)
+	s.view = "volume"
+	s.volumeEvent <- true
 	return nil
+}
+
+func (s *screen) clearVolume() {
+	after := time.After(1000000 * time.Second)
+	for {
+		select {
+		case <-after:
+			s.view = "body"
+			s.volume.clear()
+			after = time.After(1000000 * time.Second)
+		case <-s.volumeEvent:
+			after = time.After(3 * time.Second)
+		}
+	}
 }
 
 func (s *screen) showHelp(g *ui.Gui, v *ui.View) error {
@@ -391,6 +411,15 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			v.Title = s.login.title
 		} else if s.view == "help" {
 			if err := s.help.show(g, s.keys); err != nil {
+				return err
+			}
+		} else if s.view == "volume" {
+			v, err := g.SetView(s.view, s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+
+			if err := s.volume.render(g, v); err != nil {
 				return err
 			}
 		} else if s.view == "history-type" {

@@ -5,7 +5,7 @@ package player;
 service Player {   
 	rpc Play(Result) returns (Empty) {}
 	rpc PlayAlbum(Results) returns (Empty) {}
-	rpc Volume(Float) returns (Empty) {}
+	rpc Volume(Float) returns (Float) {}
 	rpc Pause(Empty) returns (Empty) {}
 	rpc FastForward(Empty) returns (Empty) {}
 	rpc Rewind(Empty) returns (Empty) {}
