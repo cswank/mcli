@@ -67,12 +67,12 @@ func (p *play) play(r player.Result) {
 	p.client.Play(r)
 }
 
-func (p *play) next(g *ui.Gui, v *ui.View) error {
+func (p *play) next() {
 	p.client.FastForward()
-	return nil
+	p.clear()
 }
 
-func (p *play) rewind(g *ui.Gui, v *ui.View) error {
-	p.client.Rewind()
-	return nil
+func (p *play) rewind() {
+	p.client.FastForward()
+	p.clear()
 }

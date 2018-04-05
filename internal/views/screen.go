@@ -265,12 +265,26 @@ func (s *screen) clearVolume() {
 		select {
 		case <-after:
 			s.view = "body"
-			s.volume.clear()
+			g.Update(func(g *ui.Gui) error {
+				return s.volume.clear()
+			})
 			after = time.After(1000000 * time.Second)
 		case <-s.volumeEvent:
 			after = time.After(3 * time.Second)
 		}
 	}
+}
+
+func (s *screen) next(g *ui.Gui, v *ui.View) error {
+	s.play.next()
+	s.buffer.clear()
+	return nil
+}
+
+func (s *screen) rewind(g *ui.Gui, v *ui.View) error {
+	s.play.rewind()
+	s.buffer.clear()
+	return nil
 }
 
 func (s *screen) showHelp(g *ui.Gui, v *ui.View) error {

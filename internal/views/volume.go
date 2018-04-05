@@ -30,9 +30,13 @@ func newVolume(w, h int, v float64) *volume {
 	}
 }
 
-func (v *volume) clear() {
-	vw, _ := g.View("volume")
+func (v *volume) clear() error {
+	vw, err := g.View("volume")
+	if err != nil {
+		return err
+	}
 	vw.Clear()
+	return nil
 }
 
 func (v *volume) render(g *ui.Gui, vw *ui.View) error {

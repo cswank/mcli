@@ -14,6 +14,7 @@ type buffer struct {
 	coords   coords
 	progress chan player.Progress
 	song     chan player.Result
+	text     string
 }
 
 func newBuffer(w, h int, cli player.Player) *buffer {
@@ -40,26 +41,25 @@ func (b *buffer) nextSong(r player.Result) {
 }
 
 func (b *buffer) render() {
-	var text string
 	for {
 		select {
 		case <-time.After(time.Second):
-			if g != nil && text != "" {
+			if g != nil && b.text != "" {
 				v, _ := g.View("buffer")
-				if text != v.Buffer() {
+				if b.text != v.Buffer() {
 					g.Update(func(g *ui.Gui) error {
 						v.Clear()
-						fmt.Fprint(v, text)
+						fmt.Fprint(v, b.text)
 						return nil
 					})
 				}
 			}
 		case r := <-b.song:
-			text = b.center(fmt.Sprintf("%s %s", r.Track.Title, time.Duration(r.Track.Duration)*time.Second))
+			b.text = b.center(fmt.Sprintf("%s %s", r.Track.Title, time.Duration(r.Track.Duration)*time.Second))
 			g.Update(func(g *ui.Gui) error {
 				v, _ := g.View("buffer")
 				v.Clear()
-				fmt.Fprint(v, text)
+				fmt.Fprint(v, b.text)
 				return nil
 			})
 		case p := <-b.progress:
@@ -76,6 +76,7 @@ func (b *buffer) render() {
 }
 
 func (b *buffer) clear() {
+	b.text = ""
 	v, _ := g.View("buffer")
 	v.Clear()
 }
