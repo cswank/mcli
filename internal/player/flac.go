@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cswank/beep"
@@ -29,12 +32,15 @@ type Flac struct {
 	volume        float64
 	fastForward   chan bool
 	rewind        chan bool
-	playCB        func(Progress)
-	downloadCB    func(Progress)
-	nextSong      func(r Result)
+	playCB        map[string]func(Progress)
+	downloadCB    map[string]func(Progress)
+	nextSongCB    map[string]func(r Result)
 	onDeck        chan Result
 	onDeckResult  *Result
 	currentResult *Result
+	playLock      sync.Mutex
+	downloadLock  sync.Mutex
+	nextSongLock  sync.Mutex
 }
 
 type flacSettings struct {
@@ -86,6 +92,9 @@ func NewFlac(f Fetcher) (*Flac, error) {
 		volOut:      make(chan float64),
 		onDeck:      make(chan Result),
 		volume:      s.Volume,
+		playCB:      make(map[string]func(Progress)),
+		downloadCB:  make(map[string]func(Progress)),
+		nextSongCB:  make(map[string]func(Result)),
 	}
 
 	go p.playLoop()
@@ -93,11 +102,23 @@ func NewFlac(f Fetcher) (*Flac, error) {
 	return p, nil
 }
 
-func (f *Flac) NextSong(fn func(Result)) {
-	f.nextSong = fn
-	if f.nextSong != nil && f.currentResult != nil {
-		f.nextSong(*f.currentResult)
+func (f *Flac) NextSong(id string, fn func(Result)) {
+	f.nextSongCB[id] = fn
+	if fn != nil && f.currentResult != nil {
+		fn(*f.currentResult)
 	}
+}
+
+func (f *Flac) callNextSong() {
+	f.nextSongLock.Lock()
+	for id, fn := range f.nextSongCB {
+		if fn != nil && f.currentResult != nil {
+			fn(*f.currentResult)
+		} else if fn == nil {
+			delete(f.nextSongCB, id)
+		}
+	}
+	f.nextSongLock.Unlock()
 }
 
 func (f *Flac) Play(r Result) {
@@ -143,16 +164,43 @@ func (f *Flac) Queue() *Results {
 	}
 }
 
-func (f *Flac) RemoveFromQueue(i int) {
-	if i == 0 {
-		<-f.onDeck
-	} else {
-		f.queue.Remove(i - 1)
+func (f *Flac) RemoveFromQueue(indices []int) {
+	sort.Sort(sort.Reverse(sort.IntSlice(indices)))
+	for _, i := range indices {
+		if i == 0 {
+			<-f.onDeck
+		} else {
+			f.queue.Remove(i - 1)
+		}
 	}
 }
 
-func (f *Flac) Done() {
+func (f *Flac) Done(id string) {
+	f.playLock.Lock()
+	delete(f.playCB, id)
+	for k, v := range f.playCB {
+		if v == nil {
+			delete(f.playCB, k)
+		}
+	}
+	f.playLock.Unlock()
+	f.downloadLock.Lock()
+	delete(f.downloadCB, id)
+	for k, v := range f.downloadCB {
+		if v == nil {
+			delete(f.downloadCB, k)
+		}
+	}
+	f.downloadLock.Unlock()
 
+	f.nextSongLock.Lock()
+	delete(f.nextSongCB, id)
+	for k, v := range f.nextSongCB {
+		if v == nil {
+			delete(f.nextSongCB, k)
+		}
+	}
+	f.nextSongLock.Unlock()
 }
 
 func (f *Flac) Close() {
@@ -199,9 +247,7 @@ func (f *Flac) playLoop() {
 
 func (f *Flac) doPlay(result Result) error {
 	f.currentResult = &result
-	if f.nextSong != nil {
-		f.nextSong(result)
-	}
+	f.callNextSong()
 
 	if err := f.history.Save(result); err != nil {
 		return err
@@ -242,9 +288,15 @@ func (f *Flac) doPlay(result Result) error {
 			pos := s.Position()
 			done = pos >= l
 			i++
-			if f.playCB != nil {
-				f.playCB(Progress{N: pos, Total: l})
+			f.playLock.Lock()
+			for k, cb := range f.playCB {
+				if cb != nil {
+					cb(Progress{N: pos, Total: l})
+				} else {
+					delete(f.playCB, k)
+				}
 			}
+			f.playLock.Unlock()
 		case v := <-f.vol:
 			speaker.Lock()
 			if (f.volume < 2.0 && v > 0.0) || (f.volume > -5.0 && v < 0.0) {
@@ -270,12 +322,16 @@ func (f *Flac) doPlay(result Result) error {
 	return s.Close()
 }
 
-func (f *Flac) DownloadProgress(fn func(Progress)) {
-	f.downloadCB = fn
+func (f *Flac) DownloadProgress(id string, fn func(Progress)) {
+	f.downloadLock.Lock()
+	f.downloadCB[id] = fn
+	f.downloadLock.Unlock()
 }
 
-func (f *Flac) PlayProgress(fn func(Progress)) {
-	f.playCB = fn
+func (f *Flac) PlayProgress(id string, fn func(Progress)) {
+	f.playLock.Lock()
+	f.playCB[id] = fn
+	f.playLock.Unlock()
 }
 
 func (f *Flac) download(r *Result) {
@@ -290,7 +346,7 @@ func (f *Flac) download(r *Result) {
 }
 
 func (f *Flac) doDownload(r Result) error {
-	file, err := os.Create(r.Path)
+	file, err := ioutil.TempFile(fmt.Sprintf("%s/tmp", os.Getenv("MCLI_HOME")), "")
 	if err != nil {
 		return fmt.Errorf("could not create file for %+v: %s", r, err)
 	}
@@ -313,7 +369,7 @@ func (f *Flac) doDownload(r Result) error {
 
 	file.Close()
 	pr.Close()
-	return nil
+	return os.Rename(file.Name(), r.Path)
 }
 
 func (f *Flac) ensureCache() error {
@@ -332,6 +388,12 @@ func (f *Flac) checkCache(result Result) (string, bool) {
 		os.MkdirAll(dir, 0700)
 	}
 
+	dir = fmt.Sprintf("%s/tmp", os.Getenv("MCLI_HOME"))
+	e, _ = exists(dir)
+	if !e {
+		os.MkdirAll(dir, 0700)
+	}
+
 	pth := fmt.Sprintf("%s/cache/%s/%s/%s/%s.flac", os.Getenv("MCLI_HOME"), f.Fetcher.Name(), f.clean(result.Artist.Name), f.clean(result.Album.Title), f.clean(result.Track.Title))
 	e, _ = exists(pth)
 	return pth, e
@@ -344,10 +406,10 @@ func (f *Flac) clean(s string) string {
 type progressRead struct {
 	io.Reader
 	t, l, reads int
-	cb          func(Progress)
+	cb          map[string]func(Progress)
 }
 
-func newProgressRead(r io.Reader, l int, cb func(Progress)) *progressRead {
+func newProgressRead(r io.Reader, l int, cb map[string]func(Progress)) *progressRead {
 	return &progressRead{Reader: r, t: 0, l: l, cb: cb}
 }
 
@@ -356,15 +418,21 @@ func (r *progressRead) Read(p []byte) (int, error) {
 	r.t += n
 	r.reads++
 	if r.cb != nil && r.reads%100 == 0 {
-		r.cb(Progress{N: r.t, Total: r.l})
+		for k, cb := range r.cb {
+			if cb != nil {
+				cb(Progress{N: r.t, Total: r.l})
+			} else {
+				delete(r.cb, k)
+			}
+		}
 	}
 	return n, err
 }
 
 // Close the reader when it implements io.Closer
 func (r *progressRead) Close() error {
-	if r.cb != nil {
-		r.cb(Progress{N: 0, Total: r.t})
+	for _, cb := range r.cb {
+		cb(Progress{N: 0, Total: r.t})
 	}
 
 	if closer, ok := r.Reader.(io.Closer); ok {

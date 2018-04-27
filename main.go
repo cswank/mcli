@@ -6,14 +6,16 @@ import (
 	"log"
 	"os"
 
+	"bitbucket.org/cswank/mcli/internal/http"
 	"bitbucket.org/cswank/mcli/internal/player"
 	"bitbucket.org/cswank/mcli/internal/rpc"
 	"bitbucket.org/cswank/mcli/internal/views"
+	rice "github.com/GeertJohan/go.rice"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
 )
 
 var (
-	srv     = kingpin.Flag("server", "start grpc server").Short('s').Bool()
+	srv     = kingpin.Flag("server", "start grpc and http servers").Short('s').Bool()
 	cli     = kingpin.Flag("client", "start grpc client").Short('c').Bool()
 	addr    = kingpin.Flag("address", "address of grpc server").Short('a').Default("localhost:50051").String()
 	logout  = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
@@ -59,8 +61,21 @@ func main() {
 }
 
 func doServe() {
-	if err := rpc.Start(); err != nil {
-		log.Fatal(err)
+	box := rice.MustFindBox("internal/http/html")
+
+	cli, err := player.NewTidal(nil)
+	if err != nil {
+		log.Fatal("cli ", err)
+	}
+
+	go func() {
+		if err := rpc.Start(cli); err != nil {
+			log.Fatal("rpc ", err)
+		}
+	}()
+
+	if err := http.Start(cli, box); err != nil {
+		log.Fatal("http ", err)
 	}
 }
 

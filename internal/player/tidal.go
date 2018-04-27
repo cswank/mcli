@@ -229,21 +229,27 @@ func (t *Tidal) getTracks(tracks []tidal.Track, tp string) (*Results, error) {
 	out := make([]Result, len(tracks))
 	var maxTitle int
 
+	var album Album
 	for i, tr := range tracks {
 		if len(tr.Title) > maxTitle {
 			maxTitle = len(tr.Title)
 		}
 		dur, _ := tr.Duration.Int64()
+		a := Album{
+			ID:    tr.Album.ID.String(),
+			Title: tr.Album.Title,
+		}
+		if tp == "album" && i == 0 {
+			album = a
+		}
+
 		out[i] = Result{
 			Service: t.Name(),
 			Artist: Artist{
 				Name: tr.Artists[0].Name,
 				ID:   tr.Artists[0].ID.String(),
 			},
-			Album: Album{
-				ID:    tr.Album.ID.String(),
-				Title: tr.Album.Title,
-			},
+			Album: a,
 			Track: Track{
 				ID:       fmt.Sprintf("%s", tr.ID),
 				Title:    tr.Title,
@@ -254,6 +260,7 @@ func (t *Tidal) getTracks(tracks []tidal.Track, tp string) (*Results, error) {
 
 	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	return &Results{
+		Album:   album,
 		Header:  fmt.Sprintf(f, "Title", "Length"),
 		Type:    tp,
 		Fmt:     f,

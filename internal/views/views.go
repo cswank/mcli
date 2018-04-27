@@ -74,7 +74,7 @@ func Start(p player.Player) error {
 		}
 	}
 
-	cli.Done()
+	cli.Done(s.id)
 	g.Close()
 	return nil
 }

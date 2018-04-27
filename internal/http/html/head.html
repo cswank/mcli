@@ -1,0 +1,12 @@
+{{define "head"}}
+  <head>
+    <link rel="stylesheet" href="/static/site.css">
+    {{range .Stylesheets}}
+    <link rel="stylesheet" href="{{.}}">
+    {{end}}
+    {{range .Scripts}}
+    <script src="{{.}}"></script>
+    {{end}}
+  </head>
+{{end}}
+{{template "base.html"}}

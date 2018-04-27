@@ -1,0 +1,22 @@
+{{define "content"}}
+<div>
+  <table id="results">
+    <thead>
+      <tr>
+	<td>Track</td>
+	<td>Album</td>
+	<td>Artist</td>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Results.Results}}
+      <tr>
+	<td><a href="" onclick="return play({{.}});">{{.Track.Title}}</a></td>
+	<td><a href="/albums/{{.Album.ID}}">{{.Album.Title}}</a></td>
+	<td><a href="/artists/{{.Artist.ID}}">{{.Artist.Name}}</a></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}

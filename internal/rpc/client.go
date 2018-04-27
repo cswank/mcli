@@ -28,8 +28,8 @@ func NewClient(addr string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Done() {
-	c.client.Done(context.Background(), &pb.Empty{})
+func (c *Client) Done(id string) {
+	c.client.Done(context.Background(), &pb.String{Value: id})
 	c.conn.Close()
 }
 
@@ -87,16 +87,20 @@ func (c *Client) Queue() *player.Results {
 	return ResultsFromPB(out)
 }
 
-func (c *Client) RemoveFromQueue(i int) {
-	_, err := c.client.RemoveFromQueue(context.Background(), &pb.Int{Value: int64(i)})
+func (c *Client) RemoveFromQueue(indices []int) {
+	out := make([]int64, len(indices))
+	for i, val := range indices {
+		out[i] = int64(val)
+	}
+	_, err := c.client.RemoveFromQueue(context.Background(), &pb.Ints{Value: out})
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (c *Client) NextSong(f func(player.Result)) {
+func (c *Client) NextSong(id string, f func(player.Result)) {
 	go func() {
-		stream, err := c.client.NextSong(context.Background(), &pb.Empty{})
+		stream, err := c.client.NextSong(context.Background(), &pb.String{Value: id})
 		if err != nil {
 			log.Fatal("could not get stream for next song", err)
 		}
@@ -113,9 +117,9 @@ func (c *Client) NextSong(f func(player.Result)) {
 	}()
 }
 
-func (c *Client) PlayProgress(f func(player.Progress)) {
+func (c *Client) PlayProgress(id string, f func(player.Progress)) {
 	go func() {
-		stream, err := c.client.PlayProgress(context.Background(), &pb.Empty{})
+		stream, err := c.client.PlayProgress(context.Background(), &pb.String{Value: id})
 		if err != nil {
 			log.Fatal("could not get stream for next song", err)
 		}
@@ -132,9 +136,9 @@ func (c *Client) PlayProgress(f func(player.Progress)) {
 	}()
 }
 
-func (c *Client) DownloadProgress(f func(player.Progress)) {
+func (c *Client) DownloadProgress(id string, f func(player.Progress)) {
 	go func() {
-		stream, err := c.client.DownloadProgress(context.Background(), &pb.Empty{})
+		stream, err := c.client.DownloadProgress(context.Background(), &pb.String{Value: id})
 		if err != nil {
 			log.Fatal("could not get stream for next song", err)
 		}

@@ -1,0 +1,25 @@
+{{define "footer"}}
+<div class="footer">
+  <div class="song-control">
+    <span id="current-song"></span>
+    <a href="" id="current-album"></a>
+    <a href="" id="current-artist"></a>
+  </div>
+  <div class="song-control">
+    <a href="" onClick="return volume(-0.5);">-</a>
+    volume
+    <a href="" onClick="return volume(0.5);">+</a>
+  </div>
+  <div class="song-control">
+    <a href="" onClick="return rewind();">rewind</a>
+    <a href="" onClick="return pause();" id="playpause">play</a>
+    <a href="" onClick="return fastforward();">fastforward</a>
+  </div>
+  <div class="progress">
+    <div id="download-bar" class="bar"></div>
+  </div>
+  <div class="progress">
+    <div id="play-bar" class="bar"></div>
+  </div>
+</div>
+{{end}}

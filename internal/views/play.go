@@ -15,7 +15,7 @@ type play struct {
 	client player.Client
 }
 
-func newPlay(w, h int, c player.Client) *play {
+func newPlay(w, h int, id string, c player.Client) *play {
 	p := &play{
 		width:  w,
 		coords: coords{x1: -1, y1: h - 2, x2: w, y2: h},
@@ -23,7 +23,7 @@ func newPlay(w, h int, c player.Client) *play {
 		ch:     make(chan player.Progress),
 	}
 
-	c.PlayProgress(p.playProgress)
+	c.PlayProgress(id, p.playProgress)
 	return p
 }
 
@@ -40,7 +40,7 @@ func (p *play) addAlbumToQueue(album []player.Result) {
 }
 
 func (p *play) removeFromQueue(i int) {
-	p.client.RemoveFromQueue(i)
+	p.client.RemoveFromQueue([]int{i})
 }
 
 func (p *play) getQueue() []player.Result {

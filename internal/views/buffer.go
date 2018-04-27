@@ -2,12 +2,27 @@ package views
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
 	"bitbucket.org/cswank/mcli/internal/player"
 	ui "github.com/jroimartin/gocui"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
 
 type buffer struct {
 	width    int
@@ -17,7 +32,7 @@ type buffer struct {
 	text     string
 }
 
-func newBuffer(w, h int, cli player.Player) *buffer {
+func newBuffer(w, h int, id string, cli player.Player) *buffer {
 	b := &buffer{
 		width:    w - 1,
 		coords:   coords{x1: -1, y1: h - 3, x2: w, y2: h - 1},
@@ -25,8 +40,8 @@ func newBuffer(w, h int, cli player.Player) *buffer {
 		song:     make(chan player.Result),
 	}
 
-	cli.NextSong(b.nextSong)
-	cli.DownloadProgress(b.downloadProgress)
+	cli.NextSong(id, b.nextSong)
+	cli.DownloadProgress(id, b.downloadProgress)
 
 	go b.render()
 	return b

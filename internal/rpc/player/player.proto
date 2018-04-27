@@ -10,13 +10,13 @@ service Player {
 	rpc FastForward(Empty) returns (Empty) {}
 	rpc Rewind(Empty) returns (Empty) {}
 	rpc Queue(Empty) returns (Results) {}
-	rpc RemoveFromQueue(Int) returns (Results) {}
-	rpc NextSong(Empty) returns (stream Result) {}
-	rpc PlayProgress(Empty) returns (stream Progress) {}
-	rpc DownloadProgress(Empty) returns (stream Progress) {}
+	rpc RemoveFromQueue(Ints) returns (Results) {}
+	rpc NextSong(String) returns (stream Result) {}
+	rpc PlayProgress(String) returns (stream Progress) {}
+	rpc DownloadProgress(String) returns (stream Progress) {}
 	rpc History(Page) returns (Results) {}
-	rpc Done(Empty) returns (Empty) {}
-        rpc Close(Empty) returns (Empty) {}
+	rpc Done(String) returns (Empty) {}
+	rpc Close(Empty) returns (Empty) {}
 }
 
 message Empty {
@@ -42,6 +42,36 @@ message Int {
 	int64 value = 1;
 }
 
+message Ints {
+	repeated int64 value = 1;
+}
+
+message String {
+	string value = 1;
+}
+
+message Track {
+	string id = 1;
+	string title = 2;
+	int64 duration = 3;
+}
+
+message Artist {
+	string id = 1;
+	string name = 2;
+}
+
+message Album {
+	string id = 1;
+	string title = 2;
+
+}
+
+message Playlist {
+	string id = 1;
+	string title = 2;
+}
+
 message Result {
 	string service = 1;
 	string path = 2;
@@ -50,33 +80,12 @@ message Result {
 	Album album = 5;
 	Artist artist = 6;
 	Playlist playlist = 7;
-	
-	message Track {
-		string id = 1;
-		string title = 2;
-		int64 duration = 3;
-	}
-	
-	message Artist {
-		string id = 1;
-		string name = 2;
-	}
-
-	message Album {
-		string id = 1;
-		string title = 2;
-
-	}
-
-	message Playlist {
-		string id = 1;
-		string title = 2;
-	}
 }
 
 message Results {
 	string type = 1;
 	string header = 2;
 	string fmt = 3;
-	repeated Result results = 4;
+	Album album = 4;        
+	repeated Result results = 5;
 }

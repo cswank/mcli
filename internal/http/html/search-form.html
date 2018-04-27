@@ -1,0 +1,10 @@
+{{define "content"}}
+<div id="search">
+  <h3>Search for {{.SearchType}}</h3>
+  <form action="/search">
+    <input type="text" name="term"/><br/>
+    <input type="hidden" name="type" value="{{.SearchType}}"/><br/>
+    <input type="submit" name="search"/>
+  </form>
+</div>
+{{end}}

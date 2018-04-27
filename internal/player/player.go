@@ -20,12 +20,12 @@ type Player interface {
 	FastForward()
 	Rewind()
 	Queue() *Results
-	RemoveFromQueue(int)
-	NextSong(func(Result))
-	PlayProgress(func(Progress))
-	DownloadProgress(func(Progress))
+	RemoveFromQueue([]int)
+	NextSong(id string, f func(Result))
+	PlayProgress(id string, f func(Progress))
+	DownloadProgress(id string, f func(Progress))
 	History(int, int, Sort) (*Results, error)
-	Done()
+	Done(string)
 	Close()
 }
 
@@ -46,42 +46,43 @@ type Fetcher interface {
 }
 
 type Progress struct {
-	N     int
-	Total int
+	N     int `json:"n"`
+	Total int `json:"total"`
 }
 
 type Track struct {
-	ID       string
-	Title    string
-	Duration int
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Duration int    `json:"duration"`
 }
 
 type Artist struct {
-	ID   string
-	Name string
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type Album struct {
-	ID    string
-	Title string
+	ID    string `json:"id"`
+	Title string `json:"title"`
 }
 
 type Result struct {
-	Service   string
-	Path      string
-	PlayCount int
-	Track     Track
-	Artist    Artist
-	Album     Album
-	Playlist  Album
+	Service   string `json:"service"`
+	Path      string `json:"path"`
+	PlayCount int    `json:"play_count"`
+	Track     Track  `json:"track"`
+	Artist    Artist `json:"artist"`
+	Album     Album  `json:"album"`
+	Playlist  Album  `json:"playlist"`
 }
 
 type Results struct {
-	Type    string
-	Header  string
-	Results []Result
-	Fmt     string
-	Print   func(Result) string
+	Album   Album               `json:"album"`
+	Type    string              `json:"type"`
+	Header  string              `json:"header"`
+	Results []Result            `json:"results"`
+	Fmt     string              `json:"fmt"`
+	Print   func(Result) string `json:"-" template:"-"`
 }
 
 func (r *Results) PrintPlaylists() func(res Result) string {
@@ -137,7 +138,7 @@ func (r *Results) PrintAlbumTracks() func(res Result) string {
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Length")
 	return func(res Result) string {
 		d := time.Duration(res.Track.Duration) * time.Second
-		return fmt.Sprintf(r.Fmt, res.Track.Title, fmtDuration(d))
+		return fmt.Sprintf(r.Fmt, res.Track.Title, FmtDuration(d))
 	}
 }
 
@@ -209,7 +210,7 @@ func truncate(s string, l int) string {
 	return s[:l]
 }
 
-func fmtDuration(d time.Duration) string {
+func FmtDuration(d time.Duration) string {
 	d = d.Round(time.Second)
 	m := d / time.Minute
 	d -= m * time.Minute

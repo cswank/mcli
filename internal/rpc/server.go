@@ -1,12 +1,8 @@
 package rpc
 
 import (
-	"fmt"
 	"log"
 	"net"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"google.golang.org/grpc"
 
@@ -27,8 +23,8 @@ type server struct {
 	done                   chan bool
 }
 
-func (s *server) Done(ctx context.Context, _ *pb.Empty) (*pb.Empty, error) {
-	s.cli.Done()
+func (s *server) Done(ctx context.Context, id *pb.String) (*pb.Empty, error) {
+	s.cli.Done(id.Value)
 	close(s.done)
 	s.done = make(chan bool)
 	return &pb.Empty{}, nil
@@ -72,32 +68,37 @@ func (s *server) Queue(ctx context.Context, r *pb.Empty) (*pb.Results, error) {
 	return PBFromResults(s.cli.Queue()), nil
 }
 
-func (s *server) RemoveFromQueue(ctx context.Context, r *pb.Int) (*pb.Results, error) {
-	s.cli.RemoveFromQueue(int(r.Value))
+func (s *server) RemoveFromQueue(ctx context.Context, r *pb.Ints) (*pb.Results, error) {
+	out := make([]int, len(r.Value))
+	for i, val := range r.Value {
+		out[i] = int(val)
+	}
+
+	s.cli.RemoveFromQueue(out)
 	return PBFromResults(s.cli.Queue()), nil
 }
 
-func (s *server) NextSong(_ *pb.Empty, stream pb.Player_NextSongServer) error {
+func (s *server) NextSong(id *pb.String, stream pb.Player_NextSongServer) error {
 	s.nextSongStream = stream
-	s.cli.NextSong(s.nextSong)
+	s.cli.NextSong(id.Value, s.nextSong)
 	<-s.done
-	s.cli.NextSong(nil)
+	s.cli.NextSong(id.Value, nil)
 	return nil
 }
 
-func (s *server) PlayProgress(_ *pb.Empty, stream pb.Player_PlayProgressServer) error {
+func (s *server) PlayProgress(id *pb.String, stream pb.Player_PlayProgressServer) error {
 	s.playProgressStream = stream
-	s.cli.PlayProgress(s.playProgress)
+	s.cli.PlayProgress(id.Value, s.playProgress)
 	<-s.done
-	s.cli.PlayProgress(nil)
+	s.cli.PlayProgress(id.Value, nil)
 	return nil
 }
 
-func (s *server) DownloadProgress(_ *pb.Empty, stream pb.Player_DownloadProgressServer) error {
+func (s *server) DownloadProgress(id *pb.String, stream pb.Player_DownloadProgressServer) error {
 	s.downloadProgressStream = stream
-	s.cli.DownloadProgress(s.downloadProgress)
+	s.cli.DownloadProgress(id.Value, s.downloadProgress)
 	<-s.done
-	s.cli.DownloadProgress(nil)
+	s.cli.DownloadProgress(id.Value, nil)
 	return nil
 }
 
@@ -124,7 +125,7 @@ func (s *server) downloadProgress(p player.Progress) {
 	}
 }
 
-func Start() error {
+func Start(cli player.Client) error {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		return err
@@ -132,25 +133,20 @@ func Start() error {
 
 	// Creates a new gRPC server
 	s := grpc.NewServer()
-	cli, err := player.NewTidal(nil)
-	if err != nil {
-		return err
-	}
-
 	pb.RegisterPlayerServer(s, &server{
 		cli:  cli,
 		done: make(chan bool),
 	})
 
-	stop := make(chan os.Signal)
-	signal.Notify(stop, syscall.SIGTERM)
-	signal.Notify(stop, syscall.SIGINT)
-	go s.Serve(lis)
+	// stop := make(chan os.Signal)
+	// signal.Notify(stop, syscall.SIGTERM)
+	// signal.Notify(stop, syscall.SIGINT)
+	s.Serve(lis)
 
-	<-stop
-	fmt.Println("graceful stop")
-	s.GracefulStop()
-	cli.Close()
+	// <-stop
+	// fmt.Println("graceful stop")
+	// s.GracefulStop()
+	//cli.Close()
 	return nil
 }
 
@@ -166,7 +162,7 @@ func ResultFromPB(r *pb.Result) player.Result {
 	}
 }
 
-func trackFromPB(t *pb.Result_Track) player.Track {
+func trackFromPB(t *pb.Track) player.Track {
 	if t == nil {
 		return player.Track{}
 	}
@@ -177,7 +173,7 @@ func trackFromPB(t *pb.Result_Track) player.Track {
 	}
 }
 
-func playlistFromPB(p *pb.Result_Playlist) player.Album {
+func playlistFromPB(p *pb.Playlist) player.Album {
 	if p == nil {
 		return player.Album{}
 	}
@@ -187,7 +183,7 @@ func playlistFromPB(p *pb.Result_Playlist) player.Album {
 	}
 }
 
-func albumFromPB(a *pb.Result_Album) player.Album {
+func albumFromPB(a *pb.Album) player.Album {
 	if a == nil {
 		return player.Album{}
 	}
@@ -197,7 +193,7 @@ func albumFromPB(a *pb.Result_Album) player.Album {
 	}
 }
 
-func artistFromPB(a *pb.Result_Artist) player.Artist {
+func artistFromPB(a *pb.Artist) player.Artist {
 	if a == nil {
 		return player.Artist{}
 	}
@@ -207,30 +203,30 @@ func artistFromPB(a *pb.Result_Artist) player.Artist {
 	}
 }
 
-func pbFromTrack(t player.Track) *pb.Result_Track {
-	return &pb.Result_Track{
+func pbFromTrack(t player.Track) *pb.Track {
+	return &pb.Track{
 		Id:       t.ID,
 		Title:    t.Title,
 		Duration: int64(t.Duration),
 	}
 }
 
-func pbFromPlaylist(a player.Album) *pb.Result_Playlist {
-	return &pb.Result_Playlist{
+func pbFromPlaylist(a player.Album) *pb.Playlist {
+	return &pb.Playlist{
 		Id:    a.ID,
 		Title: a.Title,
 	}
 }
 
-func pbFromAlbum(a player.Album) *pb.Result_Album {
-	return &pb.Result_Album{
+func pbFromAlbum(a player.Album) *pb.Album {
+	return &pb.Album{
 		Id:    a.ID,
 		Title: a.Title,
 	}
 }
 
-func pbFromArtist(a player.Artist) *pb.Result_Artist {
-	return &pb.Result_Artist{
+func pbFromArtist(a player.Artist) *pb.Artist {
+	return &pb.Artist{
 		Id:   a.ID,
 		Name: a.Name,
 	}

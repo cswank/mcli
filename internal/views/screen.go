@@ -12,6 +12,7 @@ type screen struct {
 	view   string
 	width  int
 	height int
+	id     string
 
 	header      *header
 	body        *body
@@ -33,15 +34,17 @@ type screen struct {
 }
 
 func newScreen(width, height int, cli player.Client) (*screen, error) {
+	id := randString(10)
 	s := &screen{
+		id:          id,
 		client:      cli,
 		view:        "body",
 		width:       width,
 		height:      height,
 		historySort: player.Time,
-		play:        newPlay(width, height, cli),
+		play:        newPlay(width, height, id, cli),
 		body:        newBody(width, height, cli.AlbumLink()),
-		buffer:      newBuffer(width, height, cli),
+		buffer:      newBuffer(width, height, id, cli),
 		header:      newHeader(width, height),
 		help:        newHelp(width, height),
 		volume:      newVolume(width, height, cli.Volume(0.0)),
