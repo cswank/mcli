@@ -31,6 +31,7 @@ func Start(cli player.Client, box *rice.Box) error {
 		return err
 	}
 
+	log.Println("http listening on ", srv.server.Addr)
 	return srv.server.ListenAndServe()
 }
 

@@ -126,6 +126,7 @@ func (s *server) downloadProgress(p player.Progress) {
 }
 
 func Start(cli player.Client) error {
+	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		return err
