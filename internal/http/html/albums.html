@@ -3,15 +3,15 @@
   <table id="results">
     <thead>
       <tr>
-	<td>Album</td>
-	<td>Artist</td>
+        <td>Album</td>
+        <td>Artist</td>
       </tr>
     </thead>
     <tbody>
       {{range .Results.Results}}
       <tr>
-	<td><a href="/albums/{{.Album.ID}}">{{.Album.Title}}</a></td>
-	<td><a href="/artists/{{.Artist.ID}}">{{.Artist.Name}}</a></td>
+        <td><a href="/albums/{{.Album.ID}}">{{.Album.Title}}</a></td>
+        <td><a href="/artists/{{.Artist.ID}}">{{.Artist.Name}}</a></td>
       </tr>
       {{end}}
     </tbody>

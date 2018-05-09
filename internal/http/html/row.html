@@ -1,0 +1,8 @@
+{{define "row"}}
+<tr>
+  <td><a href="#" onclick="return play({{.}});">{{.Track.Title}}</a></td>
+  <td><a href="/albums/{{.Album.ID}}">{{.Album.Title}}</a></td>
+  <td><a href="/artists/{{.Artist.ID}}">{{.Artist.Name}}</a></td>
+  <td>{{duration .Track.Duration}}</td>
+</tr>
+{{end}}

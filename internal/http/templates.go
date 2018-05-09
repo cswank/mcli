@@ -47,7 +47,7 @@ func newTemplates(box *rice.Box) (*templates, error) {
 	tmpls := map[string]tmpl{
 		"history.html":     {},
 		"playlists.html":   {},
-		"album.html":       {funcs: funcs},
+		"album.html":       {funcs: funcs, files: []string{"row.html"}},
 		"queue.html":       {},
 		"artists.html":     {},
 		"tracks.html":      {},
