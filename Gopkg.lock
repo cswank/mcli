@@ -3,13 +3,29 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/GeertJohan/go.rice"
+  packages = [
+    ".",
+    "embedded"
+  ]
+  revision = "c02ca9a983da5807ddf7d796784928f5be4afd09"
+
+[[projects]]
+  branch = "master"
   name = "github.com/alecthomas/units"
   packages = ["."]
   revision = "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
 
 [[projects]]
   name = "github.com/asdine/storm"
-  packages = [".","codec","codec/json","index","internal","q"]
+  packages = [
+    ".",
+    "codec",
+    "codec/json",
+    "index",
+    "internal",
+    "q"
+  ]
   revision = "a86fa5e09c9c50a06416b08fd9acd4839fb2d62e"
   version = "v2.1.0"
 
@@ -34,7 +50,12 @@
 [[projects]]
   branch = "master"
   name = "github.com/cswank/beep"
-  packages = [".","effects","flac","speaker"]
+  packages = [
+    ".",
+    "effects",
+    "flac",
+    "speaker"
+  ]
   revision = "7bb960101a4bdb18e46a1b479a31ca84299d583d"
 
 [[projects]]
@@ -42,6 +63,12 @@
   name = "github.com/cswank/tidal"
   packages = ["."]
   revision = "c9e020041ea919f68d45ab9c6e2f20d617b8a717"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/daaku/go.zipexe"
+  packages = ["."]
+  revision = "a5fe2436ffcb3236e175e5149162b41cd28bd27d"
 
 [[projects]]
   branch = "master"
@@ -57,7 +84,13 @@
 
 [[projects]]
   name = "github.com/golang/protobuf"
-  packages = ["proto","ptypes","ptypes/any","ptypes/duration","ptypes/timestamp"]
+  packages = [
+    "proto",
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
+    "ptypes/timestamp"
+  ]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
   version = "v1.0.0"
 
@@ -68,15 +101,42 @@
   revision = "3926a9f66452f7a8c8d9c0e4e3074383f9aff5cd"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
+
+[[projects]]
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
+  version = "v1.6.2"
+
+[[projects]]
+  name = "github.com/gorilla/websocket"
+  packages = ["."]
+  revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/hajimehoshi/oto"
-  packages = [".","internal/jni"]
+  packages = [
+    ".",
+    "internal/jni"
+  ]
   revision = "e2f7012830c68205e59a6663c6e2398f6f778629"
 
 [[projects]]
   name = "github.com/jroimartin/gocui"
   packages = ["."]
   revision = "4f518eddb04b8f73870836b6d1941e8aa3c06637"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kardianos/osext"
+  packages = ["."]
+  revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -98,7 +158,15 @@
 
 [[projects]]
   name = "github.com/mewkiz/flac"
-  packages = [".","frame","internal/bits","internal/hashutil","internal/hashutil/crc16","internal/hashutil/crc8","meta"]
+  packages = [
+    ".",
+    "frame",
+    "internal/bits",
+    "internal/hashutil",
+    "internal/hashutil/crc16",
+    "internal/hashutil/crc8",
+    "meta"
+  ]
   revision = "5d94ee8c15da5a101247ef7a62aa174291454b8c"
   version = "v1.0.5"
 
@@ -117,7 +185,15 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  packages = [
+    "context",
+    "http2",
+    "http2/hpack",
+    "idna",
+    "internal/timeseries",
+    "lex/httplex",
+    "trace"
+  ]
   revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
 
 [[projects]]
@@ -128,7 +204,22 @@
 
 [[projects]]
   name = "golang.org/x/text"
-  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable"
+  ]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
@@ -140,7 +231,31 @@
 
 [[projects]]
   name = "google.golang.org/grpc"
-  packages = [".","balancer","balancer/base","balancer/roundrobin","codes","connectivity","credentials","encoding","encoding/proto","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","resolver","resolver/dns","resolver/passthrough","stats","status","tap","transport"]
+  packages = [
+    ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "codes",
+    "connectivity",
+    "credentials",
+    "encoding",
+    "encoding/proto",
+    "grpclb/grpc_lb_v1/messages",
+    "grpclog",
+    "internal",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap",
+    "transport"
+  ]
   revision = "8e4536a86ab602859c20df5ebfd0bd4228d08655"
   version = "v1.10.0"
 
@@ -153,6 +268,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "875305d7e1bb1da57a6098a39c116296eec0a92741055590d538e5b255310c29"
+  inputs-digest = "5ee7d1dbbb3f7405f44cc924e6fa924bf43559978fdcf9253d59bdd17cca3f34"
   solver-name = "gps-cdcl"
   solver-version = 1
