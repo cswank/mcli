@@ -416,7 +416,8 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 
 	return func(g *ui.Gui) error {
 		g.Cursor = false
-		if s.view == "login" {
+		switch s.view {
+		case "login":
 			v, err := g.SetView("login", s.login.coords.x1, s.login.coords.y1, s.login.coords.x2, s.login.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
@@ -426,11 +427,11 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			v.Editable = true
 			v.Frame = true
 			v.Title = s.login.title
-		} else if s.view == "help" {
+		case "help":
 			if err := s.help.show(g, s.keys); err != nil {
 				return err
 			}
-		} else if s.view == "volume" {
+		case "volume":
 			v, err := g.SetView(s.view, s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
@@ -439,7 +440,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if err := s.volume.render(g, v); err != nil {
 				return err
 			}
-		} else if s.view == "history-type" {
+		case "history-type":
 			v, err := g.SetView(s.view, s.history.coords.x1, s.history.coords.y1, s.history.coords.x2, s.history.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
@@ -448,7 +449,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if err := s.history.render(g, v); err != nil {
 				return err
 			}
-		} else if s.view == "search-type" || s.view == "search" {
+		case "search-type", "search":
 			if s.view == "search" {
 				g.Cursor = true
 			}
@@ -460,7 +461,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if err := s.search.render(g, v); err != nil {
 				return err
 			}
-		} else {
+		default:
 			g.DeleteView("search")
 			g.DeleteView("search-type")
 			v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2)
@@ -497,10 +498,10 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			}
 			v.Frame = false
 			v.Editable = true
+			_, err = g.SetCurrentView(s.view)
+			return err
 		}
-
-		_, err := g.SetCurrentView(s.view)
-		return err
+		return nil
 	}
 }
 
