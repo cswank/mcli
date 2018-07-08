@@ -45,6 +45,8 @@ func (s *screen) getKeys() []key {
 		{views: []string{"search-type"}, keys: []interface{}{'t'}, keybinding: s.search.artist},
 		{views: []string{"search-type"}, keys: []interface{}{'k'}, keybinding: s.search.track},
 		{views: []string{"search-type"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escapeSearch},
+		{views: []string{"artist-dialog"}, keys: []interface{}{'m'}, keybinding: s.artistDialog.albums},
+		{views: []string{"artist-dialog"}, keys: []interface{}{'k'}, keybinding: s.artistDialog.tracks},
 		{views: []string{"history-type"}, keys: []interface{}{'r'}, keybinding: s.history.recent},
 		{views: []string{"history-type"}, keys: []interface{}{'p'}, keybinding: s.history.played},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.search.exit},

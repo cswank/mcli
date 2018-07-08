@@ -42,7 +42,6 @@ func init() {
 	} else {
 		log.SetOutput(ioutil.Discard)
 	}
-
 }
 
 func cleanup() {

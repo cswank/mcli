@@ -14,16 +14,17 @@ type screen struct {
 	height int
 	id     string
 
-	header      *header
-	body        *body
-	play        *play
-	buffer      *buffer
-	search      *search
-	history     *history
-	volume      *volume
-	historySort player.Sort
-	login       *login
-	help        *help
+	header       *header
+	body         *body
+	play         *play
+	buffer       *buffer
+	search       *search
+	artistDialog *artistDialog
+	history      *history
+	volume       *volume
+	historySort  player.Sort
+	login        *login
+	help         *help
 
 	keys []key
 
@@ -54,6 +55,7 @@ func newScreen(width, height int, cli player.Client) (*screen, error) {
 	go s.clearVolume()
 	s.login = newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
+	s.artistDialog = newArtistDialog(width, height, s.doShowArtist)
 	s.history = newHistory(width, height, s.showHistory)
 	s.keys = s.getKeys()
 	return s, nil
@@ -83,15 +85,9 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "artist search":
-		s.body.cursor = 0
-		results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height*5)
-		if err != nil {
-			return err
-		}
-		results.Print = results.PrintArtist()
-		s.body.newResults(results)
-		s.header.header = results.Header
-		s.stack.add(results, c)
+		s.view = "artist-dialog"
+		s.artistDialog.selected = r
+		return nil
 	case "artist albums":
 		s.body.cursor = 0
 		results, err := s.client.GetAlbum(r.Album.ID)
@@ -327,6 +323,36 @@ func (s *screen) doLogin(username, password string) error {
 	return g.DeleteView("login")
 }
 
+func (s *screen) doShowArtist(id, term string) error {
+	s.view = "body"
+	c := s.body.cursor
+	if term == "albums" {
+		s.body.cursor = 0
+		results, err := s.client.GetArtistAlbums(id, s.height*5)
+		if err != nil {
+			return err
+		}
+		results.Print = results.PrintArtist()
+		s.body.newResults(results)
+		s.header.header = results.Header
+		s.stack.add(results, c)
+		return nil
+	}
+
+	//must be tracks
+	s.body.cursor = 0
+	results, err := s.client.GetArtistTracks(id, s.height*5)
+	if err != nil {
+		return err
+	}
+
+	results.Print = results.PrintTracks()
+	s.body.newResults(results)
+	s.header.header = results.Header
+	s.stack.add(results, c)
+	return nil
+}
+
 func (s *screen) doSearch(searchType, term string) error {
 	if searchType != "" && term == "" {
 		s.view = "search"
@@ -461,9 +487,19 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if err := s.search.render(g, v); err != nil {
 				return err
 			}
+		case "artist-dialog":
+			v, err := g.SetView(s.view, s.artistDialog.coords.x1, s.artistDialog.coords.y1, s.artistDialog.coords.x2, s.artistDialog.coords.y2)
+			if err != nil && err != ui.ErrUnknownView {
+				return err
+			}
+
+			if err := s.artistDialog.render(g, v); err != nil {
+				return err
+			}
 		default:
 			g.DeleteView("search")
 			g.DeleteView("search-type")
+			g.DeleteView("artist-dialog")
 			v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
@@ -498,10 +534,9 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			}
 			v.Frame = false
 			v.Editable = true
-			_, err = g.SetCurrentView(s.view)
-			return err
 		}
-		return nil
+		_, err := g.SetCurrentView(s.view)
+		return err
 	}
 }
 
