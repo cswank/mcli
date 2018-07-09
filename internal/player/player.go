@@ -114,7 +114,7 @@ func (r *Results) PrintArtist() func(res Result) string {
 	var maxTitle int
 
 	for _, res := range r.Results {
-		if len(res.Album.Title) > maxTitle {
+		if len(res.Album.Title) > maxTitle && len(res.Album.Title) < 50 {
 			maxTitle = len(res.Album.Title)
 		}
 	}
@@ -122,7 +122,12 @@ func (r *Results) PrintArtist() func(res Result) string {
 	r.Fmt = fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Artist")
 	return func(res Result) string {
-		return fmt.Sprintf(r.Fmt, res.Album.Title, res.Artist.Name)
+		title := res.Album.Title
+		end := len(title)
+		if end > 50 {
+			end = 48
+		}
+		return fmt.Sprintf(r.Fmt, title[:end], res.Artist.Name)
 	}
 }
 
