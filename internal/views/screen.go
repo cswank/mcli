@@ -214,17 +214,8 @@ func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 
 func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 	r := s.body.view[s.body.cursor]
-	c := s.body.cursor
-	results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height)
-	if err != nil {
-		return err
-	}
-
-	results.Print = results.PrintArtist()
-	s.body.newResults(results)
-	s.header.header = results.Header
-	s.stack.add(results, c)
-	s.body.cursor = 0
+	s.view = "artist-dialog"
+	s.artistDialog.selected = r
 	return nil
 }
 
