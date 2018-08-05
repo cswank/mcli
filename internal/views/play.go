@@ -73,6 +73,6 @@ func (p *play) next() {
 }
 
 func (p *play) rewind() {
-	p.client.FastForward()
+	p.client.Rewind()
 	p.clear()
 }
