@@ -1,6 +1,7 @@
 package player
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,12 +36,13 @@ type Flac struct {
 	playCB        map[string]func(Progress)
 	downloadCB    map[string]func(Progress)
 	nextSongCB    map[string]func(r Result)
-	onDeck        chan Result
+	onDeck        chan song
 	onDeckResult  *Result
 	currentResult *Result
 	playLock      sync.Mutex
 	downloadLock  sync.Mutex
 	nextSongLock  sync.Mutex
+	cacheOnDisk   bool
 }
 
 type flacSettings struct {
@@ -51,7 +53,7 @@ func getFlacPath() string {
 	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
 }
 
-func NewFlac(f Fetcher) (*Flac, error) {
+func NewFlac(f Fetcher, opts ...func(*Flac)) (*Flac, error) {
 	hist, err := NewStormHistory()
 	if err != nil {
 		return nil, err
@@ -90,16 +92,24 @@ func NewFlac(f Fetcher) (*Flac, error) {
 		rewind:      make(chan bool),
 		vol:         make(chan float64),
 		volOut:      make(chan float64),
-		onDeck:      make(chan Result),
+		onDeck:      make(chan song),
 		volume:      s.Volume,
 		playCB:      make(map[string]func(Progress)),
 		downloadCB:  make(map[string]func(Progress)),
 		nextSongCB:  make(map[string]func(Result)),
 	}
 
+	for _, opt := range opts {
+		opt(p)
+	}
+
 	go p.playLoop()
 	go p.downloadLoop()
 	return p, nil
+}
+
+var FlacCacheOnDisk = func(f *Flac) {
+	f.cacheOnDisk = true
 }
 
 func (f *Flac) NextSong(id string, fn func(Result)) {
@@ -228,37 +238,32 @@ func (f *Flac) downloadLoop() {
 	for {
 		r := f.queue.Next()
 		f.onDeckResult = &r
-		f.download(&r)
-		f.onDeck <- r
+		song := f.download(&r)
+		f.onDeck <- *song
 		f.onDeckResult = nil
 	}
 }
 
 func (f *Flac) playLoop() {
 	for {
-		r := <-f.onDeck
+		s := <-f.onDeck
 		f.playing = true
-		if err := f.doPlay(r); err != nil {
+		if err := f.doPlay(s); err != nil {
 			log.Fatal(err)
 		}
 		f.playing = false
 	}
 }
 
-func (f *Flac) doPlay(result Result) error {
-	f.currentResult = &result
+func (f *Flac) doPlay(s song) error {
+	f.currentResult = &s.result
 	f.callNextSong()
 
-	if err := f.history.Save(result); err != nil {
+	if err := f.history.Save(s.result); err != nil {
 		return err
 	}
 
-	file, err := os.Open(result.Path)
-	if err != nil {
-		return err
-	}
-
-	s, format, err := flac.Decode(file)
+	music, format, err := flac.Decode(s.reader())
 	if err != nil {
 		return err
 	}
@@ -268,7 +273,7 @@ func (f *Flac) doPlay(result Result) error {
 	}
 
 	vol := &effects.Volume{
-		Streamer: s,
+		Streamer: music,
 		Base:     2,
 		Volume:   f.volume,
 	}
@@ -280,12 +285,12 @@ func (f *Flac) doPlay(result Result) error {
 
 	var done bool
 	var paused bool
-	l := s.Len()
+	l := music.Len()
 	var i int
 	for !done {
 		select {
 		case <-time.After(500 * time.Millisecond):
-			pos := s.Position()
+			pos := music.Position()
 			done = pos >= l
 			i++
 			f.playLock.Lock()
@@ -313,13 +318,14 @@ func (f *Flac) doPlay(result Result) error {
 		case <-f.fastForward:
 			done = true
 		case <-f.rewind:
-			s.Close()
-			return f.doPlay(result)
+			music.Close()
+			s.reset()
+			return f.doPlay(s)
 		}
 	}
 
 	f.currentResult = nil
-	return s.Close()
+	return music.Close()
 }
 
 func (f *Flac) DownloadProgress(id string, fn func(Progress)) {
@@ -334,42 +340,58 @@ func (f *Flac) PlayProgress(id string, fn func(Progress)) {
 	f.playLock.Unlock()
 }
 
-func (f *Flac) download(r *Result) {
+func (f *Flac) download(r *Result) *song {
+	var out *song
 	pth, e := f.checkCache(*r)
 	r.Path = pth
-	if !e {
-		err := f.doDownload(*r)
+	if !e || !f.cacheOnDisk {
+		s, err := f.doDownload(*r)
 		if err != nil {
 			log.Fatal(err)
 		}
+		out = s
 	}
+
+	return out
 }
 
-func (f *Flac) doDownload(r Result) error {
-	file, err := ioutil.TempFile(fmt.Sprintf("%s/tmp", os.Getenv("MCLI_HOME")), "")
-	if err != nil {
-		return fmt.Errorf("could not create file for %+v: %s", r, err)
+func (f *Flac) doDownload(r Result) (*song, error) {
+	out := &song{
+		result: r,
 	}
-
 	u, err := f.Fetcher.GetTrack(r.Track.ID)
 	if err != nil {
-		return fmt.Errorf("could not get track %+v: %s", r, err)
+		return out, fmt.Errorf("could not get track %+v: %s", r, err)
 	}
 
 	resp, err := http.Get(u)
 	if err != nil {
-		return fmt.Errorf("could not get stream %+v: %s", r, err)
+		return out, fmt.Errorf("could not get stream %+v: %s", r, err)
+	}
+
+	if f.cacheOnDisk {
+		file, err := ioutil.TempFile(fmt.Sprintf("%s/tmp", os.Getenv("MCLI_HOME")), "")
+		if err != nil {
+			return out, fmt.Errorf("could not create file for %+v: %s", r, err)
+		}
+		defer file.Close()
+		if err != nil {
+			os.Rename(file.Name(), r.Path)
+		}
+		out.file = file
+	} else {
+		out.buf = &bytes.Buffer{}
 	}
 
 	pr := newProgressRead(resp.Body, int(resp.ContentLength), f.downloadCB)
-	_, err = io.Copy(file, pr)
+	w := out.writer()
+	_, err = io.Copy(w, pr)
 	if err != nil {
-		return err
+		return out, err
 	}
-
-	file.Close()
 	pr.Close()
-	return os.Rename(file.Name(), r.Path)
+
+	return out, nil
 }
 
 func (f *Flac) ensureCache() error {
@@ -382,6 +404,9 @@ func (f *Flac) ensureCache() error {
 }
 
 func (f *Flac) checkCache(result Result) (string, bool) {
+	if !f.cacheOnDisk {
+		return "", false
+	}
 	dir := fmt.Sprintf("%s/cache/%s/%s/%s", os.Getenv("MCLI_HOME"), f.Fetcher.Name(), f.clean(result.Artist.Name), f.clean(result.Album.Title))
 	e, _ := exists(dir)
 	if !e {
@@ -437,6 +462,59 @@ func (r *progressRead) Close() error {
 
 	if closer, ok := r.Reader.(io.Closer); ok {
 		return closer.Close()
+	}
+	return nil
+}
+
+type songBuffer struct {
+	closed bool
+	buf    *bytes.Reader
+}
+
+func (s *songBuffer) Read(p []byte) (n int, err error) {
+	if s.closed {
+		s.closed = false
+		return 0, io.EOF
+	}
+	return s.buf.Read(p)
+}
+
+func (s *songBuffer) Seek(offset int64, whence int) (int64, error) {
+	return s.buf.Seek(offset, whence)
+}
+
+func (s *songBuffer) Close() error {
+	s.closed = true
+	return nil
+}
+
+type song struct {
+	result Result
+	file   *os.File
+	buf    *bytes.Buffer
+}
+
+func (s *song) reader() io.ReadCloser {
+	if s.file != nil {
+		return s.file
+	}
+
+	return &songBuffer{
+		buf: bytes.NewReader(s.buf.Bytes()),
+	}
+}
+
+func (s *song) writer() io.Writer {
+	if s.file != nil {
+		return s.file
+	}
+	return s.buf
+}
+
+func (s *song) reset() error {
+	if s.file != nil {
+		_, err := s.file.Seek(0, 0)
+		return err
 	}
 	return nil
 }
