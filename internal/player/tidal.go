@@ -14,14 +14,14 @@ type Tidal struct {
 }
 
 //NewTidal returns a Client composed of a Flac player and Tidal Fetcher
-func NewTidal(p Player) (Client, error) {
+func NewTidal(p Player, cache bool) (Client, error) {
 	t, err := newTidal()
 	if err != nil {
 		return nil, err
 	}
 
 	if p == nil {
-		return NewFlac(t)
+		return NewFlac(t, cache)
 	}
 
 	return &struct {

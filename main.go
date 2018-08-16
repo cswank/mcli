@@ -17,6 +17,7 @@ import (
 var (
 	srv     = kingpin.Flag("server", "start grpc and http servers").Short('s').Bool()
 	cli     = kingpin.Flag("client", "start grpc client").Short('c').Bool()
+	cache   = kingpin.Flag("cache", "cache songs to disk").Bool()
 	addr    = kingpin.Flag("address", "address of grpc server").Short('a').Default("localhost:50051").String()
 	logout  = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 	logfile *os.File
@@ -60,9 +61,7 @@ func main() {
 }
 
 func doServe() {
-	box := rice.MustFindBox("internal/http/html")
-
-	cli, err := player.NewTidal(nil)
+	cli, err := player.NewTidal(nil, *cache)
 	if err != nil {
 		log.Fatal("cli ", err)
 	}
@@ -73,6 +72,7 @@ func doServe() {
 		}
 	}()
 
+	box := rice.MustFindBox("internal/http/html")
 	if err := http.Start(cli, box); err != nil {
 		log.Fatal("http ", err)
 	}

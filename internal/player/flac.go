@@ -53,7 +53,7 @@ func getFlacPath() string {
 	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
 }
 
-func NewFlac(f Fetcher, opts ...func(*Flac)) (*Flac, error) {
+func NewFlac(f Fetcher, cache bool) (*Flac, error) {
 	hist, err := NewStormHistory()
 	if err != nil {
 		return nil, err
@@ -97,10 +97,7 @@ func NewFlac(f Fetcher, opts ...func(*Flac)) (*Flac, error) {
 		playCB:      make(map[string]func(Progress)),
 		downloadCB:  make(map[string]func(Progress)),
 		nextSongCB:  make(map[string]func(Result)),
-	}
-
-	for _, opt := range opts {
-		opt(p)
+		cacheOnDisk: cache,
 	}
 
 	go p.playLoop()

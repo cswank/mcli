@@ -30,7 +30,7 @@ type coords struct {
 
 //Start is what main calls to get the app rolling
 func Start(p player.Player) error {
-	cli, err := player.NewTidal(p)
+	cli, err := player.NewTidal(p, false)
 	if err != nil {
 		return err
 	}
