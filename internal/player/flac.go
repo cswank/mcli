@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/cswank/beep"
+
 	"github.com/cswank/beep/effects"
 	"github.com/cswank/beep/flac"
 	"github.com/cswank/beep/speaker"
@@ -361,10 +362,12 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 		return out, fmt.Errorf("could not get track %+v: %s", r, err)
 	}
 
-	resp, err := http.Get(u)
+	resp, err := f.getTrack(u)
 	if err != nil {
 		return out, fmt.Errorf("could not get stream %+v: %s", r, err)
 	}
+
+	defer resp.Body.Close()
 
 	if f.cacheOnDisk {
 		file, err := ioutil.TempFile(fmt.Sprintf("%s/tmp", os.Getenv("MCLI_HOME")), "")
@@ -389,6 +392,17 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 	pr.Close()
 
 	return out, nil
+}
+
+func (f *Flac) getTrack(uri string) (*http.Response, error) {
+	if strings.Index(uri, "file://") == 0 {
+		f, err := os.Open(uri[7:])
+		return &http.Response{
+			Body: f,
+		}, err
+	}
+
+	return http.Get(uri)
 }
 
 func (f *Flac) ensureCache() error {
