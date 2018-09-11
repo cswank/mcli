@@ -61,7 +61,7 @@ func main() {
 }
 
 func doServe() {
-	cli, err := player.NewTidal(nil, *cache)
+	cli, err := player.NewDisk(nil)
 	if err != nil {
 		log.Fatal("cli ", err)
 	}
