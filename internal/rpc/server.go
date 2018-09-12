@@ -286,9 +286,9 @@ func ProgressFromPB(p *pb.Progress) player.Progress {
 	}
 }
 
-func (s *server) Name(ctx context.Context) *pb.String {
+func (s *server) Name(ctx context.Context, _ *pb.Empty) (*pb.String, error) {
 	n := s.cli.Name()
-	return &pb.String{Value: n}
+	return &pb.String{Value: n}, nil
 }
 
 func (s *server) Login(ctx context.Context, up *pb.UsernamePassword) (*pb.Empty, error) {
@@ -296,14 +296,14 @@ func (s *server) Login(ctx context.Context, up *pb.UsernamePassword) (*pb.Empty,
 	return &pb.Empty{}, err
 }
 
-func (s *server) Ping() (*pb.Bool, error) {
+func (s *server) Ping(ctx context.Context, _ *pb.Empty) (*pb.Bool, error) {
 	out := s.cli.Ping()
 	return &pb.Bool{Value: out}, nil
 }
 
-func (s *server) AlbumLink(ctx context.Context, _ *pb.Empty) (*pb.Empty, error) {
+func (s *server) AlbumLink(ctx context.Context, _ *pb.Empty) (*pb.String, error) {
 	s.cli.AlbumLink()
-	return &pb.Empty{}, nil
+	return &pb.String{}, nil
 }
 
 func (s *server) FindArtist(ctx context.Context, r *pb.Request) (*pb.Results, error) {
