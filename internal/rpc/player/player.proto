@@ -17,10 +17,39 @@ service Player {
 	rpc History(Page) returns (Results) {}
 	rpc Done(String) returns (Empty) {}
 	rpc Close(Empty) returns (Empty) {}
+
+    rpc Name(Empty) returns (String) {}
+    rpc	Login(UsernamePassword) returns (Empty) {}
+    rpc	Ping(Empty) returns (Bool) {}
+    rpc	AlbumLink(Empty) returns (String) {}
+    rpc FindArtist(Request) returns (Results) {}
+	rpc FindAlbum(Request) returns (Results) {}
+	rpc FindTrack(Request) returns (Results) {}
+	rpc GetAlbum(String) returns (Results) {}
+	rpc GetTrack(String) returns (String) {}
+	rpc GetArtistAlbums(Request) returns (Results) {}
+	rpc GetArtistTracks(Request) returns (Results) {}
+	rpc GetPlaylists(Empty) returns (Results) {}
+	rpc GetPlaylist(Request) returns (Results) {}
 }
 
 message Empty {
 	
+}
+
+message UsernamePassword {
+    string username = 1;
+    string passwrord = 2;
+}
+
+message Request {
+    string term = 1;
+    int64 n = 2;
+}
+
+message Search {
+    string term = 1;
+    int64 n = 2;
 }
 
 message Page {
@@ -48,6 +77,10 @@ message Ints {
 
 message String {
 	string value = 1;
+}
+
+message Bool {
+	bool value = 1;
 }
 
 message Track {
@@ -86,6 +119,6 @@ message Results {
 	string type = 1;
 	string header = 2;
 	string fmt = 3;
-	Album album = 4;        
+	Album album = 4;
 	repeated Result results = 5;
 }

@@ -9,12 +9,16 @@ It is generated from these files:
 
 It has these top-level messages:
 	Empty
+	UsernamePassword
+	Request
+	Search
 	Page
 	Progress
 	Float
 	Int
 	Ints
 	String
+	Bool
 	Track
 	Artist
 	Album
@@ -52,6 +56,78 @@ func (m *Empty) String() string            { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()               {}
 func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+type UsernamePassword struct {
+	Username  string `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
+	Passwrord string `protobuf:"bytes,2,opt,name=passwrord" json:"passwrord,omitempty"`
+}
+
+func (m *UsernamePassword) Reset()                    { *m = UsernamePassword{} }
+func (m *UsernamePassword) String() string            { return proto.CompactTextString(m) }
+func (*UsernamePassword) ProtoMessage()               {}
+func (*UsernamePassword) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *UsernamePassword) GetUsername() string {
+	if m != nil {
+		return m.Username
+	}
+	return ""
+}
+
+func (m *UsernamePassword) GetPasswrord() string {
+	if m != nil {
+		return m.Passwrord
+	}
+	return ""
+}
+
+type Request struct {
+	Term string `protobuf:"bytes,1,opt,name=term" json:"term,omitempty"`
+	N    int64  `protobuf:"varint,2,opt,name=n" json:"n,omitempty"`
+}
+
+func (m *Request) Reset()                    { *m = Request{} }
+func (m *Request) String() string            { return proto.CompactTextString(m) }
+func (*Request) ProtoMessage()               {}
+func (*Request) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *Request) GetTerm() string {
+	if m != nil {
+		return m.Term
+	}
+	return ""
+}
+
+func (m *Request) GetN() int64 {
+	if m != nil {
+		return m.N
+	}
+	return 0
+}
+
+type Search struct {
+	Term string `protobuf:"bytes,1,opt,name=term" json:"term,omitempty"`
+	N    int64  `protobuf:"varint,2,opt,name=n" json:"n,omitempty"`
+}
+
+func (m *Search) Reset()                    { *m = Search{} }
+func (m *Search) String() string            { return proto.CompactTextString(m) }
+func (*Search) ProtoMessage()               {}
+func (*Search) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *Search) GetTerm() string {
+	if m != nil {
+		return m.Term
+	}
+	return ""
+}
+
+func (m *Search) GetN() int64 {
+	if m != nil {
+		return m.N
+	}
+	return 0
+}
+
 type Page struct {
 	Page     int64  `protobuf:"varint,1,opt,name=page" json:"page,omitempty"`
 	PageSize int64  `protobuf:"varint,2,opt,name=pageSize" json:"pageSize,omitempty"`
@@ -61,7 +137,7 @@ type Page struct {
 func (m *Page) Reset()                    { *m = Page{} }
 func (m *Page) String() string            { return proto.CompactTextString(m) }
 func (*Page) ProtoMessage()               {}
-func (*Page) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*Page) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *Page) GetPage() int64 {
 	if m != nil {
@@ -92,7 +168,7 @@ type Progress struct {
 func (m *Progress) Reset()                    { *m = Progress{} }
 func (m *Progress) String() string            { return proto.CompactTextString(m) }
 func (*Progress) ProtoMessage()               {}
-func (*Progress) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*Progress) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *Progress) GetN() int64 {
 	if m != nil {
@@ -115,7 +191,7 @@ type Float struct {
 func (m *Float) Reset()                    { *m = Float{} }
 func (m *Float) String() string            { return proto.CompactTextString(m) }
 func (*Float) ProtoMessage()               {}
-func (*Float) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*Float) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *Float) GetValue() float32 {
 	if m != nil {
@@ -131,7 +207,7 @@ type Int struct {
 func (m *Int) Reset()                    { *m = Int{} }
 func (m *Int) String() string            { return proto.CompactTextString(m) }
 func (*Int) ProtoMessage()               {}
-func (*Int) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*Int) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *Int) GetValue() int64 {
 	if m != nil {
@@ -147,7 +223,7 @@ type Ints struct {
 func (m *Ints) Reset()                    { *m = Ints{} }
 func (m *Ints) String() string            { return proto.CompactTextString(m) }
 func (*Ints) ProtoMessage()               {}
-func (*Ints) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*Ints) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 func (m *Ints) GetValue() []int64 {
 	if m != nil {
@@ -163,13 +239,29 @@ type String struct {
 func (m *String) Reset()                    { *m = String{} }
 func (m *String) String() string            { return proto.CompactTextString(m) }
 func (*String) ProtoMessage()               {}
-func (*String) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*String) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *String) GetValue() string {
 	if m != nil {
 		return m.Value
 	}
 	return ""
+}
+
+type Bool struct {
+	Value bool `protobuf:"varint,1,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *Bool) Reset()                    { *m = Bool{} }
+func (m *Bool) String() string            { return proto.CompactTextString(m) }
+func (*Bool) ProtoMessage()               {}
+func (*Bool) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+
+func (m *Bool) GetValue() bool {
+	if m != nil {
+		return m.Value
+	}
+	return false
 }
 
 type Track struct {
@@ -181,7 +273,7 @@ type Track struct {
 func (m *Track) Reset()                    { *m = Track{} }
 func (m *Track) String() string            { return proto.CompactTextString(m) }
 func (*Track) ProtoMessage()               {}
-func (*Track) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*Track) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *Track) GetId() string {
 	if m != nil {
@@ -212,7 +304,7 @@ type Artist struct {
 func (m *Artist) Reset()                    { *m = Artist{} }
 func (m *Artist) String() string            { return proto.CompactTextString(m) }
 func (*Artist) ProtoMessage()               {}
-func (*Artist) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*Artist) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *Artist) GetId() string {
 	if m != nil {
@@ -236,7 +328,7 @@ type Album struct {
 func (m *Album) Reset()                    { *m = Album{} }
 func (m *Album) String() string            { return proto.CompactTextString(m) }
 func (*Album) ProtoMessage()               {}
-func (*Album) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+func (*Album) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 func (m *Album) GetId() string {
 	if m != nil {
@@ -260,7 +352,7 @@ type Playlist struct {
 func (m *Playlist) Reset()                    { *m = Playlist{} }
 func (m *Playlist) String() string            { return proto.CompactTextString(m) }
 func (*Playlist) ProtoMessage()               {}
-func (*Playlist) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+func (*Playlist) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *Playlist) GetId() string {
 	if m != nil {
@@ -289,7 +381,7 @@ type Result struct {
 func (m *Result) Reset()                    { *m = Result{} }
 func (m *Result) String() string            { return proto.CompactTextString(m) }
 func (*Result) ProtoMessage()               {}
-func (*Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+func (*Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 func (m *Result) GetService() string {
 	if m != nil {
@@ -351,7 +443,7 @@ type Results struct {
 func (m *Results) Reset()                    { *m = Results{} }
 func (m *Results) String() string            { return proto.CompactTextString(m) }
 func (*Results) ProtoMessage()               {}
-func (*Results) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+func (*Results) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
 func (m *Results) GetType() string {
 	if m != nil {
@@ -390,12 +482,16 @@ func (m *Results) GetResults() []*Result {
 
 func init() {
 	proto.RegisterType((*Empty)(nil), "player.Empty")
+	proto.RegisterType((*UsernamePassword)(nil), "player.UsernamePassword")
+	proto.RegisterType((*Request)(nil), "player.Request")
+	proto.RegisterType((*Search)(nil), "player.Search")
 	proto.RegisterType((*Page)(nil), "player.Page")
 	proto.RegisterType((*Progress)(nil), "player.Progress")
 	proto.RegisterType((*Float)(nil), "player.Float")
 	proto.RegisterType((*Int)(nil), "player.Int")
 	proto.RegisterType((*Ints)(nil), "player.Ints")
 	proto.RegisterType((*String)(nil), "player.String")
+	proto.RegisterType((*Bool)(nil), "player.Bool")
 	proto.RegisterType((*Track)(nil), "player.Track")
 	proto.RegisterType((*Artist)(nil), "player.Artist")
 	proto.RegisterType((*Album)(nil), "player.Album")
@@ -429,6 +525,19 @@ type PlayerClient interface {
 	History(ctx context.Context, in *Page, opts ...grpc.CallOption) (*Results, error)
 	Done(ctx context.Context, in *String, opts ...grpc.CallOption) (*Empty, error)
 	Close(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+	Name(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error)
+	Login(ctx context.Context, in *UsernamePassword, opts ...grpc.CallOption) (*Empty, error)
+	Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bool, error)
+	AlbumLink(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error)
+	FindArtist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	FindAlbum(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	FindTrack(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	GetAlbum(ctx context.Context, in *String, opts ...grpc.CallOption) (*Results, error)
+	GetTrack(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error)
+	GetArtistAlbums(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	GetArtistTracks(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	GetPlaylists(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error)
+	GetPlaylist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
 }
 
 type playerClient struct {
@@ -634,6 +743,123 @@ func (c *playerClient) Close(ctx context.Context, in *Empty, opts ...grpc.CallOp
 	return out, nil
 }
 
+func (c *playerClient) Name(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error) {
+	out := new(String)
+	err := grpc.Invoke(ctx, "/player.Player/Name", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) Login(ctx context.Context, in *UsernamePassword, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := grpc.Invoke(ctx, "/player.Player/Login", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bool, error) {
+	out := new(Bool)
+	err := grpc.Invoke(ctx, "/player.Player/Ping", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) AlbumLink(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error) {
+	out := new(String)
+	err := grpc.Invoke(ctx, "/player.Player/AlbumLink", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) FindArtist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/FindArtist", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) FindAlbum(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/FindAlbum", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) FindTrack(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/FindTrack", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) GetAlbum(ctx context.Context, in *String, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/GetAlbum", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) GetTrack(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error) {
+	out := new(String)
+	err := grpc.Invoke(ctx, "/player.Player/GetTrack", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) GetArtistAlbums(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/GetArtistAlbums", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) GetArtistTracks(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/GetArtistTracks", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) GetPlaylists(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/GetPlaylists", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) GetPlaylist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := grpc.Invoke(ctx, "/player.Player/GetPlaylist", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Player service
 
 type PlayerServer interface {
@@ -651,6 +877,19 @@ type PlayerServer interface {
 	History(context.Context, *Page) (*Results, error)
 	Done(context.Context, *String) (*Empty, error)
 	Close(context.Context, *Empty) (*Empty, error)
+	Name(context.Context, *Empty) (*String, error)
+	Login(context.Context, *UsernamePassword) (*Empty, error)
+	Ping(context.Context, *Empty) (*Bool, error)
+	AlbumLink(context.Context, *Empty) (*String, error)
+	FindArtist(context.Context, *Request) (*Results, error)
+	FindAlbum(context.Context, *Request) (*Results, error)
+	FindTrack(context.Context, *Request) (*Results, error)
+	GetAlbum(context.Context, *String) (*Results, error)
+	GetTrack(context.Context, *String) (*String, error)
+	GetArtistAlbums(context.Context, *Request) (*Results, error)
+	GetArtistTracks(context.Context, *Request) (*Results, error)
+	GetPlaylists(context.Context, *Empty) (*Results, error)
+	GetPlaylist(context.Context, *Request) (*Results, error)
 }
 
 func RegisterPlayerServer(s *grpc.Server, srv PlayerServer) {
@@ -918,6 +1157,240 @@ func _Player_Close_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Player_Name_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).Name(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/Name",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).Name(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UsernamePassword)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/Login",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).Login(ctx, req.(*UsernamePassword))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/Ping",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).Ping(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_AlbumLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).AlbumLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/AlbumLink",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).AlbumLink(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_FindArtist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).FindArtist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/FindArtist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).FindArtist(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_FindAlbum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).FindAlbum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/FindAlbum",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).FindAlbum(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_FindTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).FindTrack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/FindTrack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).FindTrack(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_GetAlbum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(String)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).GetAlbum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/GetAlbum",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).GetAlbum(ctx, req.(*String))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_GetTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(String)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).GetTrack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/GetTrack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).GetTrack(ctx, req.(*String))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_GetArtistAlbums_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).GetArtistAlbums(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/GetArtistAlbums",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).GetArtistAlbums(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_GetArtistTracks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).GetArtistTracks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/GetArtistTracks",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).GetArtistTracks(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_GetPlaylists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).GetPlaylists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/GetPlaylists",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).GetPlaylists(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_GetPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).GetPlaylist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Player/GetPlaylist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).GetPlaylist(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Player_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "player.Player",
 	HandlerType: (*PlayerServer)(nil),
@@ -966,6 +1439,58 @@ var _Player_serviceDesc = grpc.ServiceDesc{
 			MethodName: "Close",
 			Handler:    _Player_Close_Handler,
 		},
+		{
+			MethodName: "Name",
+			Handler:    _Player_Name_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _Player_Login_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _Player_Ping_Handler,
+		},
+		{
+			MethodName: "AlbumLink",
+			Handler:    _Player_AlbumLink_Handler,
+		},
+		{
+			MethodName: "FindArtist",
+			Handler:    _Player_FindArtist_Handler,
+		},
+		{
+			MethodName: "FindAlbum",
+			Handler:    _Player_FindAlbum_Handler,
+		},
+		{
+			MethodName: "FindTrack",
+			Handler:    _Player_FindTrack_Handler,
+		},
+		{
+			MethodName: "GetAlbum",
+			Handler:    _Player_GetAlbum_Handler,
+		},
+		{
+			MethodName: "GetTrack",
+			Handler:    _Player_GetTrack_Handler,
+		},
+		{
+			MethodName: "GetArtistAlbums",
+			Handler:    _Player_GetArtistAlbums_Handler,
+		},
+		{
+			MethodName: "GetArtistTracks",
+			Handler:    _Player_GetArtistTracks_Handler,
+		},
+		{
+			MethodName: "GetPlaylists",
+			Handler:    _Player_GetPlaylists_Handler,
+		},
+		{
+			MethodName: "GetPlaylist",
+			Handler:    _Player_GetPlaylist_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -990,45 +1515,58 @@ var _Player_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("player.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 637 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x55, 0xdb, 0x6e, 0x13, 0x31,
-	0x10, 0xcd, 0x66, 0x2f, 0x49, 0xa6, 0xa1, 0xad, 0x2c, 0x84, 0x56, 0xa1, 0xa0, 0x68, 0x91, 0x48,
-	0x40, 0x6d, 0x54, 0x15, 0x1e, 0x78, 0xad, 0x28, 0x11, 0xe5, 0x01, 0x05, 0x17, 0xf1, 0xee, 0x36,
-	0x26, 0x5d, 0xe1, 0xb5, 0x23, 0xdb, 0xdb, 0x12, 0xfe, 0x80, 0x1f, 0xe0, 0x4b, 0xf9, 0x00, 0x64,
-	0x7b, 0xbd, 0x69, 0x2e, 0xa2, 0xf0, 0x94, 0x19, 0x9f, 0x33, 0x63, 0x9f, 0xb3, 0x63, 0x07, 0xba,
-	0x73, 0x46, 0x16, 0x54, 0x8e, 0xe6, 0x52, 0x68, 0x81, 0x12, 0x97, 0x65, 0x2d, 0x88, 0xdf, 0x15,
-	0x73, 0xbd, 0xc8, 0x3e, 0x40, 0x34, 0x21, 0x33, 0x8a, 0x10, 0x44, 0x73, 0x32, 0xa3, 0x69, 0xd0,
-	0x0f, 0x86, 0x21, 0xb6, 0x31, 0xea, 0x41, 0xdb, 0xfc, 0x5e, 0xe4, 0x3f, 0x68, 0xda, 0xb4, 0xeb,
-	0x75, 0x6e, 0xf8, 0x4a, 0x48, 0x9d, 0x86, 0xfd, 0x60, 0xd8, 0xc1, 0x36, 0xce, 0x46, 0xd0, 0x9e,
-	0x48, 0x31, 0x93, 0x54, 0x29, 0xd4, 0x85, 0x80, 0x57, 0xcd, 0x02, 0x8e, 0x1e, 0x42, 0xac, 0x85,
-	0x26, 0xac, 0x6a, 0xe3, 0x92, 0xec, 0x09, 0xc4, 0x63, 0x26, 0x88, 0x36, 0xf0, 0x0d, 0x61, 0xa5,
-	0xdb, 0xbd, 0x89, 0x5d, 0x92, 0x3d, 0x86, 0xf0, 0x9c, 0xaf, 0x81, 0xa1, 0x07, 0x0f, 0x20, 0x3a,
-	0xe7, 0x5a, 0xdd, 0x45, 0xc3, 0x25, 0xfa, 0x14, 0x92, 0x0b, 0x2d, 0x73, 0x3e, 0x5b, 0xad, 0xee,
-	0x78, 0xfc, 0x1c, 0xe2, 0xcf, 0x92, 0x5c, 0x7d, 0x43, 0xbb, 0xd0, 0xcc, 0xa7, 0x15, 0xd6, 0xcc,
-	0xa7, 0xf6, 0xa0, 0xb9, 0x66, 0x4e, 0x6f, 0x07, 0xbb, 0xc4, 0x18, 0x31, 0x2d, 0x25, 0xd1, 0xb9,
-	0xe0, 0x56, 0x70, 0x88, 0xeb, 0x3c, 0x3b, 0x84, 0xe4, 0x54, 0xea, 0x5c, 0xe9, 0x8d, 0x5e, 0x08,
-	0x22, 0x4e, 0x0a, 0xdf, 0xca, 0xc6, 0xd9, 0x11, 0xc4, 0xa7, 0xec, 0xb2, 0x2c, 0xfe, 0x6d, 0xe3,
-	0xec, 0x18, 0xda, 0x13, 0x46, 0x16, 0x6c, 0x5b, 0xfb, 0xed, 0x15, 0xbf, 0x03, 0x48, 0x30, 0x55,
-	0x25, 0xd3, 0x28, 0x85, 0x96, 0xa2, 0xf2, 0x26, 0xbf, 0xf2, 0xe2, 0x7d, 0xea, 0x3e, 0xb6, 0xbe,
-	0xf6, 0x27, 0x33, 0x31, 0x3a, 0x80, 0x8e, 0x99, 0x8d, 0x2b, 0x51, 0x72, 0x5d, 0x89, 0x5c, 0x2e,
-	0xa0, 0x67, 0x10, 0x6b, 0x63, 0x58, 0x1a, 0xf5, 0x83, 0xe1, 0xce, 0xc9, 0x83, 0x51, 0x35, 0x55,
-	0xd6, 0x45, 0xec, 0x30, 0x43, 0x22, 0x46, 0x5c, 0x1a, 0xaf, 0x92, 0xac, 0x62, 0xec, 0x30, 0xf4,
-	0x1c, 0x12, 0x62, 0xfd, 0x4a, 0x13, 0xcb, 0xda, 0xad, 0x59, 0x76, 0x15, 0x57, 0x28, 0x3a, 0x84,
-	0xf6, 0xbc, 0x92, 0x9e, 0xb6, 0x2c, 0x73, 0xdf, 0x33, 0xbd, 0x25, 0xb8, 0x66, 0x64, 0xbf, 0x02,
-	0x68, 0x39, 0xd9, 0xca, 0xa8, 0xd3, 0x8b, 0xb9, 0x17, 0x6d, 0x63, 0xf4, 0x08, 0x92, 0x6b, 0x4a,
-	0xa6, 0x54, 0x56, 0x9a, 0xab, 0x0c, 0xed, 0x43, 0xf8, 0xb5, 0xf0, 0x53, 0x6c, 0xc2, 0xa5, 0x88,
-	0xe8, 0x2f, 0x22, 0x86, 0xd0, 0x92, 0x6e, 0xb7, 0x34, 0xee, 0x87, 0x77, 0x55, 0xb8, 0x43, 0x60,
-	0x0f, 0x9f, 0xfc, 0x8c, 0x21, 0x99, 0x58, 0x08, 0x0d, 0x20, 0x32, 0x11, 0x5a, 0xe3, 0xf6, 0xea,
-	0x2d, 0xdc, 0x8d, 0x6c, 0xa0, 0x23, 0xe8, 0x18, 0xa2, 0x1b, 0x94, 0xbd, 0x55, 0xb6, 0xda, 0xa4,
-	0x0f, 0x21, 0xf9, 0x22, 0x58, 0x59, 0x50, 0x54, 0x43, 0xf6, 0x5a, 0xf5, 0x56, 0xd3, 0xac, 0x81,
-	0x06, 0x10, 0x4f, 0x48, 0xa9, 0xee, 0x10, 0x6d, 0x8f, 0x6d, 0x27, 0xd8, 0x19, 0x13, 0xa5, 0xc7,
-	0x42, 0xde, 0x12, 0x39, 0xbd, 0x97, 0x3e, 0x34, 0x33, 0x77, 0x9b, 0xf3, 0xfb, 0x99, 0x2f, 0x20,
-	0xfe, 0x54, 0xd2, 0x72, 0xe3, 0x04, 0xeb, 0x2a, 0xb3, 0x06, 0x3a, 0x81, 0x3d, 0x4c, 0x0b, 0x71,
-	0x43, 0xc7, 0x52, 0x14, 0xae, 0xa8, 0xeb, 0x59, 0xe6, 0xea, 0x6f, 0xab, 0x19, 0x41, 0xfb, 0x23,
-	0xfd, 0xae, 0x2f, 0x04, 0x9f, 0x2d, 0x6d, 0x76, 0x2f, 0x41, 0x6f, 0xcd, 0xf6, 0xac, 0x71, 0x1c,
-	0xa0, 0xd7, 0xd0, 0x35, 0x4e, 0xd7, 0xaf, 0xd6, 0x7a, 0xcd, 0x72, 0xe4, 0x2a, 0x86, 0xad, 0x7a,
-	0x03, 0xfb, 0x67, 0xe2, 0x96, 0x33, 0x41, 0xa6, 0xff, 0x59, 0xf9, 0x12, 0x5a, 0xef, 0x73, 0xa5,
-	0x85, 0x5c, 0x2c, 0xb5, 0x98, 0xe7, 0x77, 0x9b, 0x96, 0x01, 0x44, 0x67, 0x82, 0xd3, 0x8d, 0xce,
-	0x1b, 0x9e, 0x0e, 0x20, 0x7e, 0xcb, 0xc4, 0xfd, 0x5f, 0xf5, 0x32, 0xb1, 0xff, 0x01, 0xaf, 0xfe,
-	0x04, 0x00, 0x00, 0xff, 0xff, 0x6e, 0xbd, 0xb3, 0x47, 0x13, 0x06, 0x00, 0x00,
+	// 846 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0xdf, 0x93, 0xe2, 0x44,
+	0x10, 0x26, 0xe4, 0x07, 0xd0, 0x8b, 0xb7, 0xd4, 0x94, 0x65, 0xa5, 0xf0, 0xb4, 0xb6, 0x62, 0x29,
+	0x78, 0xb2, 0x88, 0xab, 0x56, 0xf9, 0x7a, 0x7a, 0x72, 0xae, 0xb5, 0x75, 0x85, 0x41, 0x7d, 0x9f,
+	0x25, 0x23, 0x9b, 0xda, 0x24, 0x13, 0x67, 0x26, 0x8b, 0xf8, 0x87, 0xf8, 0x97, 0xfa, 0xae, 0x35,
+	0x3f, 0x12, 0x20, 0xa0, 0xe4, 0x9e, 0x98, 0x4e, 0x7f, 0x5f, 0x77, 0x7f, 0x9d, 0x9e, 0x0e, 0xd0,
+	0xcf, 0x13, 0xbc, 0x25, 0x6c, 0x9a, 0x33, 0x2a, 0x28, 0xf2, 0xb4, 0x15, 0x74, 0xc0, 0xfd, 0x3e,
+	0xcd, 0xc5, 0x36, 0xb8, 0x83, 0xc1, 0x2f, 0x9c, 0xb0, 0x0c, 0xa7, 0x64, 0x81, 0x39, 0xdf, 0x50,
+	0x16, 0xa1, 0x21, 0x74, 0x0b, 0xf3, 0xcc, 0xb7, 0xae, 0xac, 0x71, 0x2f, 0xac, 0x6c, 0xf4, 0x1c,
+	0x7a, 0xb9, 0xc4, 0x31, 0xca, 0x22, 0xbf, 0xad, 0x9c, 0xbb, 0x07, 0xc1, 0x67, 0xd0, 0x09, 0xc9,
+	0xef, 0x05, 0xe1, 0x02, 0x21, 0x70, 0x04, 0x61, 0xa9, 0x09, 0xa0, 0xce, 0xa8, 0x0f, 0x56, 0xa6,
+	0x48, 0x76, 0x68, 0x65, 0xc1, 0x0b, 0xf0, 0x96, 0x04, 0xb3, 0xd5, 0x43, 0x03, 0xec, 0x8f, 0xe0,
+	0x2c, 0xf0, 0x9a, 0x48, 0x64, 0x8e, 0xd7, 0xba, 0x2c, 0x3b, 0x54, 0x67, 0x59, 0xae, 0xfc, 0x5d,
+	0xc6, 0x7f, 0x12, 0x43, 0xa8, 0x6c, 0x89, 0xe7, 0x94, 0x09, 0xdf, 0xd6, 0x91, 0xe5, 0x39, 0x98,
+	0x42, 0x77, 0xc1, 0xe8, 0x9a, 0x11, 0xce, 0x75, 0x16, 0xcb, 0x64, 0x41, 0xef, 0x82, 0x2b, 0xa8,
+	0xc0, 0x89, 0x09, 0xa3, 0x8d, 0xe0, 0x03, 0x70, 0xe7, 0x09, 0xc5, 0x42, 0xba, 0x9f, 0x70, 0x52,
+	0xe8, 0xec, 0xed, 0x50, 0x1b, 0xc1, 0xfb, 0x60, 0xdf, 0x66, 0x35, 0xa7, 0x5d, 0x3a, 0x9f, 0x83,
+	0x73, 0x9b, 0x09, 0xbe, 0xef, 0xb5, 0x77, 0xde, 0x0f, 0xc1, 0x5b, 0x0a, 0x16, 0x67, 0xeb, 0x43,
+	0x76, 0x6f, 0x8f, 0xfd, 0x2d, 0xa5, 0xc9, 0xa1, 0xb7, 0x5b, 0x7a, 0x6f, 0xc1, 0xfd, 0x99, 0xe1,
+	0xd5, 0x23, 0x7a, 0x06, 0xed, 0x38, 0x32, 0xcc, 0x76, 0x1c, 0x29, 0x19, 0xb1, 0x48, 0x88, 0x79,
+	0x3f, 0xda, 0x90, 0x6d, 0x8a, 0x0a, 0x86, 0x45, 0x4c, 0x33, 0xd5, 0x0e, 0x3b, 0xac, 0xec, 0x60,
+	0x02, 0xde, 0x4b, 0x26, 0x62, 0x2e, 0x8e, 0x62, 0x21, 0x70, 0xd4, 0x1c, 0xe8, 0x50, 0xea, 0x1c,
+	0x5c, 0x83, 0xfb, 0x32, 0xb9, 0x2f, 0xd2, 0x66, 0x89, 0x83, 0x19, 0x74, 0x17, 0x09, 0xde, 0x26,
+	0xa7, 0xc2, 0x9f, 0x66, 0xfc, 0x6d, 0x81, 0x17, 0x12, 0x5e, 0x24, 0x02, 0xf9, 0xd0, 0xe1, 0x84,
+	0x3d, 0xc5, 0xab, 0xb2, 0x35, 0xa5, 0xa9, 0x47, 0x41, 0x3c, 0x94, 0x95, 0xc9, 0xb3, 0x9a, 0xce,
+	0x04, 0x6f, 0x57, 0xb4, 0xc8, 0x84, 0x11, 0xb9, 0x7b, 0x80, 0x3e, 0x02, 0x57, 0xc8, 0x86, 0xf9,
+	0xce, 0x95, 0x35, 0xbe, 0xb8, 0x79, 0x67, 0x6a, 0xae, 0x86, 0xea, 0x62, 0xa8, 0x7d, 0x12, 0x84,
+	0xa5, 0x38, 0xdf, 0x3d, 0x04, 0x29, 0xc5, 0xa1, 0xf6, 0xa1, 0x4f, 0xc0, 0xc3, 0xaa, 0x5f, 0xbe,
+	0xa7, 0x50, 0xcf, 0x2a, 0x94, 0x7a, 0x1a, 0x1a, 0x2f, 0x9a, 0x40, 0x37, 0x37, 0xd2, 0xfd, 0x8e,
+	0x42, 0x0e, 0x4a, 0x64, 0xd9, 0x92, 0xb0, 0x42, 0x04, 0x7f, 0x59, 0xf2, 0xfa, 0x48, 0xd9, 0x5c,
+	0x5d, 0x89, 0x6d, 0x4e, 0xaa, 0x2b, 0xb1, 0xcd, 0x09, 0x7a, 0x0f, 0xbc, 0x07, 0x82, 0x23, 0xc2,
+	0x8c, 0x66, 0x63, 0xa1, 0x01, 0xd8, 0xbf, 0xa5, 0xe5, 0x8c, 0xcb, 0xe3, 0x4e, 0x84, 0xf3, 0x3f,
+	0x22, 0xc6, 0xd0, 0x61, 0x3a, 0x9b, 0xef, 0x5e, 0xd9, 0xfb, 0x2a, 0x74, 0x11, 0x61, 0xe9, 0xbe,
+	0xf9, 0xa7, 0x07, 0xde, 0x42, 0xb9, 0xd0, 0x08, 0x1c, 0x79, 0x42, 0x35, 0xec, 0xb0, 0x4a, 0xa1,
+	0xd7, 0x4a, 0x0b, 0x5d, 0x43, 0x4f, 0x02, 0xf5, 0xa0, 0x5c, 0x1e, 0xa2, 0xf9, 0x31, 0x7c, 0x0c,
+	0xde, 0xaf, 0x34, 0x29, 0x52, 0x82, 0x2a, 0x97, 0xba, 0x74, 0xc3, 0x43, 0x33, 0x68, 0xa1, 0x11,
+	0xb8, 0x0b, 0x5c, 0xf0, 0x3d, 0xa0, 0x8a, 0x71, 0xaa, 0x82, 0x8b, 0x39, 0xe6, 0x62, 0x4e, 0xd9,
+	0x06, 0xb3, 0xe8, 0x2c, 0x7c, 0x2c, 0x67, 0x6e, 0x13, 0x67, 0xe7, 0x91, 0x9f, 0x82, 0xfb, 0x53,
+	0x41, 0x8a, 0xa3, 0x0a, 0xea, 0x2a, 0x83, 0x16, 0xba, 0x81, 0xcb, 0x90, 0xa4, 0xf4, 0x89, 0xcc,
+	0x19, 0x4d, 0x35, 0xa9, 0x5f, 0xa2, 0xe4, 0x62, 0x38, 0xc5, 0x99, 0x42, 0xf7, 0x0d, 0xf9, 0x43,
+	0x2c, 0x69, 0xb6, 0xde, 0xb5, 0x59, 0xef, 0x89, 0x61, 0xad, 0xed, 0x41, 0x6b, 0x66, 0xa1, 0xaf,
+	0xa0, 0x2f, 0x3b, 0x5d, 0xed, 0xb4, 0x3a, 0x67, 0x37, 0x72, 0x06, 0xa1, 0x58, 0xdf, 0xc0, 0xe0,
+	0x15, 0xdd, 0x64, 0x09, 0xc5, 0xd1, 0x5b, 0x32, 0x5f, 0x40, 0xe7, 0x87, 0x98, 0x0b, 0xca, 0xb6,
+	0x3b, 0x2d, 0x72, 0x39, 0x9f, 0xd2, 0x32, 0x02, 0xe7, 0x15, 0xcd, 0xc8, 0x51, 0xe4, 0xa3, 0x9e,
+	0x8e, 0xc0, 0xfd, 0x2e, 0xa1, 0x0d, 0xde, 0xea, 0x08, 0x9c, 0x37, 0x38, 0x3d, 0xc2, 0xd5, 0x12,
+	0xa8, 0xd6, 0xbb, 0x77, 0x74, 0x1d, 0x67, 0xc8, 0x2f, 0x5d, 0xf5, 0x0f, 0xdd, 0x71, 0xf0, 0x8f,
+	0xc1, 0x59, 0xc8, 0x75, 0x5c, 0x0b, 0x5e, 0xc9, 0x94, 0xdb, 0x38, 0x68, 0xa1, 0x09, 0xf4, 0xd4,
+	0x5c, 0xdf, 0xc5, 0xd9, 0xe3, 0xf9, 0x42, 0x66, 0x00, 0xf3, 0x38, 0x8b, 0xcc, 0x82, 0xdd, 0x6b,
+	0x92, 0xfa, 0x50, 0x9e, 0xea, 0xda, 0xe7, 0xd0, 0x53, 0x8c, 0xfa, 0xdd, 0x39, 0x47, 0xd0, 0x9f,
+	0x83, 0x26, 0x84, 0x6b, 0xe8, 0xbe, 0x26, 0xc2, 0x6c, 0xf1, 0xda, 0xbb, 0x39, 0x01, 0x9f, 0x28,
+	0xb8, 0xf9, 0xda, 0xfc, 0xd7, 0x48, 0x56, 0x82, 0xbf, 0x86, 0x4b, 0x19, 0x5c, 0xe9, 0x55, 0x29,
+	0x78, 0xa3, 0x9a, 0xf6, 0x69, 0x2a, 0x55, 0x33, 0xda, 0x0c, 0xfa, 0xaf, 0x89, 0x28, 0xd7, 0x29,
+	0x6f, 0x70, 0x29, 0xbf, 0x80, 0x8b, 0x3d, 0x46, 0x93, 0x24, 0xf7, 0x9e, 0xfa, 0xfb, 0xf4, 0xe5,
+	0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xa5, 0x66, 0xdc, 0xc0, 0x4e, 0x09, 0x00, 0x00,
 }

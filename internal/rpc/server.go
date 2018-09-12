@@ -16,7 +16,7 @@ const (
 )
 
 type server struct {
-	cli                    player.Player
+	cli                    player.Client
 	nextSongStream         pb.Player_NextSongServer
 	playProgressStream     pb.Player_PlayProgressServer
 	downloadProgressStream pb.Player_DownloadProgressServer
@@ -284,4 +284,69 @@ func ProgressFromPB(p *pb.Progress) player.Progress {
 		N:     int(p.GetN()),
 		Total: int(p.GetTotal()),
 	}
+}
+
+func (s *server) Name(ctx context.Context) *pb.String {
+	n := s.cli.Name()
+	return &pb.String{Value: n}
+}
+
+func (s *server) Login(ctx context.Context, up *pb.UsernamePassword) (*pb.Empty, error) {
+	err := s.cli.Login(up.Username, up.Passwrord)
+	return &pb.Empty{}, err
+}
+
+func (s *server) Ping() (*pb.Bool, error) {
+	out := s.cli.Ping()
+	return &pb.Bool{Value: out}, nil
+}
+
+func (s *server) AlbumLink(ctx context.Context, _ *pb.Empty) (*pb.Empty, error) {
+	s.cli.AlbumLink()
+	return &pb.Empty{}, nil
+}
+
+func (s *server) FindArtist(ctx context.Context, r *pb.Request) (*pb.Results, error) {
+	out, err := s.cli.FindArtist(r.Term, int(r.N))
+	return PBFromResults(out), err
+}
+
+func (s *server) FindAlbum(ctx context.Context, r *pb.Request) (*pb.Results, error) {
+	out, err := s.cli.FindAlbum(r.Term, int(r.N))
+	return PBFromResults(out), err
+}
+
+func (s *server) FindTrack(ctx context.Context, r *pb.Request) (*pb.Results, error) {
+	out, err := s.cli.FindTrack(r.Term, int(r.N))
+	return PBFromResults(out), err
+}
+
+func (s *server) GetAlbum(ctx context.Context, st *pb.String) (*pb.Results, error) {
+	out, err := s.cli.GetAlbum(st.Value)
+	return PBFromResults(out), err
+}
+
+func (s *server) GetTrack(ctx context.Context, st *pb.String) (*pb.String, error) {
+	out, err := s.cli.GetTrack(st.Value)
+	return &pb.String{Value: out}, err
+}
+
+func (s *server) GetArtistAlbums(ctx context.Context, r *pb.Request) (*pb.Results, error) {
+	out, err := s.cli.GetArtistAlbums(r.Term, int(r.N))
+	return PBFromResults(out), err
+}
+
+func (s *server) GetArtistTracks(ctx context.Context, r *pb.Request) (*pb.Results, error) {
+	out, err := s.cli.GetArtistTracks(r.Term, int(r.N))
+	return PBFromResults(out), err
+}
+
+func (s *server) GetPlaylists(ctx context.Context, e *pb.Empty) (*pb.Results, error) {
+	out, err := s.cli.GetPlaylists()
+	return PBFromResults(out), err
+}
+
+func (s *server) GetPlaylist(ctx context.Context, r *pb.Request) (*pb.Results, error) {
+	out, err := s.cli.GetPlaylist(r.Term, int(r.N))
+	return PBFromResults(out), err
 }

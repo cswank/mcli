@@ -159,3 +159,71 @@ func (c *Client) History(page, pageSize int, sort player.Sort) (*player.Results,
 	out, err := c.client.History(context.Background(), &pb.Page{Page: int64(page), PageSize: int64(pageSize), Sort: string(sort)})
 	return ResultsFromPB(out), err
 }
+
+func (c *Client) Name() string {
+	out, _ := c.client.Name(context.Background(), &pb.Empty{})
+	return out.String()
+}
+
+func (c *Client) Login(u, pw string) error {
+	l := &pb.UsernamePassword{
+		Username:  u,
+		Passwrord: pw,
+	}
+	_, err := c.client.Login(context.Background(), l)
+	return err
+}
+
+func (c *Client) Ping() bool {
+	out, _ := c.client.Ping(context.Background(), &pb.Empty{})
+	return out.Value
+}
+
+func (c *Client) AlbumLink() string {
+	return ""
+}
+
+func (c *Client) FindArtist(term string, n int) (*player.Results, error) {
+	out, err := c.client.FindArtist(context.Background(), &pb.Request{Term: term, N: int64(n)})
+	return ResultsFromPB(out), err
+}
+
+func (c *Client) FindAlbum(term string, n int) (*player.Results, error) {
+	out, err := c.client.FindAlbum(context.Background(), &pb.Request{Term: term, N: int64(n)})
+	return ResultsFromPB(out), err
+}
+
+func (c *Client) FindTrack(term string, n int) (*player.Results, error) {
+	out, err := c.client.FindTrack(context.Background(), &pb.Request{Term: term, N: int64(n)})
+	return ResultsFromPB(out), err
+}
+
+func (c *Client) GetAlbum(id string) (*player.Results, error) {
+	out, err := c.client.GetAlbum(context.Background(), &pb.String{Value: id})
+	return ResultsFromPB(out), err
+}
+
+func (c *Client) GetTrack(id string) (string, error) {
+	out, err := c.client.GetTrack(context.Background(), &pb.String{Value: id})
+	return out.Value, err
+}
+
+func (c *Client) GetArtistAlbums(id string, n int) (*player.Results, error) {
+	out, err := c.client.GetArtistAlbums(context.Background(), &pb.Request{Term: id, N: int64(n)})
+	return ResultsFromPB(out), err
+}
+
+func (c *Client) GetArtistTracks(id string, n int) (*player.Results, error) {
+	out, err := c.client.GetArtistTracks(context.Background(), &pb.Request{Term: id, N: int64(n)})
+	return ResultsFromPB(out), err
+}
+
+func (c *Client) GetPlaylists() (*player.Results, error) {
+	out, err := c.client.GetPlaylists(context.Background(), &pb.Empty{})
+	return ResultsFromPB(out), err
+}
+
+func (c *Client) GetPlaylist(id string, n int) (*player.Results, error) {
+	out, err := c.client.GetPlaylist(context.Background(), &pb.Request{Term: id, N: int64(n)})
+	return ResultsFromPB(out), err
+}

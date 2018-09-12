@@ -85,9 +85,12 @@ func gui() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		p = c
-	}
-	if err := views.Start(p); err != nil {
-		log.Fatal(err)
+		if err := views.Start(c); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		if err := views.Start(p); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
