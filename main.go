@@ -79,6 +79,7 @@ func doServe() {
 }
 
 func gui() {
+	//cli, err := player.NewTidal(p, false)
 	var p player.Player
 	if *cli {
 		c, err := rpc.NewClient(*addr)
@@ -89,7 +90,11 @@ func gui() {
 			log.Fatal(err)
 		}
 	} else {
-		if err := views.Start(p); err != nil {
+		cli, err := player.NewDisk(p)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := views.Start(cli); err != nil {
 			log.Fatal(err)
 		}
 	}

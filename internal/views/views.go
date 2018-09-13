@@ -29,13 +29,7 @@ type coords struct {
 }
 
 //Start is what main calls to get the app rolling
-func Start(p player.Player) error {
-	//cli, err := player.NewTidal(p, false)
-	cli, err := player.NewDisk(p)
-	if err != nil {
-		return err
-	}
-
+func Start(cli player.Client) error {
 	dir := os.Getenv("MCLI_HOME")
 	e, err := exists(dir)
 	if err != nil {
