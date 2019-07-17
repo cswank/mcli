@@ -248,6 +248,9 @@ func ResultsFromPB(r *pb.Results) *player.Results {
 }
 
 func PBFromResults(r *player.Results) *pb.Results {
+	if r == nil {
+		return &pb.Results{}
+	}
 	out := make([]*pb.Result, len(r.Results))
 	for i := range r.Results {
 		out[i] = PBFromResult(r.Results[i])
