@@ -87,6 +87,7 @@ message Track {
 	string id = 1;
 	string title = 2;
 	int64 duration = 3;
+    string url = 4;
 }
 
 message Artist {

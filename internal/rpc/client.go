@@ -15,6 +15,7 @@ import (
 type Client struct {
 	conn   *grpc.ClientConn
 	client pb.PlayerClient
+	flac   player.Client
 }
 
 func NewClient(addr string) (*Client, error) {
@@ -22,9 +23,16 @@ func NewClient(addr string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	d, err := player.NewDisk(nil)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Client{
 		conn:   conn,
 		client: pb.NewPlayerClient(conn),
+		flac:   d,
 	}, nil
 }
 
@@ -36,10 +44,7 @@ func (c *Client) Done(id string) {
 func (c *Client) Close() {}
 
 func (c *Client) Play(r player.Result) {
-	_, err := c.client.Play(context.Background(), PBFromResult(r))
-	if err != nil {
-		log.Println(err)
-	}
+	c.flac.Play(r)
 }
 
 func (c *Client) PlayAlbum(r *player.Results) {
@@ -65,16 +70,24 @@ func (c *Client) Pause() {
 }
 
 func (c *Client) FastForward() {
-	_, err := c.client.FastForward(context.Background(), &pb.Empty{})
-	if err != nil {
-		log.Println(err)
+	if c.flac != nil {
+		c.flac.FastForward()
+	} else {
+		_, err := c.client.FastForward(context.Background(), &pb.Empty{})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
 func (c *Client) Rewind() {
-	_, err := c.client.Rewind(context.Background(), &pb.Empty{})
-	if err != nil {
-		log.Println(err)
+	if c.flac != nil {
+		c.flac.FastForward()
+	} else {
+		_, err := c.client.Rewind(context.Background(), &pb.Empty{})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
@@ -118,22 +131,26 @@ func (c *Client) NextSong(id string, f func(player.Result)) {
 }
 
 func (c *Client) PlayProgress(id string, f func(player.Progress)) {
-	go func() {
-		stream, err := c.client.PlayProgress(context.Background(), &pb.String{Value: id})
-		if err != nil {
-			log.Fatal("could not get stream for next song", err)
-		}
-		for {
-			p, err := stream.Recv()
-			if err == io.EOF {
-				time.Sleep(time.Second)
-			} else if err != nil {
-				log.Println(err)
-			} else {
-				f(ProgressFromPB(p))
+	if c.flac != nil {
+		c.flac.PlayProgress(id, f)
+	} else {
+		go func() {
+			stream, err := c.client.PlayProgress(context.Background(), &pb.String{Value: id})
+			if err != nil {
+				log.Fatal("could not get stream for next song", err)
 			}
-		}
-	}()
+			for {
+				p, err := stream.Recv()
+				if err == io.EOF {
+					time.Sleep(time.Second)
+				} else if err != nil {
+					log.Println(err)
+				} else {
+					f(ProgressFromPB(p))
+				}
+			}
+		}()
+	}
 }
 
 func (c *Client) DownloadProgress(id string, f func(player.Progress)) {

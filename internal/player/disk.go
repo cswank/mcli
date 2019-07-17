@@ -9,13 +9,15 @@ import (
 
 type Disk struct {
 	Player
-	pth string
+	pth  string
+	host string
 }
 
 func NewDisk(p Player) (Client, error) {
 	d := &Disk{
 		Player: p,
 		pth:    os.Getenv("MCLI_DISK_LOCATION"),
+		host:   os.Getenv("MCLI_HOST"),
 	}
 
 	if p == nil {
@@ -150,6 +152,7 @@ func (d *Disk) resultFromPath(pth string) Result {
 		track = Track{
 			ID:    fmt.Sprintf("file://%s", filepath.Join(d.pth, parts[0], parts[1], parts[2])),
 			Title: strings.Replace(parts[2], ".flac", "", -1),
+			URL:   fmt.Sprintf("http://%s", filepath.Join(d.host, "tracks", parts[0], parts[1], parts[2])),
 		}
 	}
 

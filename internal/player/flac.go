@@ -357,7 +357,7 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 	out := &song{
 		result: r,
 	}
-	u, err := f.Fetcher.GetTrack(r.Track.ID)
+	u, err := f.Fetcher.GetTrack(r.Track.URL)
 	if err != nil {
 		return out, fmt.Errorf("could not get track %+v: %s", r, err)
 	}

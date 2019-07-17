@@ -79,7 +79,6 @@ func doServe() {
 }
 
 func gui() {
-	//cli, err := player.NewTidal(p, false)
 	var p player.Player
 	if *cli {
 		c, err := rpc.NewClient(*addr)
