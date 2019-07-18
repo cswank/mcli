@@ -48,9 +48,13 @@ func (c *Client) Play(r player.Result) {
 }
 
 func (c *Client) PlayAlbum(r *player.Results) {
-	_, err := c.client.PlayAlbum(context.Background(), PBFromResults(r))
-	if err != nil {
-		log.Println(err)
+	if c.flac != nil {
+		c.flac.PlayAlbum(r)
+	} else {
+		_, err := c.client.PlayAlbum(context.Background(), PBFromResults(r))
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
@@ -154,25 +158,32 @@ func (c *Client) PlayProgress(id string, f func(player.Progress)) {
 }
 
 func (c *Client) DownloadProgress(id string, f func(player.Progress)) {
-	go func() {
-		stream, err := c.client.DownloadProgress(context.Background(), &pb.String{Value: id})
-		if err != nil {
-			log.Fatal("could not get stream for next song", err)
-		}
-		for {
-			p, err := stream.Recv()
-			if err == io.EOF {
-				time.Sleep(time.Second)
-			} else if err != nil {
-				log.Println(err)
-			} else {
-				f(ProgressFromPB(p))
+	if c.flac != nil {
+		c.flac.PlayProgress(id, f)
+	} else {
+		go func() {
+			stream, err := c.client.DownloadProgress(context.Background(), &pb.String{Value: id})
+			if err != nil {
+				log.Fatal("could not get stream for next song", err)
 			}
-		}
-	}()
+			for {
+				p, err := stream.Recv()
+				if err == io.EOF {
+					time.Sleep(time.Second)
+				} else if err != nil {
+					log.Println(err)
+				} else {
+					f(ProgressFromPB(p))
+				}
+			}
+		}()
+	}
 }
 
 func (c *Client) History(page, pageSize int, sort player.Sort) (*player.Results, error) {
+	if c.flac != nil {
+		return c.flac.History(page, pageSize, sort)
+	}
 	out, err := c.client.History(context.Background(), &pb.Page{Page: int64(page), PageSize: int64(pageSize), Sort: string(sort)})
 	return ResultsFromPB(out), err
 }

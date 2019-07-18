@@ -152,7 +152,7 @@ func (d *Disk) resultFromPath(pth string) Result {
 		track = Track{
 			ID:    fmt.Sprintf("file://%s", filepath.Join(d.pth, parts[0], parts[1], parts[2])),
 			Title: strings.Replace(parts[2], ".flac", "", -1),
-			URL:   fmt.Sprintf("http://%s", filepath.Join(d.host, "tracks", parts[0], parts[1], parts[2])),
+			URI:   fmt.Sprintf("http://%s", filepath.Join(d.host, "tracks", parts[0], parts[1], parts[2])),
 		}
 	}
 
