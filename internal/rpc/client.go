@@ -24,7 +24,7 @@ func NewClient(addr string) (*Client, error) {
 		return nil, err
 	}
 
-	d, err := player.NewDisk(nil)
+	d, err := player.NewDisk(nil, addr)
 	if err != nil {
 		return nil, err
 	}

@@ -61,7 +61,7 @@ func main() {
 }
 
 func doServe() {
-	cli, err := player.NewDisk(nil)
+	cli, err := player.NewDisk(nil, "")
 	if err != nil {
 		log.Fatal("cli ", err)
 	}
@@ -89,7 +89,7 @@ func gui() {
 			log.Fatal(err)
 		}
 	} else {
-		cli, err := player.NewDisk(p)
+		cli, err := player.NewDisk(p, *addr)
 		if err != nil {
 			log.Fatal(err)
 		}

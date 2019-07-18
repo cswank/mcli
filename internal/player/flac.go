@@ -44,6 +44,7 @@ type Flac struct {
 	downloadLock  sync.Mutex
 	nextSongLock  sync.Mutex
 	cacheOnDisk   bool
+	host          string
 }
 
 type flacSettings struct {
@@ -54,7 +55,7 @@ func getFlacPath() string {
 	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
 }
 
-func NewFlac(f Fetcher, cache bool) (*Flac, error) {
+func NewFlac(f Fetcher, cache bool, host string) (*Flac, error) {
 	hist, err := NewStormHistory()
 	if err != nil {
 		return nil, err
@@ -99,6 +100,7 @@ func NewFlac(f Fetcher, cache bool) (*Flac, error) {
 		downloadCB:  make(map[string]func(Progress)),
 		nextSongCB:  make(map[string]func(Result)),
 		cacheOnDisk: cache,
+		host:        host,
 	}
 
 	go p.playLoop()
@@ -402,7 +404,7 @@ func (f *Flac) getTrack(uri string) (*http.Response, error) {
 		}, err
 	}
 
-	return http.Get(uri)
+	return http.Get(fmt.Sprintf("http://%s/%s", f.host, uri))
 }
 
 func (f *Flac) ensureCache() error {
