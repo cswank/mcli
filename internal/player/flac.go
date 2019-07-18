@@ -100,7 +100,7 @@ func NewFlac(f Fetcher, cache bool, host string) (*Flac, error) {
 		downloadCB:  make(map[string]func(Progress)),
 		nextSongCB:  make(map[string]func(Result)),
 		cacheOnDisk: cache,
-		host:        host,
+		host:        strings.Replace(host, "50051", "8080", 1),
 	}
 
 	go p.playLoop()
@@ -385,6 +385,7 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 		out.buf = &bytes.Buffer{}
 	}
 
+	log.Printf("new p r: %+v\n", resp)
 	pr := newProgressRead(resp.Body, int(resp.ContentLength), f.downloadCB)
 	w := out.writer()
 	_, err = io.Copy(w, pr)

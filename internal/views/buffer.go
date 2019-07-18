@@ -82,7 +82,9 @@ func (b *buffer) render() {
 				g.Update(func(g *ui.Gui) error {
 					v, _ := g.View("buffer")
 					v.Clear()
-					fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.N/p.Total)))
+					if p.Total >= 0 {
+						fmt.Fprint(v, fmt.Sprintf(strings.Repeat("|", b.width*p.N/p.Total)))
+					}
 					return nil
 				})
 			}

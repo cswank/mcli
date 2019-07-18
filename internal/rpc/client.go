@@ -159,7 +159,7 @@ func (c *Client) PlayProgress(id string, f func(player.Progress)) {
 
 func (c *Client) DownloadProgress(id string, f func(player.Progress)) {
 	if c.flac != nil {
-		c.flac.PlayProgress(id, f)
+		c.flac.DownloadProgress(id, f)
 	} else {
 		go func() {
 			stream, err := c.client.DownloadProgress(context.Background(), &pb.String{Value: id})
