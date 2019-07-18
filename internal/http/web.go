@@ -328,8 +328,14 @@ func (s *server) getTrack(w http.ResponseWriter, req *http.Request) error {
 	}
 
 	defer f.Close()
-	n, err := io.Copy(w, f)
-	w.Header().Add("Content-Length", strconv.Itoa(int(n)))
+
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	w.Header().Add("Content-Length", strconv.Itoa(int(fi.Size())))
+	_, err = io.Copy(w, f)
 	return err
 }
 
