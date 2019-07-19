@@ -17,6 +17,7 @@ import (
 var (
 	srv     = kingpin.Flag("server", "start grpc and http servers").Short('s').Bool()
 	cli     = kingpin.Flag("client", "start grpc client").Short('c').Bool()
+	local   = kingpin.Flag("local", "grpc client with local play").Bool()
 	cache   = kingpin.Flag("cache", "cache songs to disk").Bool()
 	addr    = kingpin.Flag("address", "address of grpc server").Short('a').Default("localhost:50051").String()
 	logout  = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
@@ -81,7 +82,7 @@ func doServe() {
 func gui() {
 	var p player.Player
 	if *cli {
-		c, err := rpc.NewClient(*addr)
+		c, err := rpc.NewClient(*addr, rpc.LocalPlay(*local, *addr))
 		if err != nil {
 			log.Fatal(err)
 		}

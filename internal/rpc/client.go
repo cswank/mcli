@@ -18,22 +18,36 @@ type Client struct {
 	flac   player.Client
 }
 
-func NewClient(addr string) (*Client, error) {
+func NewClient(addr string, opts ...func(*Client) error) (*Client, error) {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
 
-	d, err := player.NewDisk(nil, addr)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Client{
+	c := &Client{
 		conn:   conn,
 		client: pb.NewPlayerClient(conn),
-		flac:   d,
-	}, nil
+	}
+
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			return nil, err
+		}
+	}
+
+	return c, nil
+}
+
+func LocalPlay(local bool, addr string) func(c *Client) error {
+	return func(c *Client) error {
+		if !local {
+			return nil
+		}
+
+		f, err := player.NewDisk(nil, addr)
+		c.flac = f
+		return err
+	}
 }
 
 func (c *Client) Done(id string) {
