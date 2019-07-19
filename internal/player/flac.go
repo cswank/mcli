@@ -359,12 +359,8 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 	out := &song{
 		result: r,
 	}
-	u, err := f.Fetcher.GetTrack(r.Track.URI)
-	if err != nil {
-		return out, fmt.Errorf("could not get track %+v: %s", r, err)
-	}
 
-	resp, err := f.getTrack(u)
+	resp, err := f.getTrack(r)
 	if err != nil {
 		return out, fmt.Errorf("could not get stream %+v: %s", r, err)
 	}
@@ -385,7 +381,6 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 		out.buf = &bytes.Buffer{}
 	}
 
-	log.Printf("new p r: %+v\n", resp)
 	pr := newProgressRead(resp.Body, int(resp.ContentLength), f.downloadCB)
 	w := out.writer()
 	_, err = io.Copy(w, pr)
@@ -397,15 +392,15 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 	return out, nil
 }
 
-func (f *Flac) getTrack(uri string) (*http.Response, error) {
-	if strings.Index(uri, "file://") == 0 {
-		f, err := os.Open(uri[7:])
-		return &http.Response{
-			Body: f,
-		}, err
+func (f *Flac) getTrack(r Result) (*http.Response, error) {
+	if r.Track.URI != "" {
+		return http.Get(fmt.Sprintf("http://%s/%s", f.host, r.Track.URI))
 	}
 
-	return http.Get(fmt.Sprintf("http://%s/%s", f.host, uri))
+	file, err := os.Open(r.Track.ID[7:])
+	return &http.Response{
+		Body: file,
+	}, err
 }
 
 func (f *Flac) ensureCache() error {

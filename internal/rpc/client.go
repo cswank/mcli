@@ -59,6 +59,10 @@ func (c *Client) PlayAlbum(r *player.Results) {
 }
 
 func (c *Client) Volume(v float64) float64 {
+	if c.flac != nil {
+		return c.flac.Volume(v)
+	}
+
 	f, err := c.client.Volume(context.Background(), &pb.Float{Value: float32(v)})
 	if err != nil {
 		log.Println(err)
@@ -67,9 +71,13 @@ func (c *Client) Volume(v float64) float64 {
 }
 
 func (c *Client) Pause() {
-	_, err := c.client.Pause(context.Background(), &pb.Empty{})
-	if err != nil {
-		log.Println(err)
+	if c.flac != nil {
+		c.flac.Pause()
+	} else {
+		_, err := c.client.Pause(context.Background(), &pb.Empty{})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
