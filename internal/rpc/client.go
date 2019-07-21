@@ -138,22 +138,26 @@ func (c *Client) RemoveFromQueue(indices []int) {
 }
 
 func (c *Client) NextSong(id string, f func(player.Result)) {
-	go func() {
-		stream, err := c.client.NextSong(context.Background(), &pb.String{Value: id})
-		if err != nil {
-			log.Fatal("could not get stream for next song", err)
-		}
-		for {
-			ns, err := stream.Recv()
-			if err == io.EOF {
-				time.Sleep(time.Second)
-			} else if err != nil {
-				log.Println(err)
-			} else {
-				f(ResultFromPB(ns))
+	if c.flac != nil {
+		c.flac.NextSong(id, f)
+	} else {
+		go func() {
+			stream, err := c.client.NextSong(context.Background(), &pb.String{Value: id})
+			if err != nil {
+				log.Fatal("could not get stream for next song", err)
 			}
-		}
-	}()
+			for {
+				ns, err := stream.Recv()
+				if err == io.EOF {
+					time.Sleep(time.Second)
+				} else if err != nil {
+					log.Println(err)
+				} else {
+					f(ResultFromPB(ns))
+				}
+			}
+		}()
+	}
 }
 
 func (c *Client) PlayProgress(id string, f func(player.Progress)) {
