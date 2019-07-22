@@ -118,12 +118,16 @@ func (c *Client) Rewind() {
 }
 
 func (c *Client) Queue() *player.Results {
-	out, err := c.client.Queue(context.Background(), &pb.Empty{})
-	if err != nil {
-		log.Println(err)
-		return nil
+	if c.flac != nil {
+		return c.flac.Queue()
+	} else {
+		out, err := c.client.Queue(context.Background(), &pb.Empty{})
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		return ResultsFromPB(out)
 	}
-	return ResultsFromPB(out)
 }
 
 func (c *Client) RemoveFromQueue(indices []int) {
