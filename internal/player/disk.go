@@ -124,7 +124,10 @@ func (d *Disk) GetPlaylist(string, int) (*Results, error) {
 
 func (d *Disk) resultFromPath(pth string) Result {
 	pth = filepath.Join(d.pth, pth)
-	parts := strings.Split(pth[1:], string(filepath.Separator))
+	parts := filepath.SplitList(pth)
+	baseParts := filepath.SplitList(d.pth)
+
+	parts = parts[len(baseParts)-1:]
 
 	var album Album
 	var artist Artist
