@@ -51,8 +51,12 @@ func LocalPlay(local bool, addr string) func(c *Client) error {
 }
 
 func (c *Client) Done(id string) {
-	c.client.Done(context.Background(), &pb.String{Value: id})
-	c.conn.Close()
+	if c.flac != nil {
+		c.flac.Done(id)
+	} else {
+		c.client.Done(context.Background(), &pb.String{Value: id})
+		c.conn.Close()
+	}
 }
 
 func (c *Client) Close() {}
