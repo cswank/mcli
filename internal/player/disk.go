@@ -2,6 +2,7 @@ package player
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,7 +73,7 @@ func (d *Disk) doFind(glob, t string) (*Results, error) {
 }
 
 func (d *Disk) GetAlbum(id string) (*Results, error) {
-	tracks, err := filepath.Glob(filepath.Join(id, "*.flac"))
+	tracks, err := filepath.Glob(filepath.Join(d.pth, id, "*.flac"))
 	if err != nil {
 		return nil, nil
 	}
@@ -105,12 +106,13 @@ func (d *Disk) GetTrack(id string) (string, error) {
 }
 
 func (d *Disk) GetArtistAlbums(id string, n int) (*Results, error) {
-	glob := filepath.Join(id, "*")
+	log.Println("getartistalbums", id)
+	glob := filepath.Join(d.pth, id, "*")
 	return d.doFind(glob, "album search")
 }
 
 func (d *Disk) GetArtistTracks(id string, n int) (*Results, error) {
-	glob := filepath.Join(id, "*", "*.flac")
+	glob := filepath.Join(d.pth, id, "*", "*.flac")
 	return d.doFind(glob, "album")
 }
 
@@ -124,7 +126,11 @@ func (d *Disk) GetPlaylist(string, int) (*Results, error) {
 
 func (d *Disk) resultFromPath(pth string) Result {
 	pth = strings.Replace(pth, d.pth, "", -1)
-	parts := filepath.SplitList(pth)
+	if strings.Index(pth, "/") == 0 {
+		pth = pth[1:]
+	}
+
+	parts := strings.Split(pth, string(filepath.Separator))
 
 	var album Album
 	var artist Artist
