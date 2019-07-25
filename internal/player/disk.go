@@ -2,6 +2,7 @@ package player
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
