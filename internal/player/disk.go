@@ -2,7 +2,6 @@ package player
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -124,12 +123,8 @@ func (d *Disk) GetPlaylist(string, int) (*Results, error) {
 }
 
 func (d *Disk) resultFromPath(pth string) Result {
-	log.Println("resultFromPath", pth)
-	pth = filepath.Join(d.pth, pth)
+	pth = strings.Replace(pth, d.pth, "", -1)
 	parts := filepath.SplitList(pth)
-	baseParts := filepath.SplitList(d.pth)
-
-	parts = parts[len(baseParts)-1:]
 
 	var album Album
 	var artist Artist
