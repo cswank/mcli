@@ -123,6 +123,7 @@ func (d *Disk) GetPlaylist(string, int) (*Results, error) {
 }
 
 func (d *Disk) resultFromPath(pth string) Result {
+	log.Println("resultFromPath", pth)
 	pth = filepath.Join(d.pth, pth)
 	parts := filepath.SplitList(pth)
 	baseParts := filepath.SplitList(d.pth)
