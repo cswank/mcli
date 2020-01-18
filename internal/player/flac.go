@@ -15,11 +15,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cswank/beep"
+	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
 
-	"github.com/cswank/beep/effects"
-	"github.com/cswank/beep/flac"
-	"github.com/cswank/beep/speaker"
+	"github.com/faiface/beep/flac"
+	"github.com/faiface/beep/speaker"
 )
 
 type Flac struct {
