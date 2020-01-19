@@ -171,6 +171,7 @@ func trackFromPB(t *pb.Track) player.Track {
 		ID:       t.GetId(),
 		Title:    t.GetTitle(),
 		Duration: int(t.GetDuration()),
+		URI:      t.GetUri(),
 	}
 }
 
@@ -209,6 +210,7 @@ func pbFromTrack(t player.Track) *pb.Track {
 		Id:       t.ID,
 		Title:    t.Title,
 		Duration: int64(t.Duration),
+		Uri:      t.URI,
 	}
 }
 

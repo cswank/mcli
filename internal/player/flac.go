@@ -44,6 +44,7 @@ type Flac struct {
 	downloadLock  sync.Mutex
 	nextSongLock  sync.Mutex
 	cacheOnDisk   bool
+	host          string
 }
 
 type flacSettings struct {
@@ -54,7 +55,7 @@ func getFlacPath() string {
 	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
 }
 
-func NewFlac(f Fetcher, cache bool) (*Flac, error) {
+func NewFlac(f Fetcher, cache bool, host string) (*Flac, error) {
 	hist, err := NewStormHistory()
 	if err != nil {
 		return nil, err
@@ -99,6 +100,7 @@ func NewFlac(f Fetcher, cache bool) (*Flac, error) {
 		downloadCB:  make(map[string]func(Progress)),
 		nextSongCB:  make(map[string]func(Result)),
 		cacheOnDisk: cache,
+		host:        strings.Replace(host, "50051", "8080", 1),
 	}
 
 	go p.playLoop()
@@ -357,12 +359,8 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 	out := &song{
 		result: r,
 	}
-	u, err := f.Fetcher.GetTrack(r.Track.ID)
-	if err != nil {
-		return out, fmt.Errorf("could not get track %+v: %s", r, err)
-	}
 
-	resp, err := f.getTrack(u)
+	resp, err := f.getTrack(r)
 	if err != nil {
 		return out, fmt.Errorf("could not get stream %+v: %s", r, err)
 	}
@@ -394,15 +392,15 @@ func (f *Flac) doDownload(r Result) (*song, error) {
 	return out, nil
 }
 
-func (f *Flac) getTrack(uri string) (*http.Response, error) {
-	if strings.Index(uri, "file://") == 0 {
-		f, err := os.Open(uri[7:])
-		return &http.Response{
-			Body: f,
-		}, err
+func (f *Flac) getTrack(r Result) (*http.Response, error) {
+	if r.Track.URI != "" {
+		return http.Get(fmt.Sprintf("http://%s/%s", f.host, r.Track.URI))
 	}
 
-	return http.Get(uri)
+	file, err := os.Open(r.Track.ID[7:])
+	return &http.Response{
+		Body: file,
+	}, err
 }
 
 func (f *Flac) ensureCache() error {

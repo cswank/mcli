@@ -54,6 +54,7 @@ type Track struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`
 	Duration int    `json:"duration"`
+	URI      string `json:"url"`
 }
 
 type Artist struct {

@@ -3,9 +3,12 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -48,6 +51,7 @@ type server struct {
 	cli       player.Client
 	templates *templates
 	server    *http.Server
+	disk      string
 }
 
 func newServer(cli player.Client, box *rice.Box) (*server, error) {
@@ -59,6 +63,7 @@ func newServer(cli player.Client, box *rice.Box) (*server, error) {
 	s := &server{
 		cli:       cli,
 		templates: t,
+		disk:      os.Getenv("MCLI_DISK_LOCATION"),
 	}
 
 	r := mux.NewRouter().StrictSlash(true)
@@ -81,6 +86,7 @@ func newServer(cli player.Client, box *rice.Box) (*server, error) {
 	r.HandleFunc("/fastforward", s.handle(s.fastForward)).Methods("POST")
 	r.HandleFunc("/ws/play-progress", s.handle(s.playProgress))
 	r.HandleFunc("/ws/download-progress", s.handle(s.downloadProgress))
+	r.HandleFunc("/tracks/{artist}/{album}/{track}", s.handle(s.getTrack))
 	r.PathPrefix("/static/").Handler(static(box)).Methods("GET")
 
 	s.server = &http.Server{
@@ -311,6 +317,26 @@ func (s *server) playProgress(w http.ResponseWriter, req *http.Request) error {
 			return nil
 		}
 	}
+}
+
+func (s *server) getTrack(w http.ResponseWriter, req *http.Request) error {
+	vars := mux.Vars(req)
+	pth := filepath.Join(s.disk, vars["artist"], vars["album"], vars["track"])
+	f, err := os.Open(pth)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	w.Header().Add("Content-Length", strconv.Itoa(int(fi.Size())))
+	_, err = io.Copy(w, f)
+	return err
 }
 
 func (s *server) downloadProgress(w http.ResponseWriter, req *http.Request) error {

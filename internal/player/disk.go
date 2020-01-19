@@ -2,6 +2,7 @@ package player
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,14 +13,14 @@ type Disk struct {
 	pth string
 }
 
-func NewDisk(p Player) (Client, error) {
+func NewDisk(p Player, host string) (Client, error) {
 	d := &Disk{
 		Player: p,
 		pth:    os.Getenv("MCLI_DISK_LOCATION"),
 	}
 
 	if p == nil {
-		return NewFlac(d, false)
+		return NewFlac(d, false, host)
 	}
 
 	return d, nil
@@ -72,8 +73,7 @@ func (d *Disk) doFind(glob, t string) (*Results, error) {
 }
 
 func (d *Disk) GetAlbum(id string) (*Results, error) {
-	pth := strings.Replace(id, "file://", "", 1)
-	tracks, err := filepath.Glob(filepath.Join(pth, "*.flac"))
+	tracks, err := filepath.Glob(filepath.Join(d.pth, id, "*.flac"))
 	if err != nil {
 		return nil, nil
 	}
@@ -106,14 +106,13 @@ func (d *Disk) GetTrack(id string) (string, error) {
 }
 
 func (d *Disk) GetArtistAlbums(id string, n int) (*Results, error) {
-	pth := strings.Replace(id, "file://", "", 1)
-	glob := filepath.Join(pth, "*")
+	log.Println("getartistalbums", id)
+	glob := filepath.Join(d.pth, id, "*")
 	return d.doFind(glob, "album search")
 }
 
 func (d *Disk) GetArtistTracks(id string, n int) (*Results, error) {
-	pth := strings.Replace(id, "file://", "", 1)
-	glob := filepath.Join(pth, "*", "*.flac")
+	glob := filepath.Join(d.pth, id, "*", "*.flac")
 	return d.doFind(glob, "album")
 }
 
@@ -126,30 +125,34 @@ func (d *Disk) GetPlaylist(string, int) (*Results, error) {
 }
 
 func (d *Disk) resultFromPath(pth string) Result {
-	pth = strings.Replace(pth, "file://", "", 1)
-	pth = strings.Replace(pth, d.pth, "", 1)
-	parts := strings.Split(pth[1:], string(filepath.Separator))
+	pth = strings.Replace(pth, d.pth, "", -1)
+	if strings.Index(pth, "/") == 0 {
+		pth = pth[1:]
+	}
+
+	parts := strings.Split(pth, string(filepath.Separator))
 
 	var album Album
 	var artist Artist
 	var track Track
 
 	artist = Artist{
-		ID:   fmt.Sprintf("file://%s", filepath.Join(d.pth, parts[0])),
+		ID:   parts[0],
 		Name: parts[0],
 	}
 
 	if len(parts) >= 2 {
 		album = Album{
-			ID:    fmt.Sprintf("file://%s", filepath.Join(d.pth, parts[0], parts[1])),
+			ID:    filepath.Join(parts[0], parts[1]),
 			Title: parts[1],
 		}
 	}
 
 	if len(parts) >= 3 {
 		track = Track{
-			ID:    fmt.Sprintf("file://%s", filepath.Join(d.pth, parts[0], parts[1], parts[2])),
+			ID:    filepath.Join(d.pth, parts[0], parts[1], parts[2]),
 			Title: strings.Replace(parts[2], ".flac", "", -1),
+			URI:   filepath.Join("tracks", parts[0], parts[1], parts[2]),
 		}
 	}
 
