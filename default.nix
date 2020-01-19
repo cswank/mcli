@@ -3,6 +3,7 @@ stdenv.mkDerivation rec {
   name = "env";
   env = buildEnv { name = name; paths = buildInputs; };
   buildInputs = [
+    pkgconfig
     alsaLib
     alsaTools
     avahi
