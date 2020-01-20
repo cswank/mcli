@@ -1,11 +1,11 @@
 package rpc
 
 import (
+	"context"
 	"io"
 	"log"
 	"time"
 
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	"bitbucket.org/cswank/mcli/internal/player"
@@ -108,7 +108,7 @@ func (c *Client) FastForward() {
 
 func (c *Client) Rewind() {
 	if c.flac != nil {
-		c.flac.FastForward()
+		c.flac.Rewind()
 	} else {
 		_, err := c.client.Rewind(context.Background(), &pb.Empty{})
 		if err != nil {

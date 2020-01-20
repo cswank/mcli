@@ -84,6 +84,10 @@ func NewFlac(f Fetcher, cache bool, host string) (*Flac, error) {
 		json.NewEncoder(f).Encode(s)
 	}
 
+	if err := speaker.Init(44100, 44100/2); err != nil {
+		return nil, err
+	}
+
 	p := &Flac{
 		Fetcher:     f,
 		history:     hist,
@@ -263,12 +267,8 @@ func (f *Flac) doPlay(s song) error {
 		return err
 	}
 
-	music, format, err := flac.Decode(s.reader())
+	music, _, err := flac.Decode(s.reader())
 	if err != nil {
-		return err
-	}
-
-	if err := speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/2)); err != nil {
 		return err
 	}
 
