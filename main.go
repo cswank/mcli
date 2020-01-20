@@ -16,44 +16,23 @@ import (
 
 var (
 	srv     = kingpin.Flag("server", "start grpc and http servers").Short('s').Bool()
-	cli     = kingpin.Flag("client", "start grpc client").Short('c').Bool()
-	local   = kingpin.Flag("local", "grpc client with local play").Bool()
+	remote  = kingpin.Flag("remote", "grpc client with remote play").Bool()
 	cache   = kingpin.Flag("cache", "cache songs to disk").Bool()
-	addr    = kingpin.Flag("address", "address of grpc server").Short('a').Default("localhost:50051").String()
+	addr    = kingpin.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
 	logout  = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 	logfile *os.File
 )
 
-func init() {
+func main() {
 	if os.Getenv("MCLI_HOME") == "" {
 		os.Setenv("MCLI_HOME", fmt.Sprintf("%s/.mcli", os.Getenv("HOME")))
 	}
 
 	kingpin.Parse()
-	if *srv {
-		return
-	}
 
-	if *logout != "" {
-		f, err := os.Create(*logout)
-		if err != nil {
-			log.Fatal(err)
-		}
-		logfile = f
-		log.SetOutput(f)
-	} else {
-		log.SetOutput(ioutil.Discard)
-	}
-}
-
-func cleanup() {
-	if logfile != nil {
-		logfile.Close()
-	}
-}
-
-func main() {
+	doLog()
 	defer cleanup()
+
 	if *srv {
 		doServe()
 	} else {
@@ -81,8 +60,8 @@ func doServe() {
 
 func gui() {
 	var p player.Player
-	if *cli {
-		c, err := rpc.NewClient(*addr, rpc.LocalPlay(*local, *addr))
+	if !*srv {
+		c, err := rpc.NewClient(*addr, rpc.LocalPlay(!*remote, *addr))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -97,5 +76,28 @@ func gui() {
 		if err := views.Start(cli); err != nil {
 			log.Fatal(err)
 		}
+	}
+}
+
+func doLog() {
+	if *srv {
+		return
+	}
+
+	if *logout != "" {
+		f, err := os.Create(*logout)
+		if err != nil {
+			log.Fatal(err)
+		}
+		logfile = f
+		log.SetOutput(f)
+	} else {
+		log.SetOutput(ioutil.Discard)
+	}
+}
+
+func cleanup() {
+	if logfile != nil {
+		logfile.Close()
 	}
 }
