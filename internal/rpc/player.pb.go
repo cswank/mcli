@@ -878,61 +878,61 @@ func init() {
 func init() { proto.RegisterFile("player.proto", fileDescriptor_41d803d1b635d5c6) }
 
 var fileDescriptor_41d803d1b635d5c6 = []byte{
-	// 854 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0xdf, 0x93, 0xe2, 0x44,
-	0x10, 0x26, 0xe4, 0x07, 0xd0, 0x8b, 0xb7, 0xd4, 0x94, 0x65, 0xa5, 0xf0, 0xb4, 0xae, 0x62, 0x29,
-	0x78, 0xb2, 0x88, 0xab, 0x56, 0xf9, 0x7a, 0x7a, 0x72, 0xae, 0xb5, 0xb5, 0x85, 0x41, 0x7d, 0xf1,
-	0x69, 0x96, 0x8c, 0x6c, 0x6a, 0x93, 0x4c, 0x9c, 0x99, 0x2c, 0xe2, 0x1f, 0xe2, 0x5f, 0xea, 0xbb,
-	0xd6, 0xfc, 0x48, 0x80, 0x80, 0x12, 0x9f, 0x98, 0x4e, 0x7f, 0x5f, 0x77, 0x7f, 0x9d, 0x9e, 0x0e,
-	0xd0, 0xcf, 0x13, 0xbc, 0x25, 0x6c, 0x9a, 0x33, 0x2a, 0x28, 0xf2, 0xb4, 0x15, 0x74, 0xc0, 0xfd,
-	0x36, 0xcd, 0xc5, 0x36, 0xb8, 0x85, 0xc1, 0x4f, 0x9c, 0xb0, 0x0c, 0xa7, 0x64, 0x81, 0x39, 0xdf,
-	0x50, 0x16, 0xa1, 0x21, 0x74, 0x0b, 0xf3, 0xcc, 0xb7, 0x5e, 0x58, 0xe3, 0x5e, 0x58, 0xd9, 0xe8,
-	0x39, 0xf4, 0x72, 0x89, 0x63, 0x94, 0x45, 0x7e, 0x5b, 0x39, 0x77, 0x0f, 0x82, 0x4f, 0xa0, 0x13,
-	0x92, 0xdf, 0x0a, 0xc2, 0x05, 0x42, 0xe0, 0x08, 0xc2, 0x52, 0x13, 0x40, 0x9d, 0x51, 0x1f, 0xac,
-	0x4c, 0x91, 0xec, 0xd0, 0xca, 0x82, 0x97, 0xe0, 0x2d, 0x09, 0x66, 0xab, 0x87, 0x06, 0xd8, 0xef,
-	0xc1, 0x59, 0xe0, 0x35, 0x91, 0xc8, 0x1c, 0xaf, 0x75, 0x59, 0x76, 0xa8, 0xce, 0xb2, 0x5c, 0xf9,
-	0xbb, 0x8c, 0xff, 0x20, 0x86, 0x50, 0xd9, 0x12, 0xcf, 0x29, 0x13, 0xbe, 0xad, 0x23, 0xcb, 0x73,
-	0x30, 0x85, 0xee, 0x82, 0xd1, 0x35, 0x23, 0x9c, 0xeb, 0x2c, 0x96, 0xc9, 0x82, 0xde, 0x06, 0x57,
-	0x50, 0x81, 0x13, 0x13, 0x46, 0x1b, 0xc1, 0x7b, 0xe0, 0xce, 0x13, 0x8a, 0x85, 0x74, 0x3f, 0xe1,
-	0xa4, 0xd0, 0xd9, 0xdb, 0xa1, 0x36, 0x82, 0x77, 0xc1, 0xbe, 0xc9, 0x6a, 0x4e, 0xbb, 0x74, 0x3e,
-	0x07, 0xe7, 0x26, 0x13, 0x7c, 0xdf, 0x6b, 0xef, 0xbc, 0xef, 0x83, 0xb7, 0x14, 0x2c, 0xce, 0xd6,
-	0x87, 0xec, 0xde, 0x1e, 0xfb, 0x6b, 0x4a, 0x93, 0x43, 0x6f, 0xb7, 0xf4, 0xfe, 0x02, 0xee, 0x8f,
-	0x0c, 0xaf, 0x1e, 0xd1, 0x33, 0x68, 0xc7, 0x91, 0x61, 0xb6, 0xe3, 0x48, 0xc9, 0x88, 0x45, 0x42,
-	0xcc, 0xfb, 0xd1, 0x86, 0x6c, 0x53, 0x54, 0x30, 0x2c, 0x62, 0x9a, 0xa9, 0x76, 0xd8, 0x61, 0x65,
-	0xa3, 0x01, 0xd8, 0x05, 0x8b, 0x7d, 0x47, 0xe1, 0xe5, 0x31, 0x98, 0x80, 0xf7, 0x8a, 0x89, 0x98,
-	0x8b, 0xa3, 0xe8, 0x08, 0x1c, 0x35, 0x19, 0x3a, 0xb8, 0x3a, 0x07, 0x57, 0xe0, 0xbe, 0x4a, 0xee,
-	0x8b, 0xb4, 0x59, 0x29, 0xc1, 0x0c, 0xba, 0x8b, 0x04, 0x6f, 0x93, 0x53, 0xe1, 0x4f, 0x33, 0xfe,
-	0xb2, 0xc0, 0x0b, 0x09, 0x2f, 0x12, 0x81, 0x7c, 0xe8, 0x70, 0xc2, 0x9e, 0xe2, 0x55, 0xd9, 0xac,
-	0xd2, 0xd4, 0xc3, 0x21, 0x1e, 0xca, 0xca, 0xe4, 0x59, 0xcd, 0x6b, 0x82, 0xb7, 0x2b, 0x5a, 0x64,
-	0xc2, 0xc8, 0xde, 0x3d, 0x40, 0x1f, 0x80, 0x2b, 0x64, 0x0b, 0x95, 0xf2, 0x8b, 0xeb, 0xb7, 0xa6,
-	0xe6, 0xb2, 0xa8, 0xbe, 0x86, 0xda, 0x27, 0x41, 0x58, 0x8a, 0xf3, 0xdd, 0x43, 0x90, 0x52, 0x1c,
-	0x6a, 0x1f, 0xfa, 0x08, 0x3c, 0xac, 0xfa, 0xe5, 0x7b, 0x0a, 0xf5, 0xac, 0x42, 0xa9, 0xa7, 0xa1,
-	0xf1, 0xa2, 0x09, 0x74, 0x73, 0x23, 0xdd, 0xef, 0x28, 0xe4, 0xa0, 0x44, 0x96, 0x2d, 0x09, 0x2b,
-	0x44, 0xf0, 0xa7, 0x25, 0x2f, 0x94, 0x94, 0xcd, 0xd5, 0x25, 0xd9, 0xe6, 0xa4, 0xba, 0x24, 0xdb,
-	0x9c, 0xa0, 0x77, 0xc0, 0x7b, 0x20, 0x38, 0x22, 0xcc, 0x68, 0x36, 0x96, 0x7c, 0x9f, 0xbf, 0xa6,
-	0xe5, 0xd4, 0xcb, 0xe3, 0x4e, 0x84, 0xf3, 0x1f, 0x22, 0xc6, 0xd0, 0x61, 0x3a, 0x9b, 0xef, 0xbe,
-	0xb0, 0xf7, 0x55, 0xe8, 0x22, 0xc2, 0xd2, 0x7d, 0xfd, 0x77, 0x0f, 0xbc, 0x85, 0x72, 0xa1, 0x11,
-	0x38, 0xf2, 0x84, 0x6a, 0xd8, 0x61, 0x95, 0x42, 0x2f, 0x9a, 0x16, 0xba, 0x82, 0x9e, 0x04, 0xea,
-	0x41, 0xb9, 0x3c, 0x44, 0xf3, 0x63, 0xf8, 0x18, 0xbc, 0x9f, 0x69, 0x52, 0xa4, 0x04, 0x55, 0x2e,
-	0x75, 0x0d, 0x87, 0x87, 0x66, 0xd0, 0x42, 0x23, 0x70, 0x17, 0xb8, 0xe0, 0x7b, 0x40, 0x15, 0xe3,
-	0x54, 0x05, 0x17, 0x73, 0xcc, 0xc5, 0x9c, 0xb2, 0x0d, 0x66, 0xd1, 0x59, 0xf8, 0x58, 0xce, 0xdc,
-	0x26, 0xce, 0xce, 0x23, 0x3f, 0x06, 0xf7, 0x87, 0x82, 0x14, 0x47, 0x15, 0xd4, 0x55, 0x06, 0x2d,
-	0x74, 0x0d, 0x97, 0x21, 0x49, 0xe9, 0x13, 0x99, 0x33, 0x9a, 0x6a, 0x52, 0xbf, 0x44, 0xc9, 0x55,
-	0x71, 0x8a, 0x33, 0x85, 0xee, 0x1d, 0xf9, 0x5d, 0x2c, 0x69, 0xb6, 0xde, 0xb5, 0x59, 0x6f, 0x8e,
-	0x61, 0xad, 0xed, 0x41, 0x6b, 0x66, 0xa1, 0x2f, 0xa0, 0x2f, 0x3b, 0x5d, 0x6d, 0xb9, 0x3a, 0x67,
-	0x37, 0x72, 0x06, 0xa1, 0x58, 0x5f, 0xc1, 0xe0, 0x35, 0xdd, 0x64, 0x09, 0xc5, 0xd1, 0xff, 0x64,
-	0xbe, 0x84, 0xce, 0x77, 0x31, 0x17, 0x94, 0x6d, 0x77, 0x5a, 0xe4, 0xba, 0x3e, 0xa5, 0x65, 0x04,
-	0xce, 0x6b, 0x9a, 0x91, 0xa3, 0xc8, 0x47, 0x3d, 0x1d, 0x81, 0xfb, 0x4d, 0x42, 0x1b, 0xbc, 0xd5,
-	0x11, 0x38, 0x77, 0x38, 0x3d, 0xc2, 0xd5, 0x12, 0xa8, 0xd6, 0xbb, 0xb7, 0x74, 0x1d, 0x67, 0xc8,
-	0x2f, 0x5d, 0xf5, 0x4f, 0xdf, 0x71, 0xf0, 0x0f, 0xc1, 0x59, 0xc8, 0x05, 0x5d, 0x0b, 0x5e, 0xc9,
-	0x94, 0xfb, 0x39, 0x68, 0xa1, 0x09, 0xf4, 0xd4, 0x5c, 0xdf, 0xc6, 0xd9, 0xe3, 0xf9, 0x42, 0x66,
-	0x00, 0xf3, 0x38, 0x8b, 0xcc, 0x82, 0xdd, 0x6b, 0x92, 0xfa, 0x74, 0x9e, 0xea, 0xda, 0xa7, 0xd0,
-	0x53, 0x8c, 0xfa, 0xdd, 0x39, 0x47, 0xd0, 0x1f, 0x88, 0x26, 0x84, 0x2b, 0xe8, 0xbe, 0x21, 0xc2,
-	0x6c, 0xf1, 0xda, 0xbb, 0x39, 0x01, 0x9f, 0x28, 0xb8, 0xf9, 0xfe, 0xfc, 0xdb, 0x48, 0x56, 0x82,
-	0xbf, 0x84, 0x4b, 0x19, 0x5c, 0xe9, 0x55, 0x29, 0x78, 0xa3, 0x9a, 0xf6, 0x69, 0x2a, 0x55, 0x33,
-	0xda, 0x0c, 0xfa, 0x6f, 0x88, 0x28, 0xd7, 0x29, 0x6f, 0x70, 0x29, 0x3f, 0x83, 0x8b, 0x3d, 0x46,
-	0x93, 0x24, 0xf7, 0x9e, 0xfa, 0x43, 0xf5, 0xf9, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x17, 0x03,
-	0xef, 0xcb, 0x60, 0x09, 0x00, 0x00,
+	// 864 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0x5f, 0x93, 0xe2, 0x44,
+	0x10, 0x27, 0xe4, 0x0f, 0xd0, 0x8b, 0xb7, 0xd4, 0x94, 0x65, 0xa5, 0xf0, 0xb4, 0xae, 0x62, 0x29,
+	0x78, 0xb2, 0x88, 0xa8, 0x55, 0xbe, 0x9e, 0x9e, 0x9c, 0x67, 0x6d, 0x6d, 0x61, 0x50, 0x5f, 0x7c,
+	0x9a, 0x25, 0x23, 0xa4, 0x36, 0xc9, 0xc4, 0x99, 0xc9, 0x22, 0x7e, 0x03, 0xbf, 0x80, 0x9f, 0xd4,
+	0x77, 0xad, 0xf9, 0x93, 0x00, 0x01, 0x85, 0x7b, 0x62, 0x3a, 0xfd, 0xfb, 0x75, 0xf7, 0xaf, 0xd3,
+	0xd3, 0x01, 0xba, 0x79, 0x82, 0xb7, 0x84, 0x8d, 0x73, 0x46, 0x05, 0x45, 0x9e, 0xb6, 0x82, 0x16,
+	0xb8, 0xdf, 0xa6, 0xb9, 0xd8, 0x06, 0xb7, 0xd0, 0xfb, 0x89, 0x13, 0x96, 0xe1, 0x94, 0xcc, 0x31,
+	0xe7, 0x1b, 0xca, 0x22, 0xd4, 0x87, 0x76, 0x61, 0x9e, 0xf9, 0xd6, 0x33, 0x6b, 0xd8, 0x09, 0x2b,
+	0x1b, 0x3d, 0x85, 0x4e, 0x2e, 0x71, 0x8c, 0xb2, 0xc8, 0x6f, 0x2a, 0xe7, 0xee, 0x41, 0xf0, 0x09,
+	0xb4, 0x42, 0xf2, 0x5b, 0x41, 0xb8, 0x40, 0x08, 0x1c, 0x41, 0x58, 0x6a, 0x02, 0xa8, 0x33, 0xea,
+	0x82, 0x95, 0x29, 0x92, 0x1d, 0x5a, 0x59, 0xf0, 0x1c, 0xbc, 0x05, 0xc1, 0x6c, 0xb9, 0xbe, 0x00,
+	0xfb, 0x3d, 0x38, 0x73, 0xbc, 0x22, 0x12, 0x99, 0xe3, 0x95, 0x2e, 0xcb, 0x0e, 0xd5, 0x59, 0x96,
+	0x2b, 0x7f, 0x17, 0xf1, 0x1f, 0xc4, 0x10, 0x2a, 0x5b, 0xe2, 0x39, 0x65, 0xc2, 0xb7, 0x75, 0x64,
+	0x79, 0x0e, 0xc6, 0xd0, 0x9e, 0x33, 0xba, 0x62, 0x84, 0x73, 0x9d, 0xc5, 0x32, 0x59, 0xd0, 0xdb,
+	0xe0, 0x0a, 0x2a, 0x70, 0x62, 0xc2, 0x68, 0x23, 0x78, 0x0f, 0xdc, 0x59, 0x42, 0xb1, 0x90, 0xee,
+	0x47, 0x9c, 0x14, 0x3a, 0x7b, 0x33, 0xd4, 0x46, 0xf0, 0x2e, 0xd8, 0xaf, 0xb3, 0x9a, 0xd3, 0x2e,
+	0x9d, 0x4f, 0xc1, 0x79, 0x9d, 0x09, 0xbe, 0xef, 0xb5, 0x77, 0xde, 0xf7, 0xc1, 0x5b, 0x08, 0x16,
+	0x67, 0xab, 0x43, 0x76, 0x67, 0x8f, 0xfd, 0x35, 0xa5, 0xc9, 0xa1, 0xb7, 0x5d, 0x7a, 0x7f, 0x01,
+	0xf7, 0x47, 0x86, 0x97, 0x0f, 0xe8, 0x09, 0x34, 0xe3, 0xc8, 0x30, 0x9b, 0x71, 0xa4, 0x64, 0xc4,
+	0x22, 0x21, 0xe6, 0xfd, 0x68, 0x43, 0xb6, 0x29, 0x2a, 0x18, 0x16, 0x31, 0xcd, 0x54, 0x3b, 0xec,
+	0xb0, 0xb2, 0x51, 0x0f, 0xec, 0x82, 0xc5, 0xbe, 0xa3, 0xf0, 0xf2, 0x18, 0x8c, 0xc0, 0x7b, 0xc1,
+	0x44, 0xcc, 0xc5, 0x51, 0x74, 0x04, 0x8e, 0x9a, 0x0c, 0x1d, 0x5c, 0x9d, 0x83, 0x1b, 0x70, 0x5f,
+	0x24, 0xf7, 0x45, 0x7a, 0x59, 0x29, 0xc1, 0x04, 0xda, 0xf3, 0x04, 0x6f, 0x93, 0x53, 0xe1, 0x4f,
+	0x33, 0xfe, 0xb6, 0xc0, 0x0b, 0x09, 0x2f, 0x12, 0x81, 0x7c, 0x68, 0x71, 0xc2, 0x1e, 0xe3, 0x65,
+	0xd9, 0xac, 0xd2, 0xd4, 0xc3, 0x21, 0xd6, 0x65, 0x65, 0xf2, 0xac, 0xe6, 0x35, 0xc1, 0xdb, 0x25,
+	0x2d, 0x32, 0x61, 0x64, 0xef, 0x1e, 0xa0, 0x0f, 0xc0, 0x15, 0xb2, 0x85, 0x4a, 0xf9, 0xd5, 0xf4,
+	0xad, 0xb1, 0xb9, 0x2c, 0xaa, 0xaf, 0xa1, 0xf6, 0x49, 0x10, 0x96, 0xe2, 0x7c, 0xf7, 0x10, 0xa4,
+	0x14, 0x87, 0xda, 0x87, 0x3e, 0x02, 0x0f, 0xab, 0x7e, 0xf9, 0x9e, 0x42, 0x3d, 0xa9, 0x50, 0xea,
+	0x69, 0x68, 0xbc, 0x68, 0x04, 0xed, 0xdc, 0x48, 0xf7, 0x5b, 0x0a, 0xd9, 0x2b, 0x91, 0x65, 0x4b,
+	0xc2, 0x0a, 0x11, 0xfc, 0x65, 0xc9, 0x0b, 0x25, 0x65, 0x73, 0x75, 0x49, 0xb6, 0x39, 0xa9, 0x2e,
+	0xc9, 0x36, 0x27, 0xe8, 0x1d, 0xf0, 0xd6, 0x04, 0x47, 0x84, 0x19, 0xcd, 0xc6, 0x92, 0xef, 0xf3,
+	0xd7, 0xb4, 0x9c, 0x7a, 0x79, 0xdc, 0x89, 0x70, 0xfe, 0x47, 0xc4, 0x10, 0x5a, 0x4c, 0x67, 0xf3,
+	0xdd, 0x67, 0xf6, 0xbe, 0x0a, 0x5d, 0x44, 0x58, 0xba, 0xa7, 0x7f, 0xba, 0xe0, 0xcd, 0x95, 0x0b,
+	0x0d, 0xc0, 0x91, 0x27, 0x54, 0xc3, 0xf6, 0xab, 0x14, 0x7a, 0xd1, 0x34, 0xd0, 0x0d, 0x74, 0x24,
+	0x50, 0x0f, 0xca, 0xf5, 0x21, 0x9a, 0x1f, 0xc3, 0x87, 0xe0, 0xfd, 0x4c, 0x93, 0x22, 0x25, 0xa8,
+	0x72, 0xa9, 0x6b, 0xd8, 0x3f, 0x34, 0x83, 0x06, 0x1a, 0x80, 0x3b, 0xc7, 0x05, 0xdf, 0x03, 0xaa,
+	0x18, 0xa7, 0x2a, 0xb8, 0x9a, 0x61, 0x2e, 0x66, 0x94, 0x6d, 0x30, 0x8b, 0xce, 0xc2, 0x87, 0x72,
+	0xe6, 0x36, 0x71, 0x76, 0x1e, 0xf9, 0x31, 0xb8, 0x3f, 0x14, 0xa4, 0x38, 0xaa, 0xa0, 0xae, 0x32,
+	0x68, 0xa0, 0x29, 0x5c, 0x87, 0x24, 0xa5, 0x8f, 0x64, 0xc6, 0x68, 0xaa, 0x49, 0xdd, 0x12, 0x25,
+	0x57, 0xc5, 0x29, 0xce, 0x18, 0xda, 0x77, 0xe4, 0x77, 0xb1, 0xa0, 0xd9, 0x6a, 0xd7, 0x66, 0xbd,
+	0x39, 0xfa, 0xb5, 0xb6, 0x07, 0x8d, 0x89, 0x85, 0xbe, 0x80, 0xae, 0xec, 0x74, 0xb5, 0xe5, 0xea,
+	0x9c, 0xdd, 0xc8, 0x19, 0x84, 0x62, 0x7d, 0x05, 0xbd, 0x97, 0x74, 0x93, 0x25, 0x14, 0x47, 0x6f,
+	0xc8, 0x7c, 0x0e, 0xad, 0xef, 0x62, 0x2e, 0x28, 0xdb, 0xee, 0xb4, 0xc8, 0x75, 0x7d, 0x4a, 0xcb,
+	0x00, 0x9c, 0x97, 0x34, 0x23, 0x47, 0x91, 0x8f, 0x7a, 0x3a, 0x00, 0xf7, 0x9b, 0x84, 0x9e, 0x7f,
+	0xab, 0xd3, 0x7f, 0x1c, 0x68, 0xcd, 0x88, 0x58, 0xae, 0xf5, 0x30, 0xde, 0xe1, 0xf4, 0x88, 0x53,
+	0x4b, 0xa6, 0x5e, 0x83, 0x7b, 0x4b, 0x57, 0x71, 0x86, 0xfc, 0xd2, 0x55, 0xff, 0x0c, 0x1e, 0x57,
+	0xf4, 0x21, 0x38, 0x73, 0xb9, 0xac, 0x6b, 0xc1, 0x2b, 0xc9, 0x72, 0x57, 0x07, 0x0d, 0x34, 0x82,
+	0x8e, 0x9a, 0xf1, 0xdb, 0x38, 0x7b, 0x38, 0x5f, 0xc8, 0x04, 0x60, 0x16, 0x67, 0x91, 0x59, 0xb6,
+	0x7b, 0x0d, 0x53, 0x9f, 0xd1, 0x53, 0x1d, 0xfc, 0x14, 0x3a, 0x8a, 0x51, 0xbf, 0x47, 0xe7, 0x08,
+	0xfa, 0x63, 0x71, 0x09, 0xe1, 0x06, 0xda, 0xaf, 0x88, 0x30, 0x1b, 0xbd, 0xf6, 0x9e, 0x4e, 0xc0,
+	0x47, 0x0a, 0x6e, 0xbe, 0x45, 0xff, 0x35, 0x9e, 0x95, 0xe0, 0x2f, 0xe1, 0x5a, 0x06, 0x57, 0x7a,
+	0x55, 0x0a, 0x7e, 0x51, 0x4d, 0xfb, 0x34, 0x95, 0xea, 0x32, 0xda, 0x04, 0xba, 0xaf, 0x88, 0x28,
+	0x57, 0x2b, 0xbf, 0xe0, 0x82, 0x7e, 0x06, 0x57, 0x7b, 0x8c, 0x4b, 0x92, 0xdc, 0x7b, 0xea, 0xcf,
+	0xd5, 0xe7, 0xff, 0x06, 0x00, 0x00, 0xff, 0xff, 0x4f, 0xbd, 0xb4, 0xd6, 0x6c, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -961,19 +961,6 @@ type PlayerClient interface {
 	History(ctx context.Context, in *Page, opts ...grpc.CallOption) (*Results, error)
 	Done(ctx context.Context, in *String, opts ...grpc.CallOption) (*Empty, error)
 	Close(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
-	Name(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error)
-	Login(ctx context.Context, in *UsernamePassword, opts ...grpc.CallOption) (*Empty, error)
-	Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bool, error)
-	AlbumLink(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error)
-	FindArtist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
-	FindAlbum(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
-	FindTrack(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
-	GetAlbum(ctx context.Context, in *String, opts ...grpc.CallOption) (*Results, error)
-	GetTrack(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error)
-	GetArtistAlbums(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
-	GetArtistTracks(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
-	GetPlaylists(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error)
-	GetPlaylist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
 }
 
 type playerClient struct {
@@ -1179,123 +1166,6 @@ func (c *playerClient) Close(ctx context.Context, in *Empty, opts ...grpc.CallOp
 	return out, nil
 }
 
-func (c *playerClient) Name(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error) {
-	out := new(String)
-	err := c.cc.Invoke(ctx, "/player.Player/Name", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) Login(ctx context.Context, in *UsernamePassword, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/player.Player/Login", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bool, error) {
-	out := new(Bool)
-	err := c.cc.Invoke(ctx, "/player.Player/Ping", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) AlbumLink(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error) {
-	out := new(String)
-	err := c.cc.Invoke(ctx, "/player.Player/AlbumLink", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) FindArtist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/FindArtist", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) FindAlbum(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/FindAlbum", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) FindTrack(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/FindTrack", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) GetAlbum(ctx context.Context, in *String, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/GetAlbum", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) GetTrack(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error) {
-	out := new(String)
-	err := c.cc.Invoke(ctx, "/player.Player/GetTrack", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) GetArtistAlbums(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/GetArtistAlbums", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) GetArtistTracks(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/GetArtistTracks", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) GetPlaylists(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/GetPlaylists", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *playerClient) GetPlaylist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
-	out := new(Results)
-	err := c.cc.Invoke(ctx, "/player.Player/GetPlaylist", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // PlayerServer is the server API for Player service.
 type PlayerServer interface {
 	Play(context.Context, *Result) (*Empty, error)
@@ -1312,19 +1182,6 @@ type PlayerServer interface {
 	History(context.Context, *Page) (*Results, error)
 	Done(context.Context, *String) (*Empty, error)
 	Close(context.Context, *Empty) (*Empty, error)
-	Name(context.Context, *Empty) (*String, error)
-	Login(context.Context, *UsernamePassword) (*Empty, error)
-	Ping(context.Context, *Empty) (*Bool, error)
-	AlbumLink(context.Context, *Empty) (*String, error)
-	FindArtist(context.Context, *Request) (*Results, error)
-	FindAlbum(context.Context, *Request) (*Results, error)
-	FindTrack(context.Context, *Request) (*Results, error)
-	GetAlbum(context.Context, *String) (*Results, error)
-	GetTrack(context.Context, *String) (*String, error)
-	GetArtistAlbums(context.Context, *Request) (*Results, error)
-	GetArtistTracks(context.Context, *Request) (*Results, error)
-	GetPlaylists(context.Context, *Empty) (*Results, error)
-	GetPlaylist(context.Context, *Request) (*Results, error)
 }
 
 // UnimplementedPlayerServer can be embedded to have forward compatible implementations.
@@ -1372,45 +1229,6 @@ func (*UnimplementedPlayerServer) Done(ctx context.Context, req *String) (*Empty
 }
 func (*UnimplementedPlayerServer) Close(ctx context.Context, req *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Close not implemented")
-}
-func (*UnimplementedPlayerServer) Name(ctx context.Context, req *Empty) (*String, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Name not implemented")
-}
-func (*UnimplementedPlayerServer) Login(ctx context.Context, req *UsernamePassword) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (*UnimplementedPlayerServer) Ping(ctx context.Context, req *Empty) (*Bool, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
-}
-func (*UnimplementedPlayerServer) AlbumLink(ctx context.Context, req *Empty) (*String, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AlbumLink not implemented")
-}
-func (*UnimplementedPlayerServer) FindArtist(ctx context.Context, req *Request) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindArtist not implemented")
-}
-func (*UnimplementedPlayerServer) FindAlbum(ctx context.Context, req *Request) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindAlbum not implemented")
-}
-func (*UnimplementedPlayerServer) FindTrack(ctx context.Context, req *Request) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindTrack not implemented")
-}
-func (*UnimplementedPlayerServer) GetAlbum(ctx context.Context, req *String) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAlbum not implemented")
-}
-func (*UnimplementedPlayerServer) GetTrack(ctx context.Context, req *String) (*String, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTrack not implemented")
-}
-func (*UnimplementedPlayerServer) GetArtistAlbums(ctx context.Context, req *Request) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetArtistAlbums not implemented")
-}
-func (*UnimplementedPlayerServer) GetArtistTracks(ctx context.Context, req *Request) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetArtistTracks not implemented")
-}
-func (*UnimplementedPlayerServer) GetPlaylists(ctx context.Context, req *Empty) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPlaylists not implemented")
-}
-func (*UnimplementedPlayerServer) GetPlaylist(ctx context.Context, req *Request) (*Results, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPlaylist not implemented")
 }
 
 func RegisterPlayerServer(s *grpc.Server, srv PlayerServer) {
@@ -1678,240 +1496,6 @@ func _Player_Close_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Player_Name_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).Name(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/Name",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).Name(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UsernamePassword)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).Login(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/Login",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).Login(ctx, req.(*UsernamePassword))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).Ping(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/Ping",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).Ping(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_AlbumLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).AlbumLink(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/AlbumLink",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).AlbumLink(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_FindArtist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).FindArtist(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/FindArtist",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).FindArtist(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_FindAlbum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).FindAlbum(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/FindAlbum",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).FindAlbum(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_FindTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).FindTrack(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/FindTrack",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).FindTrack(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_GetAlbum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(String)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).GetAlbum(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/GetAlbum",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).GetAlbum(ctx, req.(*String))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_GetTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(String)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).GetTrack(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/GetTrack",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).GetTrack(ctx, req.(*String))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_GetArtistAlbums_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).GetArtistAlbums(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/GetArtistAlbums",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).GetArtistAlbums(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_GetArtistTracks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).GetArtistTracks(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/GetArtistTracks",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).GetArtistTracks(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_GetPlaylists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).GetPlaylists(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/GetPlaylists",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).GetPlaylists(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Player_GetPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlayerServer).GetPlaylist(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/player.Player/GetPlaylist",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerServer).GetPlaylist(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _Player_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "player.Player",
 	HandlerType: (*PlayerServer)(nil),
@@ -1960,58 +1544,6 @@ var _Player_serviceDesc = grpc.ServiceDesc{
 			MethodName: "Close",
 			Handler:    _Player_Close_Handler,
 		},
-		{
-			MethodName: "Name",
-			Handler:    _Player_Name_Handler,
-		},
-		{
-			MethodName: "Login",
-			Handler:    _Player_Login_Handler,
-		},
-		{
-			MethodName: "Ping",
-			Handler:    _Player_Ping_Handler,
-		},
-		{
-			MethodName: "AlbumLink",
-			Handler:    _Player_AlbumLink_Handler,
-		},
-		{
-			MethodName: "FindArtist",
-			Handler:    _Player_FindArtist_Handler,
-		},
-		{
-			MethodName: "FindAlbum",
-			Handler:    _Player_FindAlbum_Handler,
-		},
-		{
-			MethodName: "FindTrack",
-			Handler:    _Player_FindTrack_Handler,
-		},
-		{
-			MethodName: "GetAlbum",
-			Handler:    _Player_GetAlbum_Handler,
-		},
-		{
-			MethodName: "GetTrack",
-			Handler:    _Player_GetTrack_Handler,
-		},
-		{
-			MethodName: "GetArtistAlbums",
-			Handler:    _Player_GetArtistAlbums_Handler,
-		},
-		{
-			MethodName: "GetArtistTracks",
-			Handler:    _Player_GetArtistTracks_Handler,
-		},
-		{
-			MethodName: "GetPlaylists",
-			Handler:    _Player_GetPlaylists_Handler,
-		},
-		{
-			MethodName: "GetPlaylist",
-			Handler:    _Player_GetPlaylist_Handler,
-		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -2030,5 +1562,509 @@ var _Player_serviceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
+	Metadata: "player.proto",
+}
+
+// FetcherClient is the client API for Fetcher service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type FetcherClient interface {
+	Name(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error)
+	Login(ctx context.Context, in *UsernamePassword, opts ...grpc.CallOption) (*Empty, error)
+	Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bool, error)
+	AlbumLink(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error)
+	FindArtist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	FindAlbum(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	FindTrack(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	GetAlbum(ctx context.Context, in *String, opts ...grpc.CallOption) (*Results, error)
+	GetTrack(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error)
+	GetArtistAlbums(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	GetArtistTracks(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	GetPlaylists(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error)
+	GetPlaylist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+}
+
+type fetcherClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewFetcherClient(cc *grpc.ClientConn) FetcherClient {
+	return &fetcherClient{cc}
+}
+
+func (c *fetcherClient) Name(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error) {
+	out := new(String)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/Name", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) Login(ctx context.Context, in *UsernamePassword, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/Login", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) Ping(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Bool, error) {
+	out := new(Bool)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/Ping", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) AlbumLink(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*String, error) {
+	out := new(String)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/AlbumLink", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) FindArtist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/FindArtist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) FindAlbum(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/FindAlbum", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) FindTrack(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/FindTrack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) GetAlbum(ctx context.Context, in *String, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/GetAlbum", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) GetTrack(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error) {
+	out := new(String)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/GetTrack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) GetArtistAlbums(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/GetArtistAlbums", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) GetArtistTracks(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/GetArtistTracks", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) GetPlaylists(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/GetPlaylists", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetcherClient) GetPlaylist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error) {
+	out := new(Results)
+	err := c.cc.Invoke(ctx, "/player.Fetcher/GetPlaylist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FetcherServer is the server API for Fetcher service.
+type FetcherServer interface {
+	Name(context.Context, *Empty) (*String, error)
+	Login(context.Context, *UsernamePassword) (*Empty, error)
+	Ping(context.Context, *Empty) (*Bool, error)
+	AlbumLink(context.Context, *Empty) (*String, error)
+	FindArtist(context.Context, *Request) (*Results, error)
+	FindAlbum(context.Context, *Request) (*Results, error)
+	FindTrack(context.Context, *Request) (*Results, error)
+	GetAlbum(context.Context, *String) (*Results, error)
+	GetTrack(context.Context, *String) (*String, error)
+	GetArtistAlbums(context.Context, *Request) (*Results, error)
+	GetArtistTracks(context.Context, *Request) (*Results, error)
+	GetPlaylists(context.Context, *Empty) (*Results, error)
+	GetPlaylist(context.Context, *Request) (*Results, error)
+}
+
+// UnimplementedFetcherServer can be embedded to have forward compatible implementations.
+type UnimplementedFetcherServer struct {
+}
+
+func (*UnimplementedFetcherServer) Name(ctx context.Context, req *Empty) (*String, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Name not implemented")
+}
+func (*UnimplementedFetcherServer) Login(ctx context.Context, req *UsernamePassword) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (*UnimplementedFetcherServer) Ping(ctx context.Context, req *Empty) (*Bool, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (*UnimplementedFetcherServer) AlbumLink(ctx context.Context, req *Empty) (*String, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AlbumLink not implemented")
+}
+func (*UnimplementedFetcherServer) FindArtist(ctx context.Context, req *Request) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindArtist not implemented")
+}
+func (*UnimplementedFetcherServer) FindAlbum(ctx context.Context, req *Request) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindAlbum not implemented")
+}
+func (*UnimplementedFetcherServer) FindTrack(ctx context.Context, req *Request) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindTrack not implemented")
+}
+func (*UnimplementedFetcherServer) GetAlbum(ctx context.Context, req *String) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAlbum not implemented")
+}
+func (*UnimplementedFetcherServer) GetTrack(ctx context.Context, req *String) (*String, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTrack not implemented")
+}
+func (*UnimplementedFetcherServer) GetArtistAlbums(ctx context.Context, req *Request) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetArtistAlbums not implemented")
+}
+func (*UnimplementedFetcherServer) GetArtistTracks(ctx context.Context, req *Request) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetArtistTracks not implemented")
+}
+func (*UnimplementedFetcherServer) GetPlaylists(ctx context.Context, req *Empty) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlaylists not implemented")
+}
+func (*UnimplementedFetcherServer) GetPlaylist(ctx context.Context, req *Request) (*Results, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlaylist not implemented")
+}
+
+func RegisterFetcherServer(s *grpc.Server, srv FetcherServer) {
+	s.RegisterService(&_Fetcher_serviceDesc, srv)
+}
+
+func _Fetcher_Name_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).Name(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/Name",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).Name(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UsernamePassword)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/Login",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).Login(ctx, req.(*UsernamePassword))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/Ping",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).Ping(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_AlbumLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).AlbumLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/AlbumLink",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).AlbumLink(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_FindArtist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).FindArtist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/FindArtist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).FindArtist(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_FindAlbum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).FindAlbum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/FindAlbum",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).FindAlbum(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_FindTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).FindTrack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/FindTrack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).FindTrack(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_GetAlbum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(String)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).GetAlbum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/GetAlbum",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).GetAlbum(ctx, req.(*String))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_GetTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(String)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).GetTrack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/GetTrack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).GetTrack(ctx, req.(*String))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_GetArtistAlbums_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).GetArtistAlbums(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/GetArtistAlbums",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).GetArtistAlbums(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_GetArtistTracks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).GetArtistTracks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/GetArtistTracks",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).GetArtistTracks(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_GetPlaylists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).GetPlaylists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/GetPlaylists",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).GetPlaylists(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetcher_GetPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetcherServer).GetPlaylist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/player.Fetcher/GetPlaylist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetcherServer).GetPlaylist(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Fetcher_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "player.Fetcher",
+	HandlerType: (*FetcherServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Name",
+			Handler:    _Fetcher_Name_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _Fetcher_Login_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _Fetcher_Ping_Handler,
+		},
+		{
+			MethodName: "AlbumLink",
+			Handler:    _Fetcher_AlbumLink_Handler,
+		},
+		{
+			MethodName: "FindArtist",
+			Handler:    _Fetcher_FindArtist_Handler,
+		},
+		{
+			MethodName: "FindAlbum",
+			Handler:    _Fetcher_FindAlbum_Handler,
+		},
+		{
+			MethodName: "FindTrack",
+			Handler:    _Fetcher_FindTrack_Handler,
+		},
+		{
+			MethodName: "GetAlbum",
+			Handler:    _Fetcher_GetAlbum_Handler,
+		},
+		{
+			MethodName: "GetTrack",
+			Handler:    _Fetcher_GetTrack_Handler,
+		},
+		{
+			MethodName: "GetArtistAlbums",
+			Handler:    _Fetcher_GetArtistAlbums_Handler,
+		},
+		{
+			MethodName: "GetArtistTracks",
+			Handler:    _Fetcher_GetArtistTracks_Handler,
+		},
+		{
+			MethodName: "GetPlaylists",
+			Handler:    _Fetcher_GetPlaylists_Handler,
+		},
+		{
+			MethodName: "GetPlaylist",
+			Handler:    _Fetcher_GetPlaylist_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "player.proto",
 }

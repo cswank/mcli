@@ -17,7 +17,9 @@ service Player {
 	rpc History(Page) returns (Results) {}
 	rpc Done(String) returns (Empty) {}
 	rpc Close(Empty) returns (Empty) {}
+}
 
+service Fetcher {   
     rpc Name(Empty) returns (String) {}
     rpc	Login(UsernamePassword) returns (Empty) {}
     rpc	Ping(Empty) returns (Bool) {}
