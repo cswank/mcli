@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package player;
+package rpc;
 
 service Player {   
 	rpc Play(Result) returns (Empty) {}

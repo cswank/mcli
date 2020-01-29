@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/DataDog/zstd v1.4.4 // indirect
-	github.com/GeertJohan/go.rice v0.0.0-20170420135705-c02ca9a983da
+	github.com/GeertJohan/go.rice v1.0.0
 	github.com/Sereal/Sereal v0.0.0-20191108142857-925030a7cf14 // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/asdine/storm v1.1.0
@@ -12,7 +12,6 @@ require (
 	github.com/aybabtme/rgbterm v0.0.0-20170906152045-cc83f3b3ce59
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/cswank/tidal v0.0.0-20180325134625-c9e020041ea9
-	github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb // indirect
 	github.com/faiface/beep v1.0.2
 	github.com/fatih/color v1.7.0
 	github.com/golang/protobuf v1.3.2

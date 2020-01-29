@@ -23,7 +23,7 @@ import (
 	"github.com/faiface/beep/speaker"
 )
 
-type Flac struct {
+type Local struct {
 	queue         *queue
 	history       repo.History
 	playing       bool
@@ -54,7 +54,7 @@ func getFlacPath() string {
 	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
 }
 
-func NewFlac(host string) (*Flac, error) {
+func NewLocal(host string) (*Local, error) {
 	hist, err := repo.NewStorm()
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func NewFlac(host string) (*Flac, error) {
 		return nil, err
 	}
 
-	p := &Flac{
+	l := &Local{
 		history:     hist,
 		sep:         string(filepath.Separator),
 		queue:       newQueue(),
@@ -104,159 +104,159 @@ func NewFlac(host string) (*Flac, error) {
 		host:        strings.Replace(host, "50051", "8080", 1),
 	}
 
-	go p.playLoop()
-	go p.downloadLoop()
-	return p, nil
+	go l.playLoop()
+	go l.downloadLoop()
+	return l, nil
 }
 
-func (f *Flac) NextSong(id string, fn func(schema.Result)) {
-	f.nextSongCB[id] = fn
-	if fn != nil && f.currentResult != nil {
-		fn(*f.currentResult)
+func (l *Local) NextSong(id string, fn func(schema.Result)) {
+	l.nextSongCB[id] = fn
+	if fn != nil && l.currentResult != nil {
+		fn(*l.currentResult)
 	}
 }
 
-func (f *Flac) callNextSong() {
-	f.nextSongLock.Lock()
-	for id, fn := range f.nextSongCB {
-		if fn != nil && f.currentResult != nil {
-			fn(*f.currentResult)
+func (l *Local) callNextSong() {
+	l.nextSongLock.Lock()
+	for id, fn := range l.nextSongCB {
+		if fn != nil && l.currentResult != nil {
+			fn(*l.currentResult)
 		} else if fn == nil {
-			delete(f.nextSongCB, id)
+			delete(l.nextSongCB, id)
 		}
 	}
-	f.nextSongLock.Unlock()
+	l.nextSongLock.Unlock()
 }
 
-func (f *Flac) Play(r schema.Result) {
-	f.queue.Add(r)
+func (l *Local) Play(r schema.Result) {
+	l.queue.Add(r)
 }
 
-func (f *Flac) History(page, pageSize int, sort Sort) (*schema.Results, error) {
-	return f.history.Fetch(page, pageSize, sort)
+func (l *Local) History(page, pageSize int, sort repo.Sort) (*schema.Results, error) {
+	return l.history.Fetch(page, pageSize, sort)
 }
 
-func (f *Flac) PlayAlbum(album *schema.Results) {
+func (l *Local) PlayAlbum(album *schema.Results) {
 	for _, r := range album.Results {
-		f.Play(r)
+		l.Play(r)
 	}
 }
 
-func (f *Flac) Pause() {
-	if f.playing {
-		f.pause <- true
+func (l *Local) Pause() {
+	if l.playing {
+		l.pause <- true
 	}
 }
 
-func (f *Flac) Volume(v float64) float64 {
+func (l *Local) Volume(v float64) float64 {
 	var out float64
-	if f.playing {
-		f.vol <- v
-		out = <-f.volOut
+	if l.playing {
+		l.vol <- v
+		out = <-l.volOut
 	} else {
-		f.volume += v
-		out = f.volume
+		l.volume += v
+		out = l.volume
 	}
 
 	return out
 }
 
-func (f *Flac) Queue() *schema.Results {
+func (l *Local) Queue() *schema.Results {
 	var r []schema.Result
-	if f.onDeckResult != nil {
-		r = []schema.Result{*f.onDeckResult}
+	if l.onDeckResult != nil {
+		r = []schema.Result{*l.onDeckResult}
 	}
 	return &schema.Results{
-		Results: append(r, f.queue.Playlist()...),
+		Results: append(r, l.queue.Playlist()...),
 	}
 }
 
-func (f *Flac) RemoveFromQueue(indices []int) {
+func (l *Local) RemoveFromQueue(indices []int) {
 	sort.Sort(sort.Reverse(sort.IntSlice(indices)))
 	for _, i := range indices {
 		if i == 0 {
-			<-f.onDeck
+			<-l.onDeck
 		} else {
-			f.queue.Remove(i - 1)
+			l.queue.Remove(i - 1)
 		}
 	}
 }
 
-func (f *Flac) Done(id string) {
-	f.playLock.Lock()
-	delete(f.playCB, id)
-	for k, v := range f.playCB {
+func (l *Local) Done(id string) {
+	l.playLock.Lock()
+	delete(l.playCB, id)
+	for k, v := range l.playCB {
 		if v == nil {
-			delete(f.playCB, k)
+			delete(l.playCB, k)
 		}
 	}
-	f.playLock.Unlock()
-	f.downloadLock.Lock()
-	delete(f.downloadCB, id)
-	for k, v := range f.downloadCB {
+	l.playLock.Unlock()
+	l.downloadLock.Lock()
+	delete(l.downloadCB, id)
+	for k, v := range l.downloadCB {
 		if v == nil {
-			delete(f.downloadCB, k)
+			delete(l.downloadCB, k)
 		}
 	}
-	f.downloadLock.Unlock()
+	l.downloadLock.Unlock()
 
-	f.nextSongLock.Lock()
-	delete(f.nextSongCB, id)
-	for k, v := range f.nextSongCB {
+	l.nextSongLock.Lock()
+	delete(l.nextSongCB, id)
+	for k, v := range l.nextSongCB {
 		if v == nil {
-			delete(f.nextSongCB, k)
+			delete(l.nextSongCB, k)
 		}
 	}
-	f.nextSongLock.Unlock()
+	l.nextSongLock.Unlock()
 }
 
-func (f *Flac) Close() {
+func (l *Local) Close() {
 	file, err := os.Create(getFlacPath())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	json.NewEncoder(file).Encode(flacSettings{Volume: f.volume})
+	json.NewEncoder(file).Encode(flacSettings{Volume: l.volume})
 }
 
-func (f *Flac) FastForward() {
-	if f.playing {
-		f.fastForward <- true
+func (l *Local) FastForward() {
+	if l.playing {
+		l.fastForward <- true
 	}
 }
 
-func (f *Flac) Rewind() {
-	if f.playing {
-		f.rewind <- true
+func (l *Local) Rewind() {
+	if l.playing {
+		l.rewind <- true
 	}
 }
 
-func (f *Flac) downloadLoop() {
+func (l *Local) downloadLoop() {
 	for {
-		r := f.queue.Next()
-		f.onDeckResult = &r
-		song := f.download(&r)
-		f.onDeck <- *song
-		f.onDeckResult = nil
+		r := l.queue.Next()
+		l.onDeckResult = &r
+		song := l.download(&r)
+		l.onDeck <- *song
+		l.onDeckResult = nil
 	}
 }
 
-func (f *Flac) playLoop() {
+func (l *Local) playLoop() {
 	for {
-		s := <-f.onDeck
-		f.playing = true
-		if err := f.doPlay(s); err != nil {
+		s := <-l.onDeck
+		l.playing = true
+		if err := l.doPlay(s); err != nil {
 			log.Fatal(err)
 		}
-		f.playing = false
+		l.playing = false
 	}
 }
 
-func (f *Flac) doPlay(s song) error {
-	f.currentResult = &s.result
-	f.callNextSong()
+func (l *Local) doPlay(s song) error {
+	l.currentResult = &s.result
+	l.callNextSong()
 
-	if err := f.history.Save(s.result); err != nil {
+	if err := l.history.Save(s.result); err != nil {
 		return err
 	}
 
@@ -268,7 +268,7 @@ func (f *Flac) doPlay(s song) error {
 	vol := &effects.Volume{
 		Streamer: music,
 		Base:     2,
-		Volume:   f.volume,
+		Volume:   l.volume,
 	}
 
 	ctrl := &beep.Ctrl{
@@ -278,75 +278,75 @@ func (f *Flac) doPlay(s song) error {
 
 	var done bool
 	var paused bool
-	l := music.Len()
+	ln := music.Len()
 	var i int
 	for !done {
 		select {
 		case <-time.After(500 * time.Millisecond):
 			pos := music.Position()
-			done = pos >= l
+			done = pos >= ln
 			i++
-			f.playLock.Lock()
-			for k, cb := range f.playCB {
+			l.playLock.Lock()
+			for k, cb := range l.playCB {
 				if cb != nil {
-					cb(schema.Progress{N: pos, Total: l})
+					cb(schema.Progress{N: pos, Total: ln})
 				} else {
-					delete(f.playCB, k)
+					delete(l.playCB, k)
 				}
 			}
-			f.playLock.Unlock()
-		case v := <-f.vol:
+			l.playLock.Unlock()
+		case v := <-l.vol:
 			speaker.Lock()
-			if (f.volume < 2.0 && v > 0.0) || (f.volume > -5.0 && v < 0.0) {
+			if (l.volume < 2.0 && v > 0.0) || (l.volume > -5.0 && v < 0.0) {
 				vol.Volume += v
-				f.volume = vol.Volume
+				l.volume = vol.Volume
 			}
 			speaker.Unlock()
-			f.volOut <- f.volume
-		case <-f.pause:
+			l.volOut <- l.volume
+		case <-l.pause:
 			paused = !paused
 			speaker.Lock()
 			ctrl.Paused = paused
 			speaker.Unlock()
-		case <-f.fastForward:
+		case <-l.fastForward:
 			done = true
-		case <-f.rewind:
+		case <-l.rewind:
 			music.Close()
 			s.reset()
-			return f.doPlay(s)
+			return l.doPlay(s)
 		}
 	}
 
-	f.currentResult = nil
+	l.currentResult = nil
 	return music.Close()
 }
 
-func (f *Flac) DownloadProgress(id string, fn func(schema.Progress)) {
-	f.downloadLock.Lock()
-	f.downloadCB[id] = fn
-	f.downloadLock.Unlock()
+func (l *Local) DownloadProgress(id string, fn func(schema.Progress)) {
+	l.downloadLock.Lock()
+	l.downloadCB[id] = fn
+	l.downloadLock.Unlock()
 }
 
-func (f *Flac) PlayProgress(id string, fn func(schema.Progress)) {
-	f.playLock.Lock()
-	f.playCB[id] = fn
-	f.playLock.Unlock()
+func (l *Local) PlayProgress(id string, fn func(schema.Progress)) {
+	l.playLock.Lock()
+	l.playCB[id] = fn
+	l.playLock.Unlock()
 }
 
-func (f *Flac) download(r *schema.Result) *song {
-	out, err := f.doDownload(*r)
+func (l *Local) download(r *schema.Result) *song {
+	out, err := l.doDownload(*r)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return out
 }
 
-func (f *Flac) doDownload(r schema.Result) (*song, error) {
+func (l *Local) doDownload(r schema.Result) (*song, error) {
 	out := &song{
 		result: r,
 	}
 
-	resp, err := f.getTrack(r)
+	resp, err := l.getTrack(r)
 	if err != nil {
 		return out, fmt.Errorf("could not get stream %+v: %s", r, err)
 	}
@@ -355,7 +355,7 @@ func (f *Flac) doDownload(r schema.Result) (*song, error) {
 
 	out.buf = &bytes.Buffer{}
 
-	pr := newProgressRead(resp.Body, int(resp.ContentLength), f.downloadCB)
+	pr := newProgressRead(resp.Body, int(resp.ContentLength), l.downloadCB)
 	w := out.writer()
 	_, err = io.Copy(w, pr)
 	if err != nil {
@@ -366,9 +366,9 @@ func (f *Flac) doDownload(r schema.Result) (*song, error) {
 	return out, nil
 }
 
-func (f *Flac) getTrack(r schema.Result) (*http.Response, error) {
+func (l *Local) getTrack(r schema.Result) (*http.Response, error) {
 	if r.Track.URI != "" {
-		return http.Get(fmt.Sprintf("http://%s/%s", f.host, r.Track.URI))
+		return http.Get(fmt.Sprintf("http://%s/%s", l.host, r.Track.URI))
 	}
 
 	file, err := os.Open(r.Track.ID[7:])
@@ -377,8 +377,8 @@ func (f *Flac) getTrack(r schema.Result) (*http.Response, error) {
 	}, err
 }
 
-func (f *Flac) clean(s string) string {
-	return strings.Replace(s, f.sep, "", -1)
+func (l *Local) clean(s string) string {
+	return strings.Replace(s, l.sep, "", -1)
 }
 
 type progressRead struct {

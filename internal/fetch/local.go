@@ -1,4 +1,4 @@
-package play
+package fetch
 
 import (
 	"fmt"
@@ -10,37 +10,37 @@ import (
 	"bitbucket.org/cswank/mcli/internal/schema"
 )
 
-type Disk struct {
+type Local struct {
 	pth string
 }
 
-func NewDisk() *Disk {
-	return &Disk{
+func NewLocal() *Local {
+	return &Local{
 		pth: os.Getenv("MCLI_DISK_LOCATION"),
 	}
 }
 
-func (d *Disk) Name() string               { return "disk" }
-func (d *Disk) Login(string, string) error { return nil }
-func (d *Disk) Ping() bool                 { return true }
-func (d *Disk) AlbumLink() string          { return "" }
+func (l Local) Name() string               { return "disk" }
+func (l Local) Login(string, string) error { return nil }
+func (l Local) Ping() bool                 { return true }
+func (l Local) AlbumLink() string          { return "" }
 
-func (d *Disk) FindArtist(term string, n int) (*schema.Results, error) {
-	glob := filepath.Join(d.pth, fmt.Sprintf("*%s*", term))
-	return d.doFind(glob, "artist search")
+func (l Local) FindArtist(term string, n int) (*schema.Results, error) {
+	glob := filepath.Join(l.pth, fmt.Sprintf("*%s*", term))
+	return l.doFind(glob, "artist search")
 }
 
-func (d *Disk) FindAlbum(term string, n int) (*schema.Results, error) {
-	glob := filepath.Join(d.pth, "*", fmt.Sprintf("*%s*", term))
-	return d.doFind(glob, "album search")
+func (l Local) FindAlbum(term string, n int) (*schema.Results, error) {
+	glob := filepath.Join(l.pth, "*", fmt.Sprintf("*%s*", term))
+	return l.doFind(glob, "album search")
 }
 
-func (d *Disk) FindTrack(term string, n int) (*schema.Results, error) {
-	glob := filepath.Join(d.pth, "*", "*", fmt.Sprintf("*%s*.flac", term))
-	return d.doFind(glob, "album")
+func (l Local) FindTrack(term string, n int) (*schema.Results, error) {
+	glob := filepath.Join(l.pth, "*", "*", fmt.Sprintf("*%s*.flac", term))
+	return l.doFind(glob, "album")
 }
 
-func (d *Disk) doFind(glob, t string) (*schema.Results, error) {
+func (l Local) doFind(glob, t string) (*schema.Results, error) {
 	albums, err := filepath.Glob(glob)
 	if err != nil {
 		return nil, nil
@@ -49,7 +49,7 @@ func (d *Disk) doFind(glob, t string) (*schema.Results, error) {
 	var maxTitle int
 	out := make([]schema.Result, len(albums))
 	for i, s := range albums {
-		r := d.resultFromPath(s)
+		r := l.resultFromPath(s)
 		if len(r.Album.Title) > maxTitle {
 			maxTitle = len(r.Album.Title)
 		}
@@ -66,8 +66,8 @@ func (d *Disk) doFind(glob, t string) (*schema.Results, error) {
 	}, nil
 }
 
-func (d *Disk) GetAlbum(id string) (*schema.Results, error) {
-	tracks, err := filepath.Glob(filepath.Join(d.pth, id, "*.flac"))
+func (l Local) GetAlbum(id string) (*schema.Results, error) {
+	tracks, err := filepath.Glob(filepath.Join(l.pth, id, "*.flac"))
 	if err != nil {
 		return nil, nil
 	}
@@ -76,7 +76,7 @@ func (d *Disk) GetAlbum(id string) (*schema.Results, error) {
 	var maxTitle int
 
 	for i, tr := range tracks {
-		res := d.resultFromPath(tr)
+		res := l.resultFromPath(tr)
 		if len(res.Track.Title) > maxTitle {
 			maxTitle = len(res.Track.Title)
 		}
@@ -95,31 +95,31 @@ func (d *Disk) GetAlbum(id string) (*schema.Results, error) {
 	}, nil
 }
 
-func (d *Disk) GetTrack(id string) (string, error) {
+func (l Local) GetTrack(id string) (string, error) {
 	return id, nil
 }
 
-func (d *Disk) GetArtistAlbums(id string, n int) (*schema.Results, error) {
+func (l Local) GetArtistAlbums(id string, n int) (*schema.Results, error) {
 	log.Println("getartistalbums", id)
-	glob := filepath.Join(d.pth, id, "*")
-	return d.doFind(glob, "album search")
+	glob := filepath.Join(l.pth, id, "*")
+	return l.doFind(glob, "album search")
 }
 
-func (d *Disk) GetArtistTracks(id string, n int) (*schema.Results, error) {
-	glob := filepath.Join(d.pth, id, "*", "*.flac")
-	return d.doFind(glob, "album")
+func (l Local) GetArtistTracks(id string, n int) (*schema.Results, error) {
+	glob := filepath.Join(l.pth, id, "*", "*.flac")
+	return l.doFind(glob, "album")
 }
 
-func (d *Disk) GetPlaylists() (*schema.Results, error) {
+func (l Local) GetPlaylists() (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (d *Disk) GetPlaylist(string, int) (*schema.Results, error) {
+func (l Local) GetPlaylist(string, int) (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (d *Disk) resultFromPath(pth string) schema.Result {
-	pth = strings.Replace(pth, d.pth, "", -1)
+func (l Local) resultFromPath(pth string) schema.Result {
+	pth = strings.Replace(pth, l.pth, "", -1)
 	if strings.Index(pth, "/") == 0 {
 		pth = pth[1:]
 	}
@@ -144,7 +144,7 @@ func (d *Disk) resultFromPath(pth string) schema.Result {
 
 	if len(parts) >= 3 {
 		track = schema.Track{
-			ID:    filepath.Join(d.pth, parts[0], parts[1], parts[2]),
+			ID:    filepath.Join(l.pth, parts[0], parts[1], parts[2]),
 			Title: strings.Replace(parts[2], ".flac", "", -1),
 			URI:   filepath.Join("tracks", parts[0], parts[1], parts[2]),
 		}
