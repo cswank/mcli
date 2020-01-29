@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	"bitbucket.org/cswank/mcli/internal/player"
+	"bitbucket.org/cswank/mcli/internal/schema"
 	"github.com/atotto/clipboard"
 	ui "github.com/jroimartin/gocui"
 )
@@ -13,8 +13,8 @@ type body struct {
 	albumURL string
 	coords   coords
 	height   int
-	results  *player.Results
-	view     []player.Result
+	results  *schema.Results
+	view     []schema.Result
 	cursor   int
 	page     int
 }
@@ -50,7 +50,7 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 	return nil
 }
 
-func (b *body) newResults(r *player.Results) {
+func (b *body) newResults(r *schema.Results) {
 	b.page = 0
 	b.results = r
 	b.makeView()

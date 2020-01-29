@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/cswank/mcli/internal/player"
+	"bitbucket.org/cswank/mcli/internal/repo"
+	"bitbucket.org/cswank/mcli/internal/schema"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -16,13 +17,13 @@ type screen struct {
 
 	header       *header
 	body         *body
-	play         *play
+	play         *player
 	buffer       *buffer
 	search       *search
 	artistDialog *artistDialog
 	history      *history
 	volume       *volume
-	historySort  player.Sort
+	historySort  repo.Sort
 	login        *login
 	help         *help
 
@@ -42,7 +43,7 @@ func newScreen(width, height int, cli *client) (*screen, error) {
 		view:        "body",
 		width:       width,
 		height:      height,
-		historySort: player.Time,
+		historySort: repo.Time,
 		play:        newPlay(width, height, id, cli),
 		body:        newBody(width, height, cli.AlbumLink()),
 		buffer:      newBuffer(width, height, id, cli),
@@ -156,10 +157,10 @@ func (s *screen) queueNoCursor(g *ui.Gui, v *ui.View) error {
 	}
 
 	f := fmt.Sprintf("%%-%ds%%-%ds%%s\n", maxTitle+4, maxAlbum+4)
-	results := &player.Results{
+	results := &schema.Results{
 		Header: fmt.Sprintf(f, "Title", "Album", "Artist"),
 		Type:   "queue",
-		Print: func(r player.Result) string {
+		Print: func(r schema.Result) string {
 			return fmt.Sprintf(f, r.Track.Title, r.Album.Title, r.Artist.Name)
 		},
 		Results: items,
@@ -287,7 +288,7 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 	return s.help.hide(g, v)
 }
 
-func (s *screen) showHistory(sort player.Sort) error {
+func (s *screen) showHistory(sort repo.Sort) error {
 	g.DeleteView("history-type")
 	s.historySort = sort
 	res, err := s.client.History(0, s.height*10, sort)
@@ -351,7 +352,7 @@ func (s *screen) doSearch(searchType, term string) error {
 	}
 
 	if term != "" {
-		var results *player.Results
+		var results *schema.Results
 		var err error
 		s.view = "body"
 		switch searchType {
@@ -546,10 +547,10 @@ func (s *screen) keybindings(g *ui.Gui) error {
 
 type stack struct {
 	//current results
-	topR *player.Results
+	topR *schema.Results
 	//current cursor
 	topC    int
-	stack   []player.Results
+	stack   []schema.Results
 	cursors []int
 }
 
@@ -557,11 +558,11 @@ func (s *stack) len() int {
 	return len(s.stack)
 }
 
-func (s *stack) top() (*player.Results, int) {
+func (s *stack) top() (*schema.Results, int) {
 	return s.topR, s.topC
 }
 
-func (s *stack) add(r *player.Results, c int) {
+func (s *stack) add(r *schema.Results, c int) {
 	s.topR = r
 	s.topC = c
 	s.stack = append(s.stack, *r)
@@ -572,7 +573,7 @@ func (s *stack) clear() {
 	s.topR = nil
 	s.topC = 0
 	s.cursors = []int{}
-	s.stack = []player.Results{}
+	s.stack = []schema.Results{}
 }
 
 func (s *stack) pop() {

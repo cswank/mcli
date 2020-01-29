@@ -1,7 +1,7 @@
 package views
 
 import (
-	"bitbucket.org/cswank/mcli/internal/player"
+	"bitbucket.org/cswank/mcli/internal/repo"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -12,10 +12,10 @@ const (
 
 type history struct {
 	coords    coords
-	doHistory func(player.Sort) error
+	doHistory func(repo.Sort) error
 }
 
-func newHistory(w, h int, cb func(player.Sort) error) *history {
+func newHistory(w, h int, cb func(repo.Sort) error) *history {
 	maxX, maxY := g.Size()
 	x1 := maxX/2 - historyWidth/2
 	x2 := maxX/2 + historyWidth/2
@@ -30,12 +30,12 @@ func newHistory(w, h int, cb func(player.Sort) error) *history {
 
 func (h *history) recent(g *ui.Gui, v *ui.View) error {
 	v.Clear()
-	return h.doHistory(player.Time)
+	return h.doHistory(repo.Time)
 }
 
 func (h *history) played(g *ui.Gui, v *ui.View) error {
 	v.Clear()
-	return h.doHistory(player.Count)
+	return h.doHistory(repo.Count)
 }
 
 func (s *history) render(g *ui.Gui, v *ui.View) error {

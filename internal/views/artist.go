@@ -1,7 +1,7 @@
 package views
 
 import (
-	"bitbucket.org/cswank/mcli/internal/player"
+	"bitbucket.org/cswank/mcli/internal/schema"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -10,7 +10,7 @@ import (
 type artistDialog struct {
 	name     string
 	coords   coords
-	selected player.Result
+	selected schema.Result
 
 	searchType string
 	callback   func(string, string) error
