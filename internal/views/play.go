@@ -4,50 +4,50 @@ import (
 	"fmt"
 	"strings"
 
-	"bitbucket.org/cswank/mcli/internal/player"
+	"bitbucket.org/cswank/mcli/internal/schema"
 	ui "github.com/jroimartin/gocui"
 )
 
-type play struct {
+type player struct {
 	width  int
 	coords coords
-	ch     chan player.Progress
-	client player.Client
+	ch     chan schema.Progress
+	client *client
 }
 
-func newPlay(w, h int, id string, c player.Client) *play {
-	p := &play{
+func newPlay(w, h int, id string, c *client) *player {
+	p := &player{
 		width:  w,
 		coords: coords{x1: -1, y1: h - 2, x2: w, y2: h},
 		client: c,
-		ch:     make(chan player.Progress),
+		ch:     make(chan schema.Progress),
 	}
 
 	c.PlayProgress(id, p.playProgress)
 	return p
 }
 
-func (p *play) doPause() {
+func (p *player) doPause() {
 	p.client.Pause()
 }
 
-func (p *play) volume(v float64) float64 {
+func (p *player) volume(v float64) float64 {
 	return p.client.Volume(v)
 }
 
-func (p *play) addAlbumToQueue(album []player.Result) {
-	p.client.PlayAlbum(&player.Results{Results: album})
+func (p *player) addAlbumToQueue(album []schema.Result) {
+	p.client.PlayAlbum(&schema.Results{Results: album})
 }
 
-func (p *play) removeFromQueue(i int) {
+func (p *player) removeFromQueue(i int) {
 	p.client.RemoveFromQueue([]int{i})
 }
 
-func (p *play) getQueue() []player.Result {
+func (p *player) getQueue() []schema.Result {
 	return p.client.Queue().Results
 }
 
-func (p *play) playProgress(prog player.Progress) {
+func (p *player) playProgress(prog schema.Progress) {
 	if prog.Total > 0 {
 		g.Update(func(g *ui.Gui) error {
 			v, _ := g.View("play")
@@ -58,21 +58,21 @@ func (p *play) playProgress(prog player.Progress) {
 	}
 }
 
-func (p *play) clear() {
+func (p *player) clear() {
 	v, _ := g.View("play")
 	v.Clear()
 }
 
-func (p *play) play(r player.Result) {
+func (p *player) play(r schema.Result) {
 	p.client.Play(r)
 }
 
-func (p *play) next() {
+func (p *player) next() {
 	p.client.FastForward()
 	p.clear()
 }
 
-func (p *play) rewind() {
+func (p *player) rewind() {
 	p.client.Rewind()
 	p.clear()
 }

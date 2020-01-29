@@ -28,13 +28,13 @@ type screen struct {
 
 	keys []key
 
-	client player.Client
+	client *client
 	stack  stack
 
 	volumeEvent chan bool
 }
 
-func newScreen(width, height int, cli player.Client) (*screen, error) {
+func newScreen(width, height int, cli *client) (*screen, error) {
 	id := randString(10)
 	s := &screen{
 		id:          id,

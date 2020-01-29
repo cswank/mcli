@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/cswank/mcli/internal/player"
+	"bitbucket.org/cswank/mcli/internal/schema"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -27,17 +27,17 @@ func randString(n int) string {
 type buffer struct {
 	width    int
 	coords   coords
-	progress chan player.Progress
-	song     chan player.Result
+	progress chan schema.Progress
+	song     chan schema.Result
 	text     string
 }
 
-func newBuffer(w, h int, id string, cli player.Player) *buffer {
+func newBuffer(w, h int, id string, cli *client) *buffer {
 	b := &buffer{
 		width:    w - 1,
 		coords:   coords{x1: -1, y1: h - 3, x2: w, y2: h - 1},
-		progress: make(chan player.Progress),
-		song:     make(chan player.Result),
+		progress: make(chan schema.Progress),
+		song:     make(chan schema.Result),
 	}
 
 	cli.NextSong(id, b.nextSong)
@@ -47,11 +47,11 @@ func newBuffer(w, h int, id string, cli player.Player) *buffer {
 	return b
 }
 
-func (b *buffer) downloadProgress(prog player.Progress) {
+func (b *buffer) downloadProgress(prog schema.Progress) {
 	b.progress <- prog
 }
 
-func (b *buffer) nextSong(r player.Result) {
+func (b *buffer) nextSong(r schema.Result) {
 	b.song <- r
 }
 
