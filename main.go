@@ -17,6 +17,7 @@ var (
 	app     = kingpin.New("mcli", "A command-line music player.")
 	srv     = app.Command("serve", "start grpc and http servers")
 	addr    = app.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
+	pth     = app.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
 	logout  = app.Flag("log", "log location (for debugging)").Short('l').String()
 	logfile *os.File
 )
@@ -30,8 +31,7 @@ func main() {
 	case "serve":
 		doServe()
 	default:
-		cleanup := doLog(*logout)
-		defer cleanup()
+		defer doLog(*logout)()
 		gui()
 	}
 }
@@ -42,7 +42,7 @@ func doServe() {
 		log.Fatal("cli ", err)
 	}
 
-	f := fetch.NewLocal()
+	f := fetch.NewLocal(*pth)
 
 	if err := server.Start(p, f); err != nil {
 		log.Fatal("rpc ", err)
@@ -50,7 +50,7 @@ func doServe() {
 }
 
 func gui() {
-	f := fetch.NewLocal()
+	f := fetch.NewLocal(*pth)
 	p, err := play.NewLocal("")
 	if err != nil {
 		log.Fatal(err)

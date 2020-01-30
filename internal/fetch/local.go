@@ -3,7 +3,6 @@ package fetch
 import (
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -14,9 +13,9 @@ type Local struct {
 	pth string
 }
 
-func NewLocal() *Local {
+func NewLocal(pth string) *Local {
 	return &Local{
-		pth: os.Getenv("MCLI_DISK_LOCATION"),
+		pth: pth,
 	}
 }
 
