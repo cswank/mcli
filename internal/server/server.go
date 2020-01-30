@@ -147,15 +147,7 @@ func Start(p play.Player, f fetch.Fetcher) error {
 		done: make(chan bool),
 	})
 
-	// stop := make(chan os.Signal)
-	// signal.Notify(stop, syscall.SIGTERM)
-	// signal.Notify(stop, syscall.SIGINT)
 	s.Serve(lis)
-
-	// <-stop
-	// fmt.Println("graceful stop")
-	// s.GracefulStop()
-	//cli.Close()
 	return nil
 }
 
