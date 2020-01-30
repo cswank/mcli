@@ -7,8 +7,8 @@ import (
 	"bitbucket.org/cswank/mcli/internal/fetch"
 	"bitbucket.org/cswank/mcli/internal/play"
 	"bitbucket.org/cswank/mcli/internal/repo"
-	"bitbucket.org/cswank/mcli/internal/schema"
 	"bitbucket.org/cswank/mcli/internal/rpc"
+	"bitbucket.org/cswank/mcli/internal/schema"
 	"google.golang.org/grpc"
 
 	"golang.org/x/net/context"
@@ -142,7 +142,7 @@ func Start(p play.Player, f fetch.Fetcher) error {
 
 	// Creates a new gRPC server
 	s := grpc.NewServer()
-	RegisterPlayerServer(s, &server{
+	rpc.RegisterPlayerServer(s, &server{
 		cli:  &client{Player: p, Fetcher: f},
 		done: make(chan bool),
 	})
@@ -161,65 +161,65 @@ func Start(p play.Player, f fetch.Fetcher) error {
 
 func (s *server) Name(ctx context.Context, _ *rpc.Empty) (*rpc.String, error) {
 	n := s.cli.Name()
-	return &String{Value: n}, nil
+	return &rpc.String{Value: n}, nil
 }
 
-func (s *server) Login(ctx context.Context, up *UsernamePassword) (*rpc.Empty, error) {
+func (s *server) Login(ctx context.Context, up *rpc.UsernamePassword) (*rpc.Empty, error) {
 	err := s.cli.Login(up.Username, up.Passwrord)
-	return &Empty{}, err
+	return &rpc.Empty{}, err
 }
 
-func (s *server) Ping(ctx context.Context, _ *Empty) (*rpc.Bool, error) {
+func (s *server) Ping(ctx context.Context, _ *rpc.Empty) (*rpc.Bool, error) {
 	out := s.cli.Ping()
-	return &Bool{Value: out}, nil
+	return &rpc.Bool{Value: out}, nil
 }
 
-func (s *server) AlbumLink(ctx context.Context, _ *Empty) (*rpc.String, error) {
+func (s *server) AlbumLink(ctx context.Context, _ *rpc.Empty) (*rpc.String, error) {
 	s.cli.AlbumLink()
-	return &String{}, nil
+	return &rpc.String{}, nil
 }
 
-func (s *server) FindArtist(ctx context.Context, r *Request) (*rpc.Results, error) {
+func (s *server) FindArtist(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.FindArtist(r.Term, int(r.N))
 	return rpc.PBFromResults(out), err
 }
 
-func (s *server) FindAlbum(ctx context.Context, r *Request) (*rpc.Results, error) {
+func (s *server) FindAlbum(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.FindAlbum(r.Term, int(r.N))
-	return PBFromResults(out), err
+	return rpc.PBFromResults(out), err
 }
 
-func (s *server) FindTrack(ctx context.Context, r *Request) (*rpc.Results, error) {
+func (s *server) FindTrack(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.FindTrack(r.Term, int(r.N))
-	return PBFromResults(out), err
+	return rpc.PBFromResults(out), err
 }
 
 func (s *server) GetAlbum(ctx context.Context, st *rpc.String) (*rpc.Results, error) {
 	out, err := s.cli.GetAlbum(st.Value)
-	return PBFromResults(out), err
+	return rpc.PBFromResults(out), err
 }
 
 func (s *server) GetTrack(ctx context.Context, st *rpc.String) (*rpc.String, error) {
 	out, err := s.cli.GetTrack(st.Value)
-	return &String{Value: out}, err
+	return &rpc.String{Value: out}, err
 }
 
-func (s *server) GetArtistAlbums(ctx context.Context, r *schema.Request) (*rpc.Results, error) {
+func (s *server) GetArtistAlbums(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.GetArtistAlbums(r.Term, int(r.N))
-	return PBFromResults(out), err
+	return rpc.PBFromResults(out), err
 }
 
-func (s *server) GetArtistTracks(ctx context.Context, r *schema.Request) (*rpc.Results, error) {
+func (s *server) GetArtistTracks(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.GetArtistTracks(r.Term, int(r.N))
-	return PBFromResults(out), err
+	return rpc.PBFromResults(out), err
 }
 
 func (s *server) GetPlaylists(ctx context.Context, e *rpc.Empty) (*rpc.Results, error) {
 	out, err := s.cli.GetPlaylists()
-	return PBFromResults(out), err
+	return rpc.PBFromResults(out), err
 }
 
 func (s *server) GetPlaylist(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.GetPlaylist(r.Term, int(r.N))
-	return PBFromResults(out), err
+	return rpc.PBFromResults(out), err
 }

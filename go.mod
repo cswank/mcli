@@ -6,6 +6,8 @@ require (
 	github.com/DataDog/zstd v1.4.4 // indirect
 	github.com/GeertJohan/go.rice v1.0.0
 	github.com/Sereal/Sereal v0.0.0-20191108142857-925030a7cf14 // indirect
+	github.com/alecthomas/kingpin v2.2.6+incompatible // indirect
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/asdine/storm v1.1.0
 	github.com/atotto/clipboard v0.0.0-20171229224153-bc5958e1c833

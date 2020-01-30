@@ -367,11 +367,11 @@ func (l *Local) doDownload(r schema.Result) (*song, error) {
 }
 
 func (l *Local) getTrack(r schema.Result) (*http.Response, error) {
-	if r.Track.URI != "" {
-		return http.Get(fmt.Sprintf("http://%s/%s", l.host, r.Track.URI))
+	if strings.Index(r.Track.URI, "http://") == 0 {
+		return http.Get(r.Track.URI)
 	}
 
-	file, err := os.Open(r.Track.ID[7:])
+	file, err := os.Open(r.Track.URI[6:])
 	return &http.Response{
 		Body: file,
 	}, err

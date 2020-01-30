@@ -13,6 +13,10 @@ type Remote struct {
 	client rpc.FetcherClient
 }
 
+func NewRemote() (*Remote, error) {
+	return &Remote{}, nil
+}
+
 func (r *Remote) Name() string {
 	out, _ := r.client.Name(context.Background(), &rpc.Empty{})
 	return out.String()

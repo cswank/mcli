@@ -6,20 +6,18 @@ import (
 	"log"
 	"os"
 
-	"bitbucket.org/cswank/mcli/internal/http"
-	"bitbucket.org/cswank/mcli/internal/player"
-	"bitbucket.org/cswank/mcli/internal/rpc"
+	"bitbucket.org/cswank/mcli/internal/fetch"
+	"bitbucket.org/cswank/mcli/internal/play"
+	"bitbucket.org/cswank/mcli/internal/server"
 	"bitbucket.org/cswank/mcli/internal/views"
-	rice "github.com/GeertJohan/go.rice"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
 )
 
 var (
-	srv     = kingpin.Flag("server", "start grpc and http servers").Short('s').Bool()
-	remote  = kingpin.Flag("remote", "grpc client with remote play").Bool()
-	cache   = kingpin.Flag("cache", "cache songs to disk").Bool()
-	addr    = kingpin.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
-	logout  = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
+	app     = kingpin.New("mcli", "A command-line music player.")
+	srv     = app.Command("serve", "start grpc and http servers")
+	addr    = app.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
+	logout  = app.Flag("log", "log location (for debugging)").Short('l').String()
 	logfile *os.File
 )
 
@@ -28,76 +26,82 @@ func main() {
 		os.Setenv("MCLI_HOME", fmt.Sprintf("%s/.mcli", os.Getenv("HOME")))
 	}
 
-	kingpin.Parse()
-
-	doLog()
-	defer cleanup()
-
-	if *srv {
+	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
+	case "serve":
 		doServe()
-	} else {
+	default:
+		cleanup := doLog(*logout)
+		defer cleanup()
 		gui()
 	}
 }
 
 func doServe() {
-	cli, err := player.NewDisk(nil, "")
+	p, err := play.NewLocal(*addr)
 	if err != nil {
 		log.Fatal("cli ", err)
 	}
 
-	go func() {
-		if err := rpc.Start(cli); err != nil {
-			log.Fatal("rpc ", err)
-		}
-	}()
+	f := fetch.NewLocal()
 
-	box := rice.MustFindBox("internal/http/html")
-	if err := http.Start(cli, box); err != nil {
-		log.Fatal("http ", err)
+	if err := server.Start(p, f); err != nil {
+		log.Fatal("rpc ", err)
 	}
 }
 
 func gui() {
-	var p player.Player
-	if !*srv {
-		c, err := rpc.NewClient(*addr, rpc.LocalPlay(!*remote, *addr))
-		if err != nil {
-			log.Fatal(err)
-		}
-		if err := views.Start(c); err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		cli, err := player.NewDisk(p, *addr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if err := views.Start(cli); err != nil {
-			log.Fatal(err)
-		}
+	f := fetch.NewLocal()
+	p, err := play.NewLocal("")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	if err := views.Start(p, f); err != nil {
+		log.Fatal(err)
+	}
+
+	// f, err := fetch.NewRemote()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// var p play.Player
+	// var f fetch.Fetcher
+
+	// if !*srv {
+	// 	c, err := rpc.NewClient(*addr, rpc.LocalPlay(!*remote, *addr))
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	if err := views.Start(c); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// } else {
+	// 	cli, err := player.NewDisk(p, *addr)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	if err := views.Start(cli); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
 }
 
-func doLog() {
-	if *srv {
-		return
-	}
-
-	if *logout != "" {
-		f, err := os.Create(*logout)
+func doLog(logout string) func() {
+	out := func() {}
+	if logout != "" {
+		f, err := os.Create(logout)
 		if err != nil {
 			log.Fatal(err)
 		}
 		logfile = f
 		log.SetOutput(f)
+		out = func() {
+			f.Close()
+		}
 	} else {
 		log.SetOutput(ioutil.Discard)
 	}
-}
 
-func cleanup() {
-	if logfile != nil {
-		logfile.Close()
-	}
+	return out
 }
