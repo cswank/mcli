@@ -15,7 +15,7 @@ import (
 
 var (
 	app     = kingpin.New("mcli", "A command-line music player.")
-	srv     = app.Command("serve", "start grpc and http servers")
+	srv     = app.Command("serve", "start the grpc server")
 	addr    = app.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
 	pth     = app.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
 	logout  = app.Flag("log", "log location (for debugging)").Short('l').String()

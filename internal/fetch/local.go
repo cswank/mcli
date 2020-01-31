@@ -3,6 +3,7 @@ package fetch
 import (
 	"fmt"
 	"log"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -143,8 +144,7 @@ func (l Local) resultFromPath(pth string) schema.Result {
 
 	if len(parts) >= 3 {
 		//uri := filepath.Join("tracks", parts[0], parts[1], parts[2])
-		uri := fmt.Sprintf("file://%s", filepath.Join(l.pth, parts[0], parts[1], parts[2]))
-		log.Println(uri, l.pth)
+		uri := path.Join(l.pth, parts[0], parts[1], parts[2])
 		track = schema.Track{
 			ID:    filepath.Join(l.pth, parts[0], parts[1], parts[2]),
 			Title: strings.Replace(parts[2], ".flac", "", -1),
