@@ -3,7 +3,6 @@ package fetch
 import (
 	"fmt"
 	"log"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -27,6 +26,7 @@ func (l Local) AlbumLink() string          { return "" }
 
 func (l Local) FindArtist(term string, n int) (*schema.Results, error) {
 	glob := filepath.Join(l.pth, fmt.Sprintf("*%s*", term))
+	log.Println("find artist", glob)
 	return l.doFind(glob, "artist search")
 }
 
@@ -95,10 +95,6 @@ func (l Local) GetAlbum(id string) (*schema.Results, error) {
 	}, nil
 }
 
-func (l Local) GetTrack(id string) (string, error) {
-	return id, nil
-}
-
 func (l Local) GetArtistAlbums(id string, n int) (*schema.Results, error) {
 	log.Println("getartistalbums", id)
 	glob := filepath.Join(l.pth, id, "*")
@@ -143,12 +139,9 @@ func (l Local) resultFromPath(pth string) schema.Result {
 	}
 
 	if len(parts) >= 3 {
-		//uri := filepath.Join("tracks", parts[0], parts[1], parts[2])
-		uri := path.Join(l.pth, parts[0], parts[1], parts[2])
 		track = schema.Track{
 			ID:    filepath.Join(l.pth, parts[0], parts[1], parts[2]),
 			Title: strings.Replace(parts[2], ".flac", "", -1),
-			URI:   uri,
 		}
 	}
 

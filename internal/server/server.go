@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net"
+	"os"
 
 	"bitbucket.org/cswank/mcli/internal/fetch"
 	"bitbucket.org/cswank/mcli/internal/play"
@@ -28,7 +29,31 @@ type server struct {
 	nextSongStream         rpc.Player_NextSongServer
 	playProgressStream     rpc.Player_PlayProgressServer
 	downloadProgressStream rpc.Player_DownloadProgressServer
+	getTrackProgressStream rpc.Downloader_DownloadServer
 	done                   chan bool
+}
+
+func Start(p play.Player, f fetch.Fetcher) error {
+	log.Println("rpc listening on ", port)
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		return err
+	}
+
+	// Creates a new gRPC server
+	srv := grpc.NewServer()
+
+	s := &server{
+		cli:  &client{Player: p, Fetcher: f},
+		done: make(chan bool),
+	}
+
+	rpc.RegisterPlayerServer(srv, s)
+	rpc.RegisterFetcherServer(srv, s)
+	rpc.RegisterDownloaderServer(srv, s)
+
+	srv.Serve(lis)
+	return nil
 }
 
 func (s *server) Done(ctx context.Context, id *rpc.String) (*rpc.Empty, error) {
@@ -133,24 +158,6 @@ func (s *server) downloadProgress(p schema.Progress) {
 	}
 }
 
-func Start(p play.Player, f fetch.Fetcher) error {
-	log.Println("rpc listening on ", port)
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		return err
-	}
-
-	// Creates a new gRPC server
-	s := grpc.NewServer()
-	rpc.RegisterPlayerServer(s, &server{
-		cli:  &client{Player: p, Fetcher: f},
-		done: make(chan bool),
-	})
-
-	s.Serve(lis)
-	return nil
-}
-
 func (s *server) Name(ctx context.Context, _ *rpc.Empty) (*rpc.String, error) {
 	n := s.cli.Name()
 	return &rpc.String{Value: n}, nil
@@ -191,9 +198,41 @@ func (s *server) GetAlbum(ctx context.Context, st *rpc.String) (*rpc.Results, er
 	return rpc.PBFromResults(out), err
 }
 
-func (s *server) GetTrack(ctx context.Context, st *rpc.String) (*rpc.String, error) {
-	out, err := s.cli.GetTrack(st.Value)
-	return &rpc.String{Value: out}, err
+// func (s *server) DownloadProgress(id *rpc.String, stream rpc.Player_DownloadProgressServer) error {
+// 	s.downloadProgressStream = stream
+// 	s.cli.DownloadProgress(id.Value, s.downloadProgress)
+// 	<-s.done
+// 	s.cli.DownloadProgress(id.Value, nil)
+// 	return nil
+// }
+
+func (s *server) Download(id *rpc.String, stream rpc.Downloader_DownloadServer) error {
+	s.getTrackProgressStream = stream
+	buf := make([]byte, 100000)
+	f, err := os.Open(id.Value)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	l := int(fi.Size())
+	var tot int
+	for {
+		n, err := f.Read(buf)
+		tot += n
+		s.getTrackProgressStream.Send(rpc.PBFromProgress(schema.Progress{N: tot, Total: l, Payload: buf[:n]}))
+		if err != nil || n == 0 {
+			break
+		}
+	}
+
+	return nil
 }
 
 func (s *server) GetArtistAlbums(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {

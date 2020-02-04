@@ -1,19 +1,17 @@
 package play
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
+	"bitbucket.org/cswank/mcli/internal/download"
 	"bitbucket.org/cswank/mcli/internal/repo"
 	"bitbucket.org/cswank/mcli/internal/schema"
 	"github.com/faiface/beep"
@@ -34,16 +32,14 @@ type Local struct {
 	volume        float64
 	fastForward   chan bool
 	rewind        chan bool
-	playCB        map[string]func(schema.Progress)
-	downloadCB    map[string]func(schema.Progress)
-	nextSongCB    map[string]func(r schema.Result)
+	playCB        func(schema.Progress)
+	downloadCB    func(schema.Progress)
+	nextSongCB    func(r schema.Result)
 	onDeck        chan song
 	onDeckResult  *schema.Result
 	currentResult *schema.Result
-	playLock      sync.Mutex
-	downloadLock  sync.Mutex
-	nextSongLock  sync.Mutex
 	host          string
+	dl            download.Downloader
 }
 
 type flacSettings struct {
@@ -54,11 +50,11 @@ func getFlacPath() string {
 	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
 }
 
-func NewLocal(host string) (*Local, error) {
-	hist, err := repo.NewStorm()
-	if err != nil {
-		return nil, err
-	}
+func NewLocal(host string, opts ...func(*Local)) (*Local, error) {
+	// hist, err := repo.NewStorm()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("unable to create repo: %s", err)
+	// }
 
 	pth := getFlacPath()
 	e, err := exists(pth)
@@ -84,11 +80,11 @@ func NewLocal(host string) (*Local, error) {
 	}
 
 	if err := speaker.Init(44100, 44100/2); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("uable to init speaker: %s", err)
 	}
 
 	l := &Local{
-		history:     hist,
+		//history:     hist,
 		sep:         string(filepath.Separator),
 		queue:       newQueue(),
 		pause:       make(chan bool),
@@ -98,10 +94,11 @@ func NewLocal(host string) (*Local, error) {
 		volOut:      make(chan float64),
 		onDeck:      make(chan song),
 		volume:      s.Volume,
-		playCB:      make(map[string]func(schema.Progress)),
-		downloadCB:  make(map[string]func(schema.Progress)),
-		nextSongCB:  make(map[string]func(schema.Result)),
 		host:        strings.Replace(host, "50051", "8080", 1),
+	}
+
+	for _, opt := range opts {
+		opt(l)
 	}
 
 	go l.playLoop()
@@ -109,23 +106,20 @@ func NewLocal(host string) (*Local, error) {
 	return l, nil
 }
 
-func (l *Local) NextSong(id string, fn func(schema.Result)) {
-	l.nextSongCB[id] = fn
-	if fn != nil && l.currentResult != nil {
-		fn(*l.currentResult)
+func LocalDownload(dl download.Downloader) func(*Local) {
+	return func(l *Local) {
+		l.dl = dl
 	}
 }
 
+func (l *Local) NextSong(id string, fn func(schema.Result)) {
+	l.nextSongCB = fn
+}
+
 func (l *Local) callNextSong() {
-	l.nextSongLock.Lock()
-	for id, fn := range l.nextSongCB {
-		if fn != nil && l.currentResult != nil {
-			fn(*l.currentResult)
-		} else if fn == nil {
-			delete(l.nextSongCB, id)
-		}
+	if l.currentResult != nil && l.nextSongCB != nil {
+		l.nextSongCB(*l.currentResult)
 	}
-	l.nextSongLock.Unlock()
 }
 
 func (l *Local) Play(r schema.Result) {
@@ -133,7 +127,8 @@ func (l *Local) Play(r schema.Result) {
 }
 
 func (l *Local) History(page, pageSize int, sort repo.Sort) (*schema.Results, error) {
-	return l.history.Fetch(page, pageSize, sort)
+	//return l.History(page, pageSize, sort)
+	return &schema.Results{}, nil
 }
 
 func (l *Local) PlayAlbum(album *schema.Results) {
@@ -183,31 +178,7 @@ func (l *Local) RemoveFromQueue(indices []int) {
 }
 
 func (l *Local) Done(id string) {
-	l.playLock.Lock()
-	delete(l.playCB, id)
-	for k, v := range l.playCB {
-		if v == nil {
-			delete(l.playCB, k)
-		}
-	}
-	l.playLock.Unlock()
-	l.downloadLock.Lock()
-	delete(l.downloadCB, id)
-	for k, v := range l.downloadCB {
-		if v == nil {
-			delete(l.downloadCB, k)
-		}
-	}
-	l.downloadLock.Unlock()
 
-	l.nextSongLock.Lock()
-	delete(l.nextSongCB, id)
-	for k, v := range l.nextSongCB {
-		if v == nil {
-			delete(l.nextSongCB, k)
-		}
-	}
-	l.nextSongLock.Unlock()
 }
 
 func (l *Local) Close() {
@@ -256,9 +227,9 @@ func (l *Local) doPlay(s song) error {
 	l.currentResult = &s.result
 	l.callNextSong()
 
-	if err := l.history.Save(s.result); err != nil {
-		return err
-	}
+	// if err := l.history.Save(s.result); err != nil {
+	// 	return err
+	// }
 
 	music, _, err := flac.Decode(s.reader())
 	if err != nil {
@@ -286,15 +257,9 @@ func (l *Local) doPlay(s song) error {
 			pos := music.Position()
 			done = pos >= ln
 			i++
-			l.playLock.Lock()
-			for k, cb := range l.playCB {
-				if cb != nil {
-					cb(schema.Progress{N: pos, Total: ln})
-				} else {
-					delete(l.playCB, k)
-				}
+			if l.playCB != nil {
+				l.playCB(schema.Progress{N: pos, Total: ln})
 			}
-			l.playLock.Unlock()
 		case v := <-l.vol:
 			speaker.Lock()
 			if (l.volume < 2.0 && v > 0.0) || (l.volume > -5.0 && v < 0.0) {
@@ -312,7 +277,6 @@ func (l *Local) doPlay(s song) error {
 			done = true
 		case <-l.rewind:
 			music.Close()
-			s.reset()
 			return l.doPlay(s)
 		}
 	}
@@ -322,15 +286,11 @@ func (l *Local) doPlay(s song) error {
 }
 
 func (l *Local) DownloadProgress(id string, fn func(schema.Progress)) {
-	l.downloadLock.Lock()
-	l.downloadCB[id] = fn
-	l.downloadLock.Unlock()
+	l.downloadCB = fn
 }
 
 func (l *Local) PlayProgress(id string, fn func(schema.Progress)) {
-	l.playLock.Lock()
-	l.playCB[id] = fn
-	l.playLock.Unlock()
+	l.playCB = fn
 }
 
 func (l *Local) download(r *schema.Result) *song {
@@ -341,40 +301,15 @@ func (l *Local) download(r *schema.Result) *song {
 	return out
 }
 
-func (l *Local) doDownload(r schema.Result) (*song, error) {
+func (l *Local) doDownload(rs schema.Result) (*song, error) {
+	r, w := io.Pipe()
 	out := &song{
-		result: r,
+		result: rs,
+		r:      r,
 	}
 
-	resp, err := l.getTrack(r)
-	if err != nil {
-		return out, fmt.Errorf("could not get stream %+v: %s", r, err)
-	}
-
-	defer resp.Body.Close()
-
-	out.buf = &bytes.Buffer{}
-
-	pr := newProgressRead(resp.Body, int(resp.ContentLength), l.downloadCB)
-	w := out.writer()
-	_, err = io.Copy(w, pr)
-	if err != nil {
-		return out, err
-	}
-	pr.Close()
-
+	l.dl.Download(rs.Track.ID, w, l.downloadCB)
 	return out, nil
-}
-
-func (l *Local) getTrack(r schema.Result) (*http.Response, error) {
-	if strings.Index(r.Track.URI, "http://") == 0 {
-		return http.Get(r.Track.URI)
-	}
-
-	file, err := os.Open(r.Track.URI[6:])
-	return &http.Response{
-		Body: file,
-	}, err
 }
 
 func (l *Local) clean(s string) string {
@@ -425,7 +360,7 @@ func (r *progressRead) Close() error {
 
 type songBuffer struct {
 	closed bool
-	buf    *bytes.Reader
+	buf    io.Reader
 }
 
 func (s *songBuffer) Read(p []byte) (n int, err error) {
@@ -437,7 +372,8 @@ func (s *songBuffer) Read(p []byte) (n int, err error) {
 }
 
 func (s *songBuffer) Seek(offset int64, whence int) (int64, error) {
-	return s.buf.Seek(offset, whence)
+	//return s.buf.Seek(offset, whence)
+	return 0, nil
 }
 
 func (s *songBuffer) Close() error {
@@ -447,32 +383,16 @@ func (s *songBuffer) Close() error {
 
 type song struct {
 	result schema.Result
-	file   *os.File
-	buf    *bytes.Buffer
+	r      io.Reader
 }
 
-func (s *song) reader() io.ReadCloser {
-	if s.file != nil {
-		return s.file
-	}
-
+func (s *song) reader() io.Reader {
 	return &songBuffer{
-		buf: bytes.NewReader(s.buf.Bytes()),
+		buf: s.r,
 	}
-}
-
-func (s *song) writer() io.Writer {
-	if s.file != nil {
-		return s.file
-	}
-	return s.buf
 }
 
 func (s *song) reset() error {
-	if s.file != nil {
-		_, err := s.file.Seek(0, 0)
-		return err
-	}
 	return nil
 }
 

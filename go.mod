@@ -27,9 +27,9 @@ require (
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.3 // indirect
 	github.com/nsf/termbox-go v0.0.0-20180129072728-88b7b944be8b // indirect
-	github.com/stretchr/testify v1.4.0 // indirect
-	golang.org/x/net v0.0.0-20190311183353-d8887717615a
-	google.golang.org/grpc v1.25.1
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+	golang.org/x/tools/gopls v0.3.0 // indirect
+	google.golang.org/grpc v1.27.0
 	gopkg.in/alecthomas/kingpin.v1 v1.3.7
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.1 // indirect
 )

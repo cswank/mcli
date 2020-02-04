@@ -24,7 +24,6 @@ func trackFromPB(t *Track) schema.Track {
 		ID:       t.GetId(),
 		Title:    t.GetTitle(),
 		Duration: int(t.GetDuration()),
-		URI:      t.GetUri(),
 	}
 }
 
@@ -63,7 +62,6 @@ func pbFromTrack(t schema.Track) *Track {
 		Id:       t.ID,
 		Title:    t.Title,
 		Duration: int64(t.Duration),
-		Uri:      t.URI,
 	}
 }
 
@@ -132,14 +130,16 @@ func PBFromResult(r schema.Result) *Result {
 
 func PBFromProgress(p schema.Progress) *Progress {
 	return &Progress{
-		N:     int64(p.N),
-		Total: int64(p.Total),
+		N:       int64(p.N),
+		Total:   int64(p.Total),
+		Payload: p.Payload,
 	}
 }
 
 func ProgressFromPB(p *Progress) schema.Progress {
 	return schema.Progress{
-		N:     int(p.GetN()),
-		Total: int(p.GetTotal()),
+		N:       int(p.GetN()),
+		Total:   int(p.GetTotal()),
+		Payload: p.Payload,
 	}
 }

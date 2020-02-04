@@ -16,8 +16,9 @@ type Results struct {
 }
 
 type Progress struct {
-	N     int `json:"n"`
-	Total int `json:"total"`
+	N       int    `json:"n"`
+	Total   int    `json:"total"`
+	Payload []byte `json:"payload"`
 }
 
 type Track struct {

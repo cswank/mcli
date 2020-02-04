@@ -2,6 +2,7 @@ package fetch
 
 import (
 	"context"
+	"log"
 
 	"bitbucket.org/cswank/mcli/internal/rpc"
 	"bitbucket.org/cswank/mcli/internal/schema"
@@ -13,8 +14,11 @@ type Remote struct {
 	client rpc.FetcherClient
 }
 
-func NewRemote() (*Remote, error) {
-	return &Remote{}, nil
+func NewRemote(conn *grpc.ClientConn) *Remote {
+	return &Remote{
+		conn:   conn,
+		client: rpc.NewFetcherClient(conn),
+	}
 }
 
 func (r *Remote) Name() string {
@@ -32,7 +36,11 @@ func (r *Remote) Login(u, pw string) error {
 }
 
 func (r *Remote) Ping() bool {
-	out, _ := r.client.Ping(context.Background(), &rpc.Empty{})
+	out, err := r.client.Ping(context.Background(), &rpc.Empty{})
+	if err != nil {
+		log.Println(err)
+		return false
+	}
 	return out.Value
 }
 
@@ -58,11 +66,6 @@ func (r Remote) FindTrack(term string, n int) (*schema.Results, error) {
 func (r Remote) GetAlbum(id string) (*schema.Results, error) {
 	out, err := r.client.GetAlbum(context.Background(), &rpc.String{Value: id})
 	return rpc.ResultsFromPB(out), err
-}
-
-func (r Remote) GetTrack(id string) (string, error) {
-	out, err := r.client.GetTrack(context.Background(), &rpc.String{Value: id})
-	return out.Value, err
 }
 
 func (r Remote) GetArtistAlbums(id string, n int) (*schema.Results, error) {

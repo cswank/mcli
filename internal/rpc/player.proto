@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package rpc;
 
+service Downloader {
+    rpc Download(String) returns (stream Progress) {}
+}
+
 service Player {   
 	rpc Play(Result) returns (Empty) {}
 	rpc PlayAlbum(Results) returns (Empty) {}
@@ -27,8 +31,7 @@ service Fetcher {
     rpc FindArtist(Request) returns (Results) {}
 	rpc FindAlbum(Request) returns (Results) {}
 	rpc FindTrack(Request) returns (Results) {}
-	rpc GetAlbum(String) returns (Results) {}
-	rpc GetTrack(String) returns (String) {}
+	rpc GetAlbum(String) returns (Results) {}	
 	rpc GetArtistAlbums(Request) returns (Results) {}
 	rpc GetArtistTracks(Request) returns (Results) {}
 	rpc GetPlaylists(Empty) returns (Results) {}
@@ -63,6 +66,7 @@ message Page {
 message Progress {
 	int64 n = 1;
 	int64 total = 2;
+    bytes payload = 3;
 }
 
 message Float {

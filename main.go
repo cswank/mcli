@@ -6,10 +6,12 @@ import (
 	"log"
 	"os"
 
+	"bitbucket.org/cswank/mcli/internal/download"
 	"bitbucket.org/cswank/mcli/internal/fetch"
 	"bitbucket.org/cswank/mcli/internal/play"
 	"bitbucket.org/cswank/mcli/internal/server"
 	"bitbucket.org/cswank/mcli/internal/views"
+	"google.golang.org/grpc"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
 )
 
@@ -50,13 +52,24 @@ func doServe() {
 }
 
 func gui() {
-	f := fetch.NewLocal(*pth)
-	p, err := play.NewLocal("")
+	log.Println("addr ", *addr)
+	conn, err := grpc.Dial(*addr, grpc.WithInsecure())
+	log.Println("a", err)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(*addr, err)
+	}
+
+	dl := download.NewRemote(conn)
+
+	f := fetch.NewRemote(conn)
+	p, err := play.NewLocal(*addr, play.LocalDownload(dl))
+	log.Println("b", err)
+	if err != nil {
+		log.Fatal("unable to create player ", err)
 	}
 
 	if err := views.Start(p, f); err != nil {
+		log.Println("c", err)
 		log.Fatal(err)
 	}
 
