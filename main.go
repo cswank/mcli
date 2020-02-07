@@ -41,7 +41,8 @@ func main() {
 }
 
 func doServe() {
-	p, err := play.NewLocal(*addr)
+	dl := download.NewLocal(*pth)
+	p, err := play.NewLocal(play.LocalDownload(dl))
 	if err != nil {
 		log.Fatal("cli ", err)
 	}
