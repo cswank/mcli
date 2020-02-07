@@ -20,7 +20,7 @@ var (
 	srv    = app.Command("serve", "start the grpc server")
 	addr   = app.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
 	pth    = app.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
-	remote = app.Flag("remote", "play music server").Short('r').Default("false").Bool()
+	remote = app.Flag("remote", "play music on the server").Short('r').Default("false").Bool()
 	logout = app.Flag("log", "log location (for debugging)").Short('l').String()
 
 	logfile *os.File
@@ -67,7 +67,7 @@ func gui() {
 		}
 
 		f = fetch.NewRemote(conn)
-		if !*remote {
+		if *remote {
 			p = play.NewRemote(conn)
 		} else {
 			p, err = play.NewLocal(play.LocalDownload(download.NewRemote(conn)))
