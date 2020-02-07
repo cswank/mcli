@@ -1,0 +1,11 @@
+* Mcli
+A command line music player.
+
+** Configurations
+
+   | music location | speaker location | player | fetcher | downloader |
+   |----------------+------------------+--------+---------+------------|
+   | remote         | local            | local  | remote  | remote     |
+   | remote         | remote           | remote | remote  | local      |
+   | local          | local            | local  | local   | local      |
+

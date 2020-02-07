@@ -16,11 +16,13 @@ import (
 )
 
 var (
-	app     = kingpin.New("mcli", "A command-line music player.")
-	srv     = app.Command("serve", "start the grpc server")
-	addr    = app.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
-	pth     = app.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
-	logout  = app.Flag("log", "log location (for debugging)").Short('l').String()
+	app    = kingpin.New("mcli", "A command-line music player.")
+	srv    = app.Command("serve", "start the grpc server")
+	addr   = app.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
+	pth    = app.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
+	remote = app.Flag("remote", "play music server").Short('r').Default("false").Bool()
+	logout = app.Flag("log", "log location (for debugging)").Short('l').String()
+
 	logfile *os.File
 )
 
@@ -52,52 +54,36 @@ func doServe() {
 }
 
 func gui() {
-	log.Println("addr ", *addr)
-	conn, err := grpc.Dial(*addr, grpc.WithInsecure())
-	log.Println("a", err)
-	if err != nil {
-		log.Fatal(*addr, err)
-	}
+	var f fetch.Fetcher
+	var p play.Player
+	var err error
 
-	dl := download.NewRemote(conn)
+	switch {
+	case *addr != "":
+		conn, err := grpc.Dial(*addr, grpc.WithInsecure())
+		if err != nil {
+			log.Fatal(*addr, err)
+		}
 
-	f := fetch.NewRemote(conn)
-	p, err := play.NewLocal(*addr, play.LocalDownload(dl))
-	log.Println("b", err)
-	if err != nil {
-		log.Fatal("unable to create player ", err)
+		f = fetch.NewRemote(conn)
+		if !*remote {
+			p = play.NewRemote(conn)
+		} else {
+			p, err = play.NewLocal(play.LocalDownload(download.NewRemote(conn)))
+		}
+	case *addr == "":
+		dl := download.NewLocal(*pth)
+		p, err = play.NewLocal(play.LocalDownload(dl))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		f = fetch.NewLocal(*pth)
 	}
 
 	if err := views.Start(p, f); err != nil {
-		log.Println("c", err)
 		log.Fatal(err)
 	}
-
-	// f, err := fetch.NewRemote()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// var p play.Player
-	// var f fetch.Fetcher
-
-	// if !*srv {
-	// 	c, err := rpc.NewClient(*addr, rpc.LocalPlay(!*remote, *addr))
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	if err := views.Start(c); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// } else {
-	// 	cli, err := player.NewDisk(p, *addr)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	if err := views.Start(cli); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }
 }
 
 func doLog(logout string) func() {

@@ -1,6 +1,7 @@
 package play
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -38,7 +39,6 @@ type Local struct {
 	onDeck        chan song
 	onDeckResult  *schema.Result
 	currentResult *schema.Result
-	host          string
 	dl            download.Downloader
 }
 
@@ -50,7 +50,7 @@ func getFlacPath() string {
 	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
 }
 
-func NewLocal(host string, opts ...func(*Local)) (*Local, error) {
+func NewLocal(opts ...func(*Local)) (*Local, error) {
 	// hist, err := repo.NewStorm()
 	// if err != nil {
 	// 	return nil, fmt.Errorf("unable to create repo: %s", err)
@@ -94,7 +94,6 @@ func NewLocal(host string, opts ...func(*Local)) (*Local, error) {
 		volOut:      make(chan float64),
 		onDeck:      make(chan song),
 		volume:      s.Volume,
-		host:        strings.Replace(host, "50051", "8080", 1),
 	}
 
 	for _, opt := range opts {
@@ -205,6 +204,7 @@ func (l *Local) Rewind() {
 func (l *Local) downloadLoop() {
 	for {
 		r := l.queue.Next()
+		log.Printf("download loop next: %+v", r)
 		l.onDeckResult = &r
 		song := l.download(&r)
 		l.onDeck <- *song
@@ -302,13 +302,13 @@ func (l *Local) download(r *schema.Result) *song {
 }
 
 func (l *Local) doDownload(rs schema.Result) (*song, error) {
-	r, w := io.Pipe()
+	buf := bytes.Buffer{}
 	out := &song{
 		result: rs,
-		r:      r,
+		r:      &buf,
 	}
 
-	l.dl.Download(rs.Track.ID, w, l.downloadCB)
+	l.dl.Download(rs.Track.ID, &buf, l.downloadCB)
 	return out, nil
 }
 

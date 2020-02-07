@@ -14,25 +14,17 @@ import (
 )
 
 type Remote struct {
-	conn   *grpc.ClientConn
 	client rpc.PlayerClient
 }
 
-func NewRemote(addr string) (*Remote, error) {
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-
+func NewRemote(conn *grpc.ClientConn) *Remote {
 	return &Remote{
-		conn:   conn,
 		client: rpc.NewPlayerClient(conn),
-	}, nil
+	}
 }
 
 func (r Remote) Done(id string) {
 	r.client.Done(context.Background(), &rpc.String{Value: id})
-	r.conn.Close()
 }
 
 func (r Remote) Close() {}
