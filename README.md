@@ -43,7 +43,7 @@ mcli serve
 ```
 
 ## Flac directory layout
-The flac files must be orgainized like $MCLI_MUSIC_LOCATION/<artist>/<album>/<song>.flac
+The flac files must be orgainized like $MCLI_MUSIC_LOCATION/artist/album/song.flac
 
 So for example, if $MCLI_MUSIC_LOCATION=/mnt/music:
 
