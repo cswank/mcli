@@ -11,7 +11,7 @@ export MCLI_MUSIC_LOCATION="/path/to/flac/files"
 mcli
 ```
 
-NOTE: see [below](#flac-directory-layout)below for the required layout of the flac files
+NOTE: see [below](#flac-directory-layout) for the required layout of the flac files
 
 ### 2: Local speakers and remote flac files
 If the music files live on a remote computer (for example: 192.1.0.22) and 
