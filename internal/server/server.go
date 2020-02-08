@@ -22,6 +22,7 @@ const (
 type client struct {
 	play.Player
 	fetch.Fetcher
+	repo.History
 }
 
 type server struct {
@@ -34,6 +35,11 @@ type server struct {
 }
 
 func Start(p play.Player, f fetch.Fetcher) error {
+	h, err := repo.NewLocal()
+	if err != nil {
+		return err
+	}
+
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -44,13 +50,14 @@ func Start(p play.Player, f fetch.Fetcher) error {
 	srv := grpc.NewServer()
 
 	s := &server{
-		cli:  &client{Player: p, Fetcher: f},
+		cli:  &client{Player: p, Fetcher: f, History: h},
 		done: make(chan bool),
 	}
 
 	rpc.RegisterPlayerServer(srv, s)
 	rpc.RegisterFetcherServer(srv, s)
 	rpc.RegisterDownloaderServer(srv, s)
+	rpc.RegisterHistoryServer(srv, s)
 
 	srv.Serve(lis)
 	return nil
@@ -135,9 +142,14 @@ func (s *server) DownloadProgress(id *rpc.String, stream rpc.Player_DownloadProg
 	return nil
 }
 
-func (s *server) History(ctx context.Context, p *rpc.Page) (*rpc.Results, error) {
-	r, err := s.cli.History(int(p.Page), int(p.PageSize), repo.Sort(p.Sort))
+func (s *server) Fetch(ctx context.Context, p *rpc.Page) (*rpc.Results, error) {
+	r, err := s.cli.Fetch(int(p.Page), int(p.PageSize), repo.Sort(p.Sort))
 	return rpc.PBFromResults(r), err
+}
+
+func (s *server) Save(ctx context.Context, in *rpc.Result) (*rpc.Empty, error) {
+	err := s.cli.Save(rpc.ResultFromPB(in))
+	return &rpc.Empty{}, err
 }
 
 func (s *server) nextSong(r schema.Result) {

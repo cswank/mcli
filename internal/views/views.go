@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/cswank/mcli/internal/colors"
 	"bitbucket.org/cswank/mcli/internal/fetch"
 	"bitbucket.org/cswank/mcli/internal/play"
+	"bitbucket.org/cswank/mcli/internal/repo"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -32,11 +33,12 @@ type coords struct {
 type client struct {
 	play.Player
 	fetch.Fetcher
+	repo.History
 }
 
 //Start is what main calls to get the app rolling
-func Start(p play.Player, f fetch.Fetcher) error {
-	cli := &client{Player: p, Fetcher: f}
+func Start(p play.Player, f fetch.Fetcher, hist repo.History) error {
+	cli := &client{Player: p, Fetcher: f, History: hist}
 	dir := os.Getenv("MCLI_HOME")
 	e, err := exists(dir)
 	if err != nil {

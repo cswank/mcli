@@ -8,7 +8,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	"bitbucket.org/cswank/mcli/internal/repo"
 	"bitbucket.org/cswank/mcli/internal/rpc"
 	"bitbucket.org/cswank/mcli/internal/schema"
 )
@@ -147,9 +146,4 @@ func (r Remote) DownloadProgress(id string, f func(schema.Progress)) {
 			}
 		}
 	}()
-}
-
-func (r Remote) History(page, pageSize int, sort repo.Sort) (*schema.Results, error) {
-	out, err := r.client.History(context.Background(), &rpc.Page{Page: int64(page), PageSize: int64(pageSize), Sort: string(sort)})
-	return rpc.ResultsFromPB(out), err
 }

@@ -6,6 +6,11 @@ service Downloader {
     rpc Download(String) returns (stream Progress) {}
 }
 
+service History {
+    rpc Fetch(Page) returns (Results) {}
+    rpc Save(Result) returns (Empty) {}
+}
+
 service Player {   
 	rpc Play(Result) returns (Empty) {}
 	rpc PlayAlbum(Results) returns (Empty) {}
@@ -18,7 +23,6 @@ service Player {
 	rpc NextSong(String) returns (stream Result) {}
 	rpc PlayProgress(String) returns (stream Progress) {}
 	rpc DownloadProgress(String) returns (stream Progress) {}
-	rpc History(Page) returns (Results) {}
 	rpc Done(String) returns (Empty) {}
 	rpc Close(Empty) returns (Empty) {}
 }

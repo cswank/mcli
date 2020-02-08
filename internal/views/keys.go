@@ -51,7 +51,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"history-type"}, keys: []interface{}{'p'}, keybinding: s.history.played},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.search.exit},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escapeSearch},
-		{views: []string{""}, keys: []interface{}{ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c)", body: "quit"}},
+		{views: []string{""}, keys: []interface{}{'q', ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c or q)", body: "quit"}},
 		{views: []string{"login"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.login.next},
 		{views: []string{"body"}, keys: []interface{}{'h'}, keybinding: s.showHelp, help: keyHelp{key: "h", body: "toggle help menu"}},
 		{views: []string{"help"}, keys: []interface{}{'h'}, keybinding: s.hideHelp},

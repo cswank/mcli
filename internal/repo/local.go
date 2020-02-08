@@ -20,7 +20,7 @@ type StormHistory struct {
 	db *storm.DB
 }
 
-func NewStorm() (*StormHistory, error) {
+func NewLocal() (*StormHistory, error) {
 	pth := fmt.Sprintf("%s/history.db", os.Getenv("MCLI_HOME"))
 	db, err := storm.Open(pth)
 	return &StormHistory{db: db}, err

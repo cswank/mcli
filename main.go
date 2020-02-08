@@ -9,6 +9,7 @@ import (
 	"bitbucket.org/cswank/mcli/internal/download"
 	"bitbucket.org/cswank/mcli/internal/fetch"
 	"bitbucket.org/cswank/mcli/internal/play"
+	"bitbucket.org/cswank/mcli/internal/repo"
 	"bitbucket.org/cswank/mcli/internal/server"
 	"bitbucket.org/cswank/mcli/internal/views"
 	"google.golang.org/grpc"
@@ -48,7 +49,6 @@ func doServe() {
 	}
 
 	f := fetch.NewLocal(*pth)
-
 	if err := server.Start(p, f); err != nil {
 		log.Fatal("rpc ", err)
 	}
@@ -57,6 +57,7 @@ func doServe() {
 func gui() {
 	var f fetch.Fetcher
 	var p play.Player
+	var h repo.History
 	var err error
 
 	switch {
@@ -66,15 +67,21 @@ func gui() {
 			log.Fatal(*addr, err)
 		}
 
+		h = repo.NewRemote(conn)
 		f = fetch.NewRemote(conn)
 		if *remote {
 			p = play.NewRemote(conn)
 		} else {
-			p, err = play.NewLocal(play.LocalDownload(download.NewRemote(conn)))
+			p, err = play.NewLocal(play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
 		}
 	case *addr == "":
+		h, err = repo.NewLocal()
+		if err != nil {
+			log.Fatal(*addr, err)
+		}
+
 		dl := download.NewLocal(*pth)
-		p, err = play.NewLocal(play.LocalDownload(dl))
+		p, err = play.NewLocal(play.LocalDownload(dl), play.LocalHistory(h))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,7 +89,7 @@ func gui() {
 		f = fetch.NewLocal(*pth)
 	}
 
-	if err := views.Start(p, f); err != nil {
+	if err := views.Start(p, f, h); err != nil {
 		log.Fatal(err)
 	}
 }

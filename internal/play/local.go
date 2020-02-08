@@ -51,11 +51,6 @@ func getFlacPath() string {
 }
 
 func NewLocal(opts ...func(*Local)) (*Local, error) {
-	// hist, err := repo.NewStorm()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("unable to create repo: %s", err)
-	// }
-
 	pth := getFlacPath()
 	e, err := exists(pth)
 	if err != nil {
@@ -84,7 +79,6 @@ func NewLocal(opts ...func(*Local)) (*Local, error) {
 	}
 
 	l := &Local{
-		//history:     hist,
 		sep:         string(filepath.Separator),
 		queue:       newQueue(),
 		pause:       make(chan bool),
@@ -100,6 +94,14 @@ func NewLocal(opts ...func(*Local)) (*Local, error) {
 		opt(l)
 	}
 
+	if l.history == nil {
+		hist, err := repo.NewLocal()
+		if err != nil {
+			return nil, fmt.Errorf("unable to create repo: %s", err)
+		}
+		l.history = hist
+	}
+
 	go l.playLoop()
 	go l.downloadLoop()
 	return l, nil
@@ -108,6 +110,12 @@ func NewLocal(opts ...func(*Local)) (*Local, error) {
 func LocalDownload(dl download.Downloader) func(*Local) {
 	return func(l *Local) {
 		l.dl = dl
+	}
+}
+
+func LocalHistory(h repo.History) func(*Local) {
+	return func(l *Local) {
+		l.history = h
 	}
 }
 
@@ -123,11 +131,6 @@ func (l *Local) callNextSong() {
 
 func (l *Local) Play(r schema.Result) {
 	l.queue.Add(r)
-}
-
-func (l *Local) History(page, pageSize int, sort repo.Sort) (*schema.Results, error) {
-	//return l.History(page, pageSize, sort)
-	return &schema.Results{}, nil
 }
 
 func (l *Local) PlayAlbum(album *schema.Results) {
@@ -227,9 +230,9 @@ func (l *Local) doPlay(s song) error {
 	l.currentResult = &s.result
 	l.callNextSong()
 
-	// if err := l.history.Save(s.result); err != nil {
-	// 	return err
-	// }
+	if err := l.history.Save(s.result); err != nil {
+		return err
+	}
 
 	music, _, err := flac.Decode(s.reader())
 	if err != nil {
@@ -277,6 +280,7 @@ func (l *Local) doPlay(s song) error {
 			done = true
 		case <-l.rewind:
 			music.Close()
+			s.r.Seek(0, 0)
 			return l.doPlay(s)
 		}
 	}
@@ -303,13 +307,11 @@ func (l *Local) download(r *schema.Result) *song {
 
 func (l *Local) doDownload(rs schema.Result) (*song, error) {
 	buf := bytes.Buffer{}
-	out := &song{
-		result: rs,
-		r:      &buf,
-	}
-
 	l.dl.Download(rs.Track.ID, &buf, l.downloadCB)
-	return out, nil
+	return &song{
+		result: rs,
+		r:      bytes.NewReader(buf.Bytes()),
+	}, nil
 }
 
 func (l *Local) clean(s string) string {
@@ -383,7 +385,7 @@ func (s *songBuffer) Close() error {
 
 type song struct {
 	result schema.Result
-	r      io.Reader
+	r      io.ReadSeeker
 }
 
 func (s *song) reader() io.Reader {

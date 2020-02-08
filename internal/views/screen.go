@@ -199,6 +199,9 @@ func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 
 func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 	r := s.body.view[s.body.cursor]
+	if r.Album.ID == "" && r.Artist.ID != "" {
+		return s.doShowArtist(r.Artist.ID, "albums")
+	}
 	c := s.body.cursor
 	results, err := s.client.GetAlbum(r.Album.ID)
 	if err != nil {
@@ -291,7 +294,7 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 func (s *screen) showHistory(sort repo.Sort) error {
 	g.DeleteView("history-type")
 	s.historySort = sort
-	res, err := s.client.History(0, s.height*10, sort)
+	res, err := s.client.Fetch(0, s.height*10, sort)
 	if err != nil {
 		return err
 	}
@@ -420,7 +423,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if !s.client.Ping() {
 		s.view = "login"
 	} else {
-		res, err := s.client.History(0, s.height*10, s.historySort)
+		res, err := s.client.Fetch(0, s.height*10, s.historySort)
 		if err == nil && len(res.Results) > 0 {
 			res.Print = res.PrintHistory()
 			s.header.header = res.Header
