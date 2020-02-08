@@ -3,8 +3,8 @@ A command line flac music player.
 
 ## Configurations
 
-### All local
-If the music files and speaker output all live on the computer, simply run:
+### 1: All local
+If the music files and speaker output all live on the computer:
 
 ```console
 export MCLI_MUSIC_LOCATION="/path/to/flac/files"
@@ -13,9 +13,9 @@ mcli
 
 NOTE: see below for the required layout of the flac files
 
-### Local speakers and remote flac files
+### 2: Local speakers and remote flac files
 If the music files live on a remote computer (for example: 192.1.0.22) and 
-speaker output is on the local computer then:
+speaker output is on the local computer:
 
 ```console
 export MCLI_HOST="192.1.0.22:50051"
@@ -24,9 +24,8 @@ mcli
 
 NOTE: A mcli server must be running on 192.1.0.22:50051
 
-### Remote speakers and remote flac files
-If the music files and speaker output live on a remote computer (for example: 192.1.0.22)
-then:
+### 3: Remote speakers and remote flac files
+If the music files and speaker output live on a remote computer (for example: 192.1.0.22):
 
 ```console
 export MCLI_HOST="192.1.0.22:50051"
