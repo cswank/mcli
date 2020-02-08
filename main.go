@@ -42,14 +42,19 @@ func main() {
 }
 
 func doServe() {
+	h, err := repo.NewLocal()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	dl := download.NewLocal(*pth)
-	p, err := play.NewLocal(play.LocalDownload(dl))
+	p, err := play.NewLocal(play.LocalDownload(dl), play.LocalHistory(h))
 	if err != nil {
 		log.Fatal("cli ", err)
 	}
 
 	f := fetch.NewLocal(*pth)
-	if err := server.Start(p, f); err != nil {
+	if err := server.Start(p, f, h); err != nil {
 		log.Fatal("rpc ", err)
 	}
 }

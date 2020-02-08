@@ -23,6 +23,7 @@ type StormHistory struct {
 func NewLocal() (*StormHistory, error) {
 	pth := fmt.Sprintf("%s/history.db", os.Getenv("MCLI_HOME"))
 	db, err := storm.Open(pth)
+	fmt.Println("storm", pth, err)
 	return &StormHistory{db: db}, err
 }
 

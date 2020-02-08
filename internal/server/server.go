@@ -34,12 +34,7 @@ type server struct {
 	done                   chan bool
 }
 
-func Start(p play.Player, f fetch.Fetcher) error {
-	h, err := repo.NewLocal()
-	if err != nil {
-		return err
-	}
-
+func Start(p play.Player, f fetch.Fetcher, h repo.History) error {
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
