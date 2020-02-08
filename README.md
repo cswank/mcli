@@ -11,7 +11,7 @@ export MCLI_MUSIC_LOCATION="/path/to/flac/files"
 mcli
 ```
 
-NOTE: see below for the required layout of the flac files
+NOTE: see [below](#flac- directory-layout)below for the required layout of the flac files
 
 ### 2: Local speakers and remote flac files
 If the music files live on a remote computer (for example: 192.1.0.22) and 
@@ -40,4 +40,14 @@ export MCLI_MUSIC_LOCATION="/path/to/flac/files"
 export MCLI_HOST="hostname or ip address of this machine"
 export MCLI_HOME="/path/to/directory/where/mcli/history/will/be/written"
 mcli serve
+```
+
+## Flac directory layout
+The flac files must be orgainized like $MCLI_MUSIC_LOCATION/<artist>/<album>/<song>.flac
+
+So for example, if $MCLI_MUSIC_LOCATION=/mnt/music:
+
+```console
+ls -d $PWD/01.Come\ Together.flac
+'/mnt/music/The Beatles/Abbey Road (remix)/01.Come Together.flac'
 ```
