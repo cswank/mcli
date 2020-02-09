@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"bitbucket.org/cswank/mcli/internal/repo"
@@ -74,6 +75,7 @@ func (s *screen) playAlbum(g *ui.Gui, v *ui.View) error {
 func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 	r := s.body.view[s.body.cursor]
 	c := s.body.cursor
+	log.Printf("type: %s, results: %+v", s.body.results.Type, r)
 	switch s.body.results.Type {
 	case "album search":
 		s.body.cursor = 0
@@ -86,9 +88,15 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "artist search":
-		s.view = "artist-dialog"
-		s.artistDialog.selected = r
-		return nil
+		s.body.cursor = 0
+		results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height*5)
+		if err != nil {
+			return err
+		}
+		results.Print = results.PrintArtist()
+		s.body.newResults(results)
+		s.header.header = results.Header
+		s.stack.add(results, c)
 	case "artist albums":
 		s.body.cursor = 0
 		results, err := s.client.GetAlbum(r.Album.ID)
