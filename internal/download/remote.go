@@ -3,7 +3,6 @@ package download
 import (
 	"context"
 	"io"
-	"log"
 
 	"bitbucket.org/cswank/mcli/internal/rpc"
 	"bitbucket.org/cswank/mcli/internal/schema"
@@ -22,23 +21,20 @@ func NewRemote(conn *grpc.ClientConn) *Remote {
 	}
 }
 
-func (r Remote) Download(id string, w io.Writer, f func(pg schema.Progress)) {
+func (r Remote) Download(id string, w io.Writer, f func(pg schema.Progress)) error {
 	stream, err := r.client.Download(context.Background(), &rpc.String{Value: id})
-	log.Println("stream", err)
 	if err != nil {
-		log.Fatal("could not get stream for track", err)
+		return err
 	}
+
 	for {
 		p, err := stream.Recv()
-		if err == io.EOF {
-			return
-		} else if err != nil {
-			log.Println(err)
-			return
+		if err != nil {
+			return isEOF(err)
 		} else {
 			_, err := w.Write(p.Payload)
 			if err != nil {
-				log.Println(err)
+				return err
 			}
 			f(rpc.ProgressFromPB(p))
 		}

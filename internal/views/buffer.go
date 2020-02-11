@@ -40,8 +40,8 @@ func newBuffer(w, h int, id string, cli *client) *buffer {
 		song:     make(chan schema.Result),
 	}
 
-	cli.NextSong(id, b.nextSong)
-	cli.DownloadProgress(id, b.downloadProgress)
+	cli.NextSong(id, b.nextSong)                 //TODO: move goroutine here
+	cli.DownloadProgress(id, b.downloadProgress) //TODO: move goroutine here
 
 	go b.render()
 	return b

@@ -6,6 +6,10 @@ service Downloader {
     rpc Download(String) returns (stream Progress) {}
 }
 
+service Uploader {
+    rpc Send(stream Upload) returns (Empty) {}
+}
+
 service History {
     rpc Fetch(Page) returns (Results) {}
     rpc Save(Result) returns (Empty) {}
@@ -70,7 +74,16 @@ message Page {
 message Progress {
 	int64 n = 1;
 	int64 total = 2;
-    bytes payload = 3;
+	bytes payload = 3;
+}
+
+message Upload {
+	int64 n = 1;
+	int64 total = 2;
+	string album = 3;
+	string artist = 4;
+	string song = 5;
+	bytes payload = 6;
 }
 
 message Float {

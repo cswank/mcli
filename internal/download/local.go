@@ -2,7 +2,6 @@ package download
 
 import (
 	"io"
-	"log"
 	"os"
 
 	"bitbucket.org/cswank/mcli/internal/schema"
@@ -19,17 +18,15 @@ func NewLocal(pth string) *Local {
 	}
 }
 
-func (l Local) Download(id string, w io.Writer, f func(pg schema.Progress)) {
+func (l Local) Download(id string, w io.Writer, f func(pg schema.Progress)) error {
 	file, err := os.Open(id)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 
 	fi, err := file.Stat()
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 
 	tot := int(fi.Size())
@@ -37,17 +34,21 @@ func (l Local) Download(id string, w io.Writer, f func(pg schema.Progress)) {
 	buf := make([]byte, 10000)
 	for {
 		n, err := file.Read(buf)
-		if err == io.EOF {
-			return
-		} else if err != nil {
-			log.Println(err)
-			return
+		if err != nil {
+			return isEOF(err)
 		} else {
 			_, err := w.Write(buf[:n])
 			if err != nil {
-				log.Println(err)
+				return err
 			}
 			f(schema.Progress{N: int(n), Total: tot})
 		}
 	}
+}
+
+func isEOF(err error) error {
+	if err == io.EOF {
+		return nil
+	}
+	return err
 }

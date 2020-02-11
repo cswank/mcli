@@ -21,6 +21,13 @@ type Progress struct {
 	Payload []byte `json:"payload"`
 }
 
+type Upload struct {
+	Artist string `json:"artist"`
+	Album  string `json:"album"`
+	Song   string `json:"song"`
+	Progress
+}
+
 type Track struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`

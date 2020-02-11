@@ -307,11 +307,11 @@ func (l *Local) download(r *schema.Result) *song {
 
 func (l *Local) doDownload(rs schema.Result) (*song, error) {
 	buf := bytes.Buffer{}
-	l.dl.Download(rs.Track.ID, &buf, l.downloadCB)
+	err := l.dl.Download(rs.Track.ID, &buf, l.downloadCB)
 	return &song{
 		result: rs,
 		r:      bytes.NewReader(buf.Bytes()),
-	}, nil
+	}, err
 }
 
 func (l *Local) clean(s string) string {

@@ -143,3 +143,27 @@ func ProgressFromPB(p *Progress) schema.Progress {
 		Payload: p.Payload,
 	}
 }
+
+func PBFromUpload(u schema.Upload) *Upload {
+	return &Upload{
+		Artist:  u.Artist,
+		Album:   u.Album,
+		Song:    u.Song,
+		N:       int64(u.N),
+		Total:   int64(u.Total),
+		Payload: u.Payload,
+	}
+}
+
+func UploadFromPB(u *Upload) schema.Upload {
+	return schema.Upload{
+		Artist: u.Artist,
+		Album:  u.Album,
+		Song:   u.Song,
+		Progress: schema.Progress{
+			N:       int(u.GetN()),
+			Total:   int(u.GetTotal()),
+			Payload: u.Payload,
+		},
+	}
+}
