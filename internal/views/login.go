@@ -8,59 +8,40 @@ import (
 )
 
 const (
-	loginWidth  = 30
-	loginHeight = 2
+	promptWidth  = 30
+	promptHeight = 2
 )
 
-type login struct {
+type prompt struct {
 	name   string
 	title  string
 	coords coords
 
-	username string
-	password string
-	login    func(string, string) error
+	prompt func(string, string) error
 }
 
-func newLogin(w, h int, cb func(string, string) error) *login {
+func newPrompt(w, h int, cb func(string, string) error) *prompt {
 	maxX, maxY := g.Size()
-	x1 := maxX/2 - loginWidth/2
-	x2 := maxX/2 + loginWidth/2
-	y1 := maxY/2 - loginHeight/2
-	y2 := maxY/2 + loginHeight/2 + loginHeight%2
+	x1 := maxX/2 - promptWidth/2
+	x2 := maxX/2 + promptWidth/2
+	y1 := maxY/2 - promptHeight/2
+	y2 := maxY/2 + promptHeight/2 + promptHeight%2
 
-	return &login{
+	return &prompt{
 		title:  "username",
 		coords: coords{x1: x1, y1: y1, x2: x2, y2: y2},
-		login:  cb,
+		prompt: cb,
 	}
 }
 
-func (l *login) show(g *ui.Gui, v *ui.View) error {
+func (p *prompt) show(g *ui.Gui, v *ui.View) error {
 	v.Editable = true
 	v.Frame = true
-	v.Title = "username"
+	v.Title = p.title
 	return v.SetCursor(0, 0)
 }
 
-func (l *login) next(g *ui.Gui, v *ui.View) error {
-	buf := strings.TrimSpace(v.Buffer())
-	v.Clear()
-	if l.username == "" {
-		l.username = buf
-		l.title = "password"
-		if err := v.SetCursor(0, 0); err != nil {
-			return err
-		}
-		return g.DeleteView("login")
-	} else if l.password == "" {
-		l.password = buf
-		return l.login(l.username, l.password)
-	}
-	return nil
-}
-
-func (l *login) Edit(v *ui.View, key ui.Key, ch rune, mod ui.Modifier) {
+func (p *prompt) Edit(v *ui.View, key ui.Key, ch rune, mod ui.Modifier) {
 	in := string(ch)
 	buf := strings.TrimSpace(v.Buffer())
 	if key == 127 && len(buf) > 0 {

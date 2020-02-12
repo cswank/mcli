@@ -38,6 +38,7 @@ func (s *screen) getKeys() []key {
 		{views: []string{"body"}, keys: []interface{}{'l'}, keybinding: s.body.albumLink, help: keyHelp{key: "l", body: "copy a link to the current album to clipboard"}},
 		{views: []string{"body"}, keys: []interface{}{'f'}, keybinding: s.next, help: keyHelp{key: "f", body: "fast forward to next song in queue"}},
 		{views: []string{"body"}, keys: []interface{}{'r'}, keybinding: s.rewind, help: keyHelp{key: "r", body: "rewind the current song to the beginning"}},
+		{views: []string{"body"}, keys: []interface{}{'i'}, keybinding: s.doImport, help: keyHelp{key: "i", body: "import a song or album"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.enter, help: keyHelp{key: "enter", body: "select item at cursor"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escape, help: keyHelp{key: "escape", body: "go back to the previous view"}},
 		{views: []string{"body"}, keys: []interface{}{ui.KeySpace}, keybinding: s.pause, help: keyHelp{key: "space", body: "pause/unpause"}},
@@ -52,7 +53,6 @@ func (s *screen) getKeys() []key {
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.search.exit},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escapeSearch},
 		{views: []string{""}, keys: []interface{}{'q', ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c or q)", body: "quit"}},
-		{views: []string{"login"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.login.next},
 		{views: []string{"body"}, keys: []interface{}{'h'}, keybinding: s.showHelp, help: keyHelp{key: "h", body: "toggle help menu"}},
 		{views: []string{"help"}, keys: []interface{}{'h'}, keybinding: s.hideHelp},
 	}
