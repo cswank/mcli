@@ -18,24 +18,25 @@ import (
 
 var (
 	app    = kingpin.New("mcli", "A command-line music player.")
-	srv    = app.Command("serve", "start the grpc server")
-	addr   = app.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
-	pth    = app.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
-	remote = app.Flag("remote", "play music on the server").Short('r').Default("false").Bool()
-	logout = app.Flag("log", "log location (for debugging)").Short('l').String()
+	srv    = kingpin.Flag("serve", "start the grpc server").Default("false").Bool()
+	addr   = kingpin.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
+	pth    = kingpin.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
+	remote = kingpin.Flag("remote", "play music on the server").Short('r').Default("false").Bool()
+	logout = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 
 	logfile *os.File
 )
 
 func main() {
+	kingpin.Parse()
+
 	if os.Getenv("MCLI_HOME") == "" {
 		os.Setenv("MCLI_HOME", fmt.Sprintf("%s/.mcli", os.Getenv("HOME")))
 	}
 
-	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
-	case "serve":
+	if *srv {
 		doServe()
-	default:
+	} else {
 		defer doLog(*logout)()
 		gui()
 	}
@@ -50,12 +51,12 @@ func doServe() {
 	dl := download.NewLocal(*pth)
 	p, err := play.NewLocal(play.LocalDownload(dl), play.LocalHistory(h))
 	if err != nil {
-		log.Fatal("cli ", err)
+		log.Fatal("unable to create player ", err)
 	}
 
 	f := fetch.NewLocal(*pth)
 	if err := server.Start(p, f, h); err != nil {
-		log.Fatal("rpc ", err)
+		log.Fatal("unable to start server ", err)
 	}
 }
 
@@ -65,21 +66,8 @@ func gui() {
 	var h repo.History
 	var err error
 
-	switch {
-	case *addr != "":
-		conn, err := grpc.Dial(*addr, grpc.WithInsecure())
-		if err != nil {
-			log.Fatal(*addr, err)
-		}
-
-		h = repo.NewRemote(conn)
-		f = fetch.NewRemote(conn)
-		if *remote {
-			p = play.NewRemote(conn)
-		} else {
-			p, err = play.NewLocal(play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
-		}
-	case *addr == "":
+	switch *addr {
+	case "":
 		h, err = repo.NewLocal()
 		if err != nil {
 			log.Fatal(*addr, err)
@@ -92,6 +80,20 @@ func gui() {
 		}
 
 		f = fetch.NewLocal(*pth)
+	default:
+		conn, err := grpc.Dial(*addr, grpc.WithInsecure())
+		if err != nil {
+			log.Fatal(*addr, err)
+		}
+
+		h = repo.NewRemote(conn)
+		f = fetch.NewRemote(conn)
+		if *remote {
+			p = play.NewRemote(conn)
+		} else {
+			p, err = play.NewLocal(play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
+		}
+		defer conn.Close()
 	}
 
 	if err := views.Start(p, f, h); err != nil {
