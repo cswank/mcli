@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"bitbucket.org/cswank/mcli/internal/repo"
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/repo"
+	"github.com/cswank/mcli/internal/schema"
 	ui "github.com/jroimartin/gocui"
 )
 

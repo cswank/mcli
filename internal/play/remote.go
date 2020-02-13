@@ -8,8 +8,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"bitbucket.org/cswank/mcli/internal/rpc"
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/rpc"
+	"github.com/cswank/mcli/internal/schema"
 )
 
 type Remote struct {

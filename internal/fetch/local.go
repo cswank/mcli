@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/schema"
 )
 
 type Local struct {

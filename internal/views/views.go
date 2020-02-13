@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"bitbucket.org/cswank/mcli/internal/colors"
-	"bitbucket.org/cswank/mcli/internal/fetch"
-	"bitbucket.org/cswank/mcli/internal/play"
-	"bitbucket.org/cswank/mcli/internal/repo"
+	"github.com/cswank/mcli/internal/colors"
+	"github.com/cswank/mcli/internal/fetch"
+	"github.com/cswank/mcli/internal/play"
+	"github.com/cswank/mcli/internal/repo"
 	ui "github.com/jroimartin/gocui"
 )
 

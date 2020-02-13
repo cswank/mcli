@@ -3,7 +3,7 @@ package download
 import (
 	"io"
 
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/schema"
 )
 
 type Downloader interface {

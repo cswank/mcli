@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"bitbucket.org/cswank/mcli/internal/schema"
 	"github.com/asdine/storm"
+	"github.com/cswank/mcli/internal/schema"
 )
 
 type StormEntry struct {

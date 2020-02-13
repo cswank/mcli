@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"bitbucket.org/cswank/mcli/internal/rpc"
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/rpc"
+	"github.com/cswank/mcli/internal/schema"
 	"google.golang.org/grpc"
 )
 

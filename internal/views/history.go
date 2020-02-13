@@ -1,7 +1,7 @@
 package views
 
 import (
-	"bitbucket.org/cswank/mcli/internal/repo"
+	"github.com/cswank/mcli/internal/repo"
 	ui "github.com/jroimartin/gocui"
 )
 

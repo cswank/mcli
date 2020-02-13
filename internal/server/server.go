@@ -5,11 +5,11 @@ import (
 	"net"
 	"os"
 
-	"bitbucket.org/cswank/mcli/internal/fetch"
-	"bitbucket.org/cswank/mcli/internal/play"
-	"bitbucket.org/cswank/mcli/internal/repo"
-	"bitbucket.org/cswank/mcli/internal/rpc"
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/fetch"
+	"github.com/cswank/mcli/internal/play"
+	"github.com/cswank/mcli/internal/repo"
+	"github.com/cswank/mcli/internal/rpc"
+	"github.com/cswank/mcli/internal/schema"
 	"google.golang.org/grpc"
 
 	"golang.org/x/net/context"

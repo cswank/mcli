@@ -12,9 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/cswank/mcli/internal/download"
-	"bitbucket.org/cswank/mcli/internal/repo"
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/download"
+	"github.com/cswank/mcli/internal/queue"
+	"github.com/cswank/mcli/internal/repo"
+	"github.com/cswank/mcli/internal/schema"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
 
@@ -23,7 +24,7 @@ import (
 )
 
 type Local struct {
-	queue         *queue
+	queue         *queue.Queue
 	history       repo.History
 	playing       bool
 	sep           string
@@ -78,7 +79,7 @@ func NewLocal(dir string, opts ...func(*Local)) (*Local, error) {
 
 	l := &Local{
 		sep:         string(filepath.Separator),
-		queue:       newQueue(),
+		queue:       queue.New(),
 		pause:       make(chan bool),
 		fastForward: make(chan bool),
 		rewind:      make(chan bool),
@@ -163,7 +164,7 @@ func (l *Local) Queue() *schema.Results {
 		r = []schema.Result{*l.onDeckResult}
 	}
 	return &schema.Results{
-		Results: append(r, l.queue.Playlist()...),
+		Results: append(r, l.queue.Queue()...),
 	}
 }
 

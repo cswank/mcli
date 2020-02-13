@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path"
 
-	"bitbucket.org/cswank/mcli/internal/schema"
 	"github.com/atotto/clipboard"
+	"github.com/cswank/mcli/internal/schema"
 	ui "github.com/jroimartin/gocui"
 )
 

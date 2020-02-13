@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 
-	"bitbucket.org/cswank/mcli/internal/download"
-	"bitbucket.org/cswank/mcli/internal/fetch"
-	"bitbucket.org/cswank/mcli/internal/play"
-	"bitbucket.org/cswank/mcli/internal/repo"
-	"bitbucket.org/cswank/mcli/internal/server"
-	"bitbucket.org/cswank/mcli/internal/views"
+	"github.com/cswank/mcli/internal/download"
+	"github.com/cswank/mcli/internal/fetch"
+	"github.com/cswank/mcli/internal/play"
+	"github.com/cswank/mcli/internal/repo"
+	"github.com/cswank/mcli/internal/server"
+	"github.com/cswank/mcli/internal/views"
 	"google.golang.org/grpc"
 	kingpin "gopkg.in/alecthomas/kingpin.v1"
 )

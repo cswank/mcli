@@ -1,6 +1,6 @@
 package fetch
 
-import "bitbucket.org/cswank/mcli/internal/schema"
+import "github.com/cswank/mcli/internal/schema"
 
 type Fetcher interface {
 	Name() string

@@ -1,6 +1,6 @@
 package repo
 
-import "bitbucket.org/cswank/mcli/internal/schema"
+import "github.com/cswank/mcli/internal/schema"
 
 type History interface {
 	Save(schema.Result) error

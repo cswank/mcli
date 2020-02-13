@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/schema"
 )
 
 func ResultFromPB(r *Result) schema.Result {

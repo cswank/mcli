@@ -1,30 +1,24 @@
-package play
+package queue
 
 import (
 	"sync"
 
-	"bitbucket.org/cswank/mcli/internal/schema"
+	"github.com/cswank/mcli/internal/schema"
 )
 
-type queue struct {
+type Queue struct {
 	queue []schema.Result
 	lock  sync.Mutex
 	ready chan bool
 }
 
-func newQueue() *queue {
-	return &queue{
+func New() *Queue {
+	return &Queue{
 		ready: make(chan bool),
 	}
 }
 
-func (q *queue) clear() {
-	q.lock.Lock()
-	q.queue = []schema.Result{}
-	q.lock.Unlock()
-}
-
-func (q *queue) Add(r schema.Result) {
+func (q *Queue) Add(r schema.Result) {
 	q.lock.Lock()
 	q.queue = append(q.queue, r)
 	q.lock.Unlock()
@@ -33,7 +27,7 @@ func (q *queue) Add(r schema.Result) {
 	}()
 }
 
-func (q *queue) Remove(i int) {
+func (q *Queue) Remove(i int) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	if len(q.queue) == 0 || i >= len(q.queue) {
@@ -42,13 +36,13 @@ func (q *queue) Remove(i int) {
 	q.queue = append(q.queue[:i], q.queue[i+1:]...)
 }
 
-func (q *queue) Playlist() []schema.Result {
+func (q *Queue) Queue() []schema.Result {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	return q.queue
 }
 
-func (q *queue) Next() schema.Result {
+func (q *Queue) Next() schema.Result {
 	<-q.ready
 	if len(q.queue) == 0 {
 		return q.Next()
