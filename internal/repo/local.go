@@ -20,10 +20,19 @@ type StormHistory struct {
 	db *storm.DB
 }
 
-func NewLocal() (*StormHistory, error) {
-	pth := fmt.Sprintf("%s/history.db", os.Getenv("MCLI_HOME"))
+func NewLocal(dir string) (*StormHistory, error) {
+	e, err := exists(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	if !e {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			return nil, err
+		}
+	}
+	pth := fmt.Sprintf("%s/history.db", dir)
 	db, err := storm.Open(pth)
-	fmt.Println("storm", pth, err)
 	return &StormHistory{db: db}, err
 }
 
@@ -63,4 +72,15 @@ func (b *StormHistory) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results
 		Type:    "history",
 		Results: out,
 	}, nil
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }

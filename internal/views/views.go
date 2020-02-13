@@ -32,20 +32,10 @@ type client struct {
 
 // Start is what main calls to get the app rolling
 func Start(p play.Player, f fetch.Fetcher, hist repo.History) error {
-	col = colors.Get()
+	col = colors.New()
 	cli := &client{Player: p, Fetcher: f, History: hist}
-	dir := os.Getenv("MCLI_HOME")
-	e, err := exists(dir)
-	if err != nil {
-		return err
-	}
 
-	if !e {
-		if err := os.MkdirAll(dir, 0700); err != nil {
-			return err
-		}
-	}
-
+	var err error
 	g, err = ui.NewGui(ui.Output256)
 	if err != nil {
 		return fmt.Errorf("could not create gui: %s", err)
@@ -76,15 +66,4 @@ func Start(p play.Player, f fetch.Fetcher, hist repo.History) error {
 	cli.Done(s.id)
 	g.Close()
 	return nil
-}
-
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }

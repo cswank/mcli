@@ -40,22 +40,20 @@ type Local struct {
 	onDeckResult  *schema.Result
 	currentResult *schema.Result
 	dl            download.Downloader
+	pth           string
 }
 
 type flacSettings struct {
 	Volume float64 `json:"volume"`
 }
 
-func getFlacPath() string {
-	return fmt.Sprintf("%s/flac.json", os.Getenv("MCLI_HOME"))
-}
-
-func NewLocal(opts ...func(*Local)) (*Local, error) {
-	pth := getFlacPath()
-	e, err := exists(pth)
+func NewLocal(dir string, opts ...func(*Local)) (*Local, error) {
+	e, err := exists(dir)
 	if err != nil {
 		return nil, err
 	}
+
+	pth := fmt.Sprintf("%s/flac.json", dir)
 
 	var s flacSettings
 	if e {
@@ -88,6 +86,7 @@ func NewLocal(opts ...func(*Local)) (*Local, error) {
 		volOut:      make(chan float64),
 		onDeck:      make(chan song),
 		volume:      s.Volume,
+		pth:         pth,
 	}
 
 	for _, opt := range opts {
@@ -95,7 +94,7 @@ func NewLocal(opts ...func(*Local)) (*Local, error) {
 	}
 
 	if l.history == nil {
-		hist, err := repo.NewLocal()
+		hist, err := repo.NewLocal(dir)
 		if err != nil {
 			return nil, fmt.Errorf("unable to create repo: %s", err)
 		}
@@ -184,7 +183,7 @@ func (l *Local) Done(id string) {
 }
 
 func (l *Local) Close() {
-	file, err := os.Create(getFlacPath())
+	file, err := os.Create(l.pth)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -207,7 +206,6 @@ func (l *Local) Rewind() {
 func (l *Local) downloadLoop() {
 	for {
 		r := l.queue.Next()
-		log.Printf("download loop next: %+v", r)
 		l.onDeckResult = &r
 		song := l.download(&r)
 		l.onDeck <- *song

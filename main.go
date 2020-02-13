@@ -20,7 +20,8 @@ var (
 	app    = kingpin.New("mcli", "A command-line music player.")
 	srv    = kingpin.Flag("serve", "start the grpc server").Default("false").Bool()
 	addr   = kingpin.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
-	pth    = kingpin.Flag("path", "path to the flac files").Short('p').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
+	pth    = kingpin.Flag("music", "path to the flac files").Short('m').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
+	home   = kingpin.Flag("home", "path to the directory where the database file lives").Default(os.Getenv("MCLI_HOME")).String()
 	remote = kingpin.Flag("remote", "play music on the server").Short('r').Default("false").Bool()
 	logout = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 
@@ -43,13 +44,13 @@ func main() {
 }
 
 func doServe() {
-	h, err := repo.NewLocal()
+	h, err := repo.NewLocal(*home)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	dl := download.NewLocal(*pth)
-	p, err := play.NewLocal(play.LocalDownload(dl), play.LocalHistory(h))
+	p, err := play.NewLocal(*pth, play.LocalDownload(dl), play.LocalHistory(h))
 	if err != nil {
 		log.Fatal("unable to create player ", err)
 	}
@@ -68,13 +69,13 @@ func gui() {
 
 	switch *addr {
 	case "":
-		h, err = repo.NewLocal()
+		h, err = repo.NewLocal(*home)
 		if err != nil {
 			log.Fatal(*addr, err)
 		}
 
 		dl := download.NewLocal(*pth)
-		p, err = play.NewLocal(play.LocalDownload(dl), play.LocalHistory(h))
+		p, err = play.NewLocal(*pth, play.LocalDownload(dl), play.LocalHistory(h))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -91,7 +92,7 @@ func gui() {
 		if *remote {
 			p = play.NewRemote(conn)
 		} else {
-			p, err = play.NewLocal(play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
+			p, err = play.NewLocal(*pth, play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
 		}
 		defer conn.Close()
 	}
