@@ -51,3 +51,15 @@ So for example, if $MCLI_MUSIC_LOCATION=/mnt/music:
 ls -d $PWD/01.Come\ Together.flac
 '/mnt/music/The Beatles/Abbey Road (remix)/01.Come Together.flac'
 ```
+
+## Colors
+There are 3 different colors used in this app, and they can be customized by setting
+the following environmental variables (the default values are shown here):
+
+```console
+export MCLI_C1="252"
+export MCLI_C2="2"
+export MCLI_C3="11"
+```
+
+The colors must be a number from the xterm 256 color palatte.
