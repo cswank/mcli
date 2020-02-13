@@ -39,9 +39,9 @@ func (b *body) render(g *ui.Gui, v *ui.View) error {
 	for i, r := range b.view {
 		s := b.results.Print(r)
 		if i == b.cursor {
-			s = c2(s)
+			s = col.C2(s)
 		} else {
-			s = c1(s)
+			s = col.C1(s)
 		}
 		if _, err := fmt.Fprint(v, s); err != nil {
 			return err

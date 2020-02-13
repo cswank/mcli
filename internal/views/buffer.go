@@ -24,6 +24,8 @@ func randString(n int) string {
 	return string(b)
 }
 
+// buffer displays the progress bar that is shown when a song is read
+// into the play queue
 type buffer struct {
 	width    int
 	coords   coords

@@ -13,15 +13,9 @@ import (
 )
 
 var (
-	g *ui.Gui
-
-	bg         ui.Attribute
-	c1, c2, c3 colors.Colorer
+	g   *ui.Gui
+	col colors.Colors
 )
-
-func init() {
-	bg, c1, c2, c3 = getColors()
-}
 
 type coords struct {
 	x1 int
@@ -36,8 +30,9 @@ type client struct {
 	repo.History
 }
 
-//Start is what main calls to get the app rolling
+// Start is what main calls to get the app rolling
 func Start(p play.Player, f fetch.Fetcher, hist repo.History) error {
+	col = colors.Get()
 	cli := &client{Player: p, Fetcher: f, History: hist}
 	dir := os.Getenv("MCLI_HOME")
 	e, err := exists(dir)
@@ -81,23 +76,6 @@ func Start(p play.Player, f fetch.Fetcher, hist repo.History) error {
 	cli.Done(s.id)
 	g.Close()
 	return nil
-}
-
-func getColors() (ui.Attribute, colors.Colorer, colors.Colorer, colors.Colorer) {
-	bg = colors.GetBackground(os.Getenv("MCLI_COLOR0"))
-	c1 := colors.Get(os.Getenv("MCLI_COLOR1"))
-	if c1 == nil {
-		c1 = colors.Get("white")
-	}
-	c2 := colors.Get(os.Getenv("MCLI_COLOR2"))
-	if c2 == nil {
-		c2 = colors.Get("green")
-	}
-	c3 := colors.Get(os.Getenv("MCLI_COLOR3"))
-	if c3 == nil {
-		c3 = colors.Get("yellow")
-	}
-	return bg, c1, c2, c3
 }
 
 func exists(path string) (bool, error) {

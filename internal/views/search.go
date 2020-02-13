@@ -65,7 +65,7 @@ func (s *search) render(g *ui.Gui, v *ui.View) error {
 		v.Frame = true
 		v.Title = "search"
 		v.Clear()
-		_, err := v.Write([]byte(c1("albu") + c2("m") + c1(" / artis") + c2("t") + c1(" / trac") + c2("k")))
+		_, err := v.Write([]byte(col.C1("albu") + col.C2("m") + col.C1(" / artis") + col.C2("t") + col.C1(" / trac") + col.C2("k")))
 		return err
 	}
 
@@ -85,10 +85,10 @@ func (s *search) Edit(v *ui.View, key ui.Key, ch rune, mod ui.Modifier) {
 	if key == 127 && len(buf) > 0 {
 		v.Clear()
 		buf = buf[:len(buf)-1]
-		v.Write([]byte(c1(buf)))
+		v.Write([]byte(col.C1(buf)))
 		v.SetCursor(len(buf), 0)
 	} else {
-		fmt.Fprint(v, c1(in))
+		fmt.Fprint(v, col.C1(in))
 		buf = v.Buffer()
 		v.SetCursor(len(buf)-1, 0)
 	}

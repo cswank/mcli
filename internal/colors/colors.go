@@ -2,110 +2,66 @@ package colors
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
-	"github.com/aybabtme/rgbterm"
-	ui "github.com/jroimartin/gocui"
+	"github.com/kelseyhightower/envconfig"
 )
 
-var (
-	ansiColors = map[string]string{
-		"black":   "30",
-		"red":     "31",
-		"green":   "32",
-		"yellow":  "33",
-		"blue":    "34",
-		"magenta": "35",
-		"cyan":    "36",
-		"white":   "37",
-	}
-
-	lookup = map[string]Colorer{
-		"black": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["black"], ansiColors["black"]), s)
-		},
-		"red": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["red"], ansiColors["red"]), s)
-		},
-		"green": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["green"], ansiColors["green"]), s)
-		},
-		"yellow": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["yellow"], ansiColors["yellow"]), s)
-		},
-		"blue": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["blue"], ansiColors["blue"]), s)
-		},
-		"magenta": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["magenta"], ansiColors["magenta"]), s)
-		},
-		"cyan": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["cyan"], ansiColors["cyan"]), s)
-		},
-		"white": func(s string) string {
-			return fmt.Sprintf(fmt.Sprintf("\033[%sm%%s\033[%sm", ansiColors["white"], ansiColors["white"]), s)
-		},
-	}
-
-	background = map[string]ui.Attribute{
-		"black":   ui.ColorBlack,
-		"red":     ui.ColorRed,
-		"green":   ui.ColorGreen,
-		"yellow":  ui.ColorYellow,
-		"blue":    ui.ColorBlue,
-		"magenta": ui.ColorMagenta,
-		"cyan":    ui.ColorCyan,
-		"white":   ui.ColorWhite,
-	}
+const (
+	fgTpl = "\033[38;5;%dm%s\u001b[0m"
+	bgTpl = "\033[48;5;%d;38;5;%dm%s\u001b[0m"
 )
-
-//GetBackground sets the background color for the ui.
-func GetBackground(s string) ui.Attribute {
-	c, ok := background[s]
-	if !ok {
-		return background["black"]
-	}
-	return c
-}
 
 //Colorer wraps a string with ansi color escape codes.
 type Colorer func(string) string
 
-//Get fetches the colorer func for the given color
-func Get(s string) Colorer {
-	if strings.Contains(s, ",") {
-		return getRGB(s)
+func (c *Colorer) Decode(value string) error {
+	ss := strings.Split(value, ",")
+	if len(ss) == 1 {
+		i := defaultuint(value, 0)
+		*c = func(s string) string {
+			return fmt.Sprintf(fgTpl, i, s)
+		}
+	} else if len(ss) == 2 {
+		fg := defaultuint(ss[0], 0)
+		bg := defaultuint(ss[1], 1)
+		*c = func(s string) string {
+			return fmt.Sprintf(bgTpl, bg, fg, s)
+		}
+	} else {
+		*c = func(s string) string {
+			return s
+		}
 	}
-	return lookup[s]
+
+	return nil
 }
 
-func getRGB(c string) Colorer {
-	parts := strings.Split(c, ",")
-	r, g, b := rgbFromStrings(parts)
-	return func(s string) string {
-		return rgbterm.FgString(s, r, g, b)
+func defaultuint(s string, i uint8) uint8 {
+	out, err := strconv.ParseUint(s, 10, 8)
+	if err != nil {
+		return i
 	}
+	return uint8(out)
 }
 
-func rgbFromStrings(s []string) (uint8, uint8, uint8) {
-	if len(s) != 3 {
-		s = []string{"255", "255", "255"}
-	}
-	r, err := strconv.ParseUint(s[0], 10, 8)
+func Get() Colors {
+	var c Colors
+	err := envconfig.Process("MCLI", &c)
 	if err != nil {
-		return rgbFromStrings([]string{})
+		log.Fatal(err)
 	}
+	return c
+}
 
-	g, err := strconv.ParseUint(s[1], 10, 8)
-	if err != nil {
-		return rgbFromStrings([]string{})
-	}
-
-	b, err := strconv.ParseUint(s[2], 10, 8)
-	if err != nil {
-		return rgbFromStrings([]string{})
-	}
-
-	return uint8(r), uint8(g), uint8(b)
+// Colors provide foreground and background colors for the ui.
+// If the default value is comma separated the first value is
+// the foreground color and the second is the background color.
+// If only one value is supplied then it's the foreground color.
+type Colors struct {
+	C1 Colorer `default:"252"`
+	C2 Colorer `default:"2"`
+	C3 Colorer `default:"11"`
 }

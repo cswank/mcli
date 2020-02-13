@@ -11,7 +11,6 @@ import (
 type player struct {
 	width  int
 	coords coords
-	ch     chan schema.Progress
 	client *client
 }
 
@@ -20,7 +19,6 @@ func newPlay(w, h int, id string, c *client) *player {
 		width:  w,
 		coords: coords{x1: -1, y1: h - 2, x2: w, y2: h},
 		client: c,
-		ch:     make(chan schema.Progress),
 	}
 
 	c.PlayProgress(id, p.playProgress)

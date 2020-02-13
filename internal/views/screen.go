@@ -25,7 +25,6 @@ type screen struct {
 	history      *history
 	volume       *volume
 	historySort  repo.Sort
-	login        *login
 	help         *help
 
 	keys []key
@@ -55,7 +54,6 @@ func newScreen(width, height int, cli *client) (*screen, error) {
 	}
 
 	go s.clearVolume()
-	s.login = newLogin(width, height, s.doLogin)
 	s.search = newSearch(width, height, s.doSearch)
 	s.artistDialog = newArtistDialog(width, height, s.doShowArtist)
 	s.history = newHistory(width, height, s.showHistory)
@@ -316,16 +314,6 @@ func (s *screen) showHistory(sort repo.Sort) error {
 	return nil
 }
 
-func (s *screen) doLogin(username, password string) error {
-	s.view = "search-type"
-	err := s.client.Login(username, password)
-	if err != nil {
-		return err
-	}
-
-	return g.DeleteView("login")
-}
-
 func (s *screen) doShowArtist(id, term string) error {
 	s.view = "body"
 	c := s.body.cursor
@@ -429,7 +417,7 @@ func (s *screen) showHistoryDialog(g *ui.Gui, v *ui.View) error {
 
 func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if !s.client.Ping() {
-		s.view = "login"
+		// show error message
 	} else {
 		res, err := s.client.Fetch(0, s.height*10, s.historySort)
 		if err == nil && len(res.Results) > 0 {
@@ -446,16 +434,6 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	return func(g *ui.Gui) error {
 		g.Cursor = false
 		switch s.view {
-		case "login":
-			v, err := g.SetView("login", s.login.coords.x1, s.login.coords.y1, s.login.coords.x2, s.login.coords.y2)
-			if err != nil && err != ui.ErrUnknownView {
-				return err
-			}
-
-			ui.DefaultEditor = s.login
-			v.Editable = true
-			v.Frame = true
-			v.Title = s.login.title
 		case "help":
 			if err := s.help.show(g, s.keys); err != nil {
 				return err

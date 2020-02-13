@@ -23,7 +23,7 @@ func newHeader(w, h int) *header {
 func (h *header) render(g *ui.Gui, v *ui.View) error {
 	v.Clear()
 	t := fmt.Sprintf("%%s%%%ds", h.width-len(h.header))
-	fmt.Fprintf(v, c2(t), strings.TrimSuffix(h.header, "\n"), "type 'h' for help")
+	fmt.Fprintf(v, col.C2(t), strings.TrimSuffix(h.header, "\n"), "type 'h' for help")
 	return nil
 }
 

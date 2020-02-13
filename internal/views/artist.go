@@ -34,7 +34,7 @@ func (a *artistDialog) render(g *ui.Gui, v *ui.View) error {
 	v.Frame = true
 	v.Title = "show"
 	v.Clear()
-	_, err := v.Write([]byte(c1("albu") + c2("m") + c1("s / trac") + c2("k") + c1("s")))
+	_, err := v.Write([]byte(col.C1("albu") + col.C2("m") + col.C1("s / trac") + col.C2("k") + col.C1("s")))
 	return err
 }
 

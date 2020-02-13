@@ -64,7 +64,7 @@ func (h *help) getBody(keys []key) []byte {
 	for _, key := range keys {
 		h := key.help
 		if h.key != "" {
-			fmt.Fprintf(out, fmt.Sprintf("%s %s\n", c3(h.key), c1(fmt.Sprintf(fmt.Sprintf("%%%ds", helpWidth-len(h.key)-4), h.body))))
+			fmt.Fprintf(out, fmt.Sprintf("%s %s\n", col.C3(h.key), col.C1(fmt.Sprintf(fmt.Sprintf("%%%ds", helpWidth-len(h.key)-4), h.body))))
 		}
 	}
 	return []byte(fmt.Sprintf(h.tpl, out.String()))

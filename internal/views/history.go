@@ -43,6 +43,6 @@ func (s *history) render(g *ui.Gui, v *ui.View) error {
 	v.Frame = true
 	v.Title = "sort by"
 	v.Clear()
-	_, err := v.Write([]byte(c1("most ") + c2("r") + c1("ecent / most ") + c2("p") + c1("layed")))
+	_, err := v.Write([]byte(col.C1("most ") + col.C2("r") + col.C1("ecent / most ") + col.C2("p") + col.C1("layed")))
 	return err
 }

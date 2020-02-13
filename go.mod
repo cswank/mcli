@@ -17,6 +17,7 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/hajimehoshi/oto v0.5.4 // indirect
 	github.com/jroimartin/gocui v0.3.1-0.20170827195011-4f518eddb04b
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.3 // indirect
