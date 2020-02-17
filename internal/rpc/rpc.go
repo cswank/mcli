@@ -13,7 +13,7 @@ func ResultFromPB(r *Result) schema.Result {
 		Album:     albumFromPB(r.GetAlbum()),
 		Artist:    artistFromPB(r.GetArtist()),
 		Playlist:  playlistFromPB(r.GetPlaylist()),
-		Message:   r.GetMessage(),
+		Error:     r.GetError(),
 	}
 }
 
