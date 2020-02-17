@@ -46,6 +46,12 @@ func (l Local) doFind(glob, t string) (*schema.Results, error) {
 		return nil, nil
 	}
 
+	if len(albums) == 0 {
+		return &schema.Results{
+			Error: "no results",
+		}, nil
+	}
+
 	var maxTitle int
 	out := make([]schema.Result, len(albums))
 	for i, s := range albums {
