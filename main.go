@@ -36,32 +36,14 @@ func main() {
 	}
 
 	if *srv {
-		doServe()
+		startServer()
 	} else {
-		defer doLog(*logout)()
-		gui()
+		defer setupLog(*logout)()
+		startUI()
 	}
 }
 
-func doServe() {
-	h, err := history.NewLocal(*home)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	dl := download.NewLocal(*pth)
-	p, err := play.NewLocal(*pth, play.LocalDownload(dl), play.LocalHistory(h))
-	if err != nil {
-		log.Fatal("unable to create player ", err)
-	}
-
-	f := fetch.NewLocal(*pth)
-	if err := server.Start(p, f, h); err != nil {
-		log.Fatal("unable to start server ", err)
-	}
-}
-
-func gui() {
+func startUI() {
 	var f fetch.Fetcher
 	var p play.Player
 	var h history.History
@@ -103,6 +85,24 @@ func remote() (play.Player, fetch.Fetcher, history.History, func()) {
 	return p, f, h, func() { conn.Close() }
 }
 
+func startServer() {
+	h, err := history.NewLocal(*home)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dl := download.NewLocal(*pth)
+	p, err := play.NewLocal(*pth, play.LocalDownload(dl), play.LocalHistory(h))
+	if err != nil {
+		log.Fatal("unable to create player ", err)
+	}
+
+	f := fetch.NewLocal(*pth)
+	if err := server.Start(p, f, h); err != nil {
+		log.Fatal("unable to start server ", err)
+	}
+}
+
 func local() (play.Player, fetch.Fetcher, history.History, func()) {
 	h, err := history.NewLocal(*home)
 	if err != nil {
@@ -120,7 +120,7 @@ func local() (play.Player, fetch.Fetcher, history.History, func()) {
 	return p, f, h, func() {}
 }
 
-func doLog(logout string) func() {
+func setupLog(logout string) func() {
 	out := func() {}
 	if logout != "" {
 		f, err := os.Create(logout)

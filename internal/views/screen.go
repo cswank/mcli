@@ -297,6 +297,16 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 	return s.help.hide(g, v)
 }
 
+func (s *screen) showManual(g *ui.Gui, v *ui.View) error {
+	s.view = "manual"
+	return nil
+}
+
+func (s *screen) hideManual(g *ui.Gui, v *ui.View) error {
+	s.view = "body"
+	return s.help.hide(g, v)
+}
+
 func (s *screen) showHistory(sort hist.Sort) error {
 	g.DeleteView("history-type")
 	s.historySort = sort

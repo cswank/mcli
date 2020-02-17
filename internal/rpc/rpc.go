@@ -13,6 +13,7 @@ func ResultFromPB(r *Result) schema.Result {
 		Album:     albumFromPB(r.GetAlbum()),
 		Artist:    artistFromPB(r.GetArtist()),
 		Playlist:  playlistFromPB(r.GetPlaylist()),
+		Message:   r.GetMessage(),
 	}
 }
 
@@ -97,6 +98,7 @@ func ResultsFromPB(r *Results) *schema.Results {
 		Header:  r.GetHeader(),
 		Fmt:     r.GetFmt(),
 		Results: res,
+		Error:   r.GetError(),
 	}
 }
 
@@ -113,6 +115,7 @@ func PBFromResults(r *schema.Results) *Results {
 		Type:    r.Type,
 		Fmt:     r.Fmt,
 		Results: out,
+		Error:   r.Error,
 	}
 }
 
@@ -125,6 +128,7 @@ func PBFromResult(r schema.Result) *Result {
 		Album:     pbFromAlbum(r.Album),
 		Artist:    pbFromArtist(r.Artist),
 		Playlist:  pbFromPlaylist(r.Playlist),
+		Error:     r.Error,
 	}
 }
 

@@ -21,9 +21,10 @@ type Colorer func(string) string
 // the foreground color and the second is the background color.
 // If only one value is supplied then it's the foreground color.
 type Colors struct {
-	C1 Colorer `default:"252"`
-	C2 Colorer `default:"2"`
-	C3 Colorer `default:"11"`
+	C1    Colorer `default:"252"`
+	C2    Colorer `default:"2"`
+	C3    Colorer `default:"11"`
+	Error Colorer `default:"196"`
 }
 
 // New reads env vars to create a new Colors struct

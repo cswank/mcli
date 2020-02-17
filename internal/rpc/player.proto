@@ -123,6 +123,7 @@ message Result {
 	Album album = 5;
 	Artist artist = 6;
 	Playlist playlist = 7;
+	string error = 8;
 }
 
 message Results {
@@ -131,4 +132,5 @@ message Results {
 	string fmt = 3;
 	Album album = 4;
 	repeated Result results = 5;
+	string error = 6;;
 }

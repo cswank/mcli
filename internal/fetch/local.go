@@ -72,6 +72,12 @@ func (l Local) GetAlbum(id string) (*schema.Results, error) {
 		return nil, nil
 	}
 
+	if len(tracks) == 0 {
+		return &schema.Results{
+			Error: "invalid album",
+		}, nil
+	}
+
 	out := make([]schema.Result, len(tracks))
 	var maxTitle int
 
