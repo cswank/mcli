@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/cswank/mcli/internal/fetch"
+	"github.com/cswank/mcli/internal/history"
 	"github.com/cswank/mcli/internal/play"
-	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/rpc"
 	"github.com/cswank/mcli/internal/schema"
 	"google.golang.org/grpc"
@@ -22,7 +22,7 @@ const (
 type client struct {
 	play.Player
 	fetch.Fetcher
-	repo.History
+	history.History
 }
 
 type server struct {
@@ -34,7 +34,7 @@ type server struct {
 	done                   chan bool
 }
 
-func Start(p play.Player, f fetch.Fetcher, h repo.History) error {
+func Start(p play.Player, f fetch.Fetcher, h history.History) error {
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -138,7 +138,7 @@ func (s *server) DownloadProgress(id *rpc.String, stream rpc.Player_DownloadProg
 }
 
 func (s *server) Fetch(ctx context.Context, p *rpc.Page) (*rpc.Results, error) {
-	r, err := s.cli.Fetch(int(p.Page), int(p.PageSize), repo.Sort(p.Sort))
+	r, err := s.cli.Fetch(int(p.Page), int(p.PageSize), history.Sort(p.Sort))
 	return rpc.PBFromResults(r), err
 }
 

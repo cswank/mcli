@@ -1,4 +1,4 @@
-package repo
+package history
 
 import "github.com/cswank/mcli/internal/schema"
 

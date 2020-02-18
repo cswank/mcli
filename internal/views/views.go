@@ -7,8 +7,8 @@ import (
 
 	"github.com/cswank/mcli/internal/colors"
 	"github.com/cswank/mcli/internal/fetch"
+	hist "github.com/cswank/mcli/internal/history"
 	"github.com/cswank/mcli/internal/play"
-	"github.com/cswank/mcli/internal/repo"
 	ui "github.com/jroimartin/gocui"
 )
 
@@ -27,11 +27,11 @@ type coords struct {
 type client struct {
 	play.Player
 	fetch.Fetcher
-	repo.History
+	hist.History
 }
 
 // Start is what main calls to get the app rolling
-func Start(p play.Player, f fetch.Fetcher, hist repo.History) error {
+func Start(p play.Player, f fetch.Fetcher, hist hist.History) error {
 	col = colors.New()
 	cli := &client{Player: p, Fetcher: f, History: hist}
 

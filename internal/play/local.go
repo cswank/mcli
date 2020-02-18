@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/cswank/mcli/internal/download"
+	"github.com/cswank/mcli/internal/history"
 	"github.com/cswank/mcli/internal/queue"
-	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/schema"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
@@ -25,7 +25,7 @@ import (
 
 type Local struct {
 	queue         *queue.Queue
-	history       repo.History
+	history       history.History
 	playing       bool
 	sep           string
 	pause         chan bool
@@ -95,9 +95,9 @@ func NewLocal(dir string, opts ...func(*Local)) (*Local, error) {
 	}
 
 	if l.history == nil {
-		hist, err := repo.NewLocal(dir)
+		hist, err := history.NewLocal(dir)
 		if err != nil {
-			return nil, fmt.Errorf("unable to create repo: %s", err)
+			return nil, fmt.Errorf("unable to create history: %s", err)
 		}
 		l.history = hist
 	}
@@ -113,7 +113,7 @@ func LocalDownload(dl download.Downloader) func(*Local) {
 	}
 }
 
-func LocalHistory(h repo.History) func(*Local) {
+func LocalHistory(h history.History) func(*Local) {
 	return func(l *Local) {
 		l.history = h
 	}
