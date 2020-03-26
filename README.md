@@ -1,6 +1,8 @@
 # Mcli
 A command line flac music player.
 
+<img src="./docs/mcli.gif"/>
+
 ## Configurations
 
 ### 1: All local

@@ -11,6 +11,7 @@ type Results struct {
 	Type    string              `json:"type"`
 	Header  string              `json:"header"`
 	Results []Result            `json:"results"`
+	Error   string              `json:"error"`
 	Fmt     string              `json:"fmt"`
 	Print   func(Result) string `json:"-" template:"-"`
 }
@@ -45,6 +46,7 @@ type Result struct {
 	Artist    Artist `json:"artist"`
 	Album     Album  `json:"album"`
 	Playlist  Album  `json:"playlist"`
+	Error     string `json:"message"`
 }
 
 func (r *Results) PrintPlaylists() func(res Result) string {

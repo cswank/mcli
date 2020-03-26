@@ -30,7 +30,7 @@ type buffer struct {
 	width    int
 	coords   coords
 	progress chan schema.Progress
-	song     chan schema.Result
+	result   chan schema.Result
 	text     string
 }
 
@@ -39,7 +39,7 @@ func newBuffer(w, h int, id string, cli *client) *buffer {
 		width:    w - 1,
 		coords:   coords{x1: -1, y1: h - 3, x2: w, y2: h - 1},
 		progress: make(chan schema.Progress),
-		song:     make(chan schema.Result),
+		result:   make(chan schema.Result),
 	}
 
 	cli.NextSong(id, b.nextSong)
@@ -54,7 +54,7 @@ func (b *buffer) downloadProgress(prog schema.Progress) {
 }
 
 func (b *buffer) nextSong(r schema.Result) {
-	b.song <- r
+	b.result <- r
 }
 
 func (b *buffer) render() {
@@ -71,8 +71,12 @@ func (b *buffer) render() {
 					})
 				}
 			}
-		case r := <-b.song:
-			b.text = b.center(fmt.Sprintf("%s %s", r.Track.Title, time.Duration(r.Track.Duration)*time.Second))
+		case r := <-b.result:
+			if r.Error == "" {
+				b.text = b.center(fmt.Sprintf("%s %s", r.Track.Title, time.Duration(r.Track.Duration)*time.Second))
+			} else {
+				b.text = b.center(col.Error(r.Error))
+			}
 			g.Update(func(g *ui.Gui) error {
 				v, _ := g.View("buffer")
 				v.Clear()

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/cswank/mcli/internal/download"
 	"github.com/cswank/mcli/internal/fetch"
@@ -17,11 +17,15 @@ import (
 )
 
 var (
+	homeDir = filepath.Join(os.Getenv("HOME"), ".mcli")
+)
+
+var (
 	app        = kingpin.New("mcli", "A command-line music player.")
 	srv        = kingpin.Flag("serve", "start the grpc server").Default("false").Bool()
-	addr       = kingpin.Flag("address", "address of grpc server").Short('a').Default(os.Getenv("MCLI_HOST")).String()
-	pth        = kingpin.Flag("music", "path to the flac files").Short('m').Default(os.Getenv("MCLI_MUSIC_LOCATION")).String()
-	home       = kingpin.Flag("home", "path to the directory where the database file lives").Default(os.Getenv("MCLI_HOME")).String()
+	addr       = kingpin.Flag("address", "address of grpc server").Short('a').Envar("MCLI_HOST").String()
+	pth        = kingpin.Flag("music", "path to the flac files").Short('m').Envar("MCLI_MUSIC_LOCATION").String()
+	home       = kingpin.Flag("home", "path to the directory where the database file lives").Default(homeDir).Envar("MCLI_HOME").String()
 	remotePlay = kingpin.Flag("remote", "play music on the server").Short('r').Default("false").Bool()
 	logout     = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 
@@ -31,37 +35,15 @@ var (
 func main() {
 	kingpin.Parse()
 
-	if os.Getenv("MCLI_HOME") == "" {
-		os.Setenv("MCLI_HOME", fmt.Sprintf("%s/.mcli", os.Getenv("HOME")))
-	}
-
 	if *srv {
-		doServe()
+		startServer()
 	} else {
-		defer doLog(*logout)()
-		gui()
+		defer setupLog(*logout)()
+		startUI()
 	}
 }
 
-func doServe() {
-	h, err := history.NewLocal(*home)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	dl := download.NewLocal(*pth)
-	p, err := play.NewLocal(*pth, play.LocalDownload(dl), play.LocalHistory(h))
-	if err != nil {
-		log.Fatal("unable to create player ", err)
-	}
-
-	f := fetch.NewLocal(*pth)
-	if err := server.Start(p, f, h); err != nil {
-		log.Fatal("unable to start server ", err)
-	}
-}
-
-func gui() {
+func startUI() {
 	var f fetch.Fetcher
 	var p play.Player
 	var h history.History
@@ -94,13 +76,31 @@ func remote() (play.Player, fetch.Fetcher, history.History, func()) {
 	if *remotePlay {
 		p = play.NewRemote(conn)
 	} else {
-		p, err = play.NewLocal(*pth, play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
+		p, err = play.NewLocal(*pth, *home, play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
 		if err != nil {
 			log.Fatal(*addr, err)
 		}
 	}
 
 	return p, f, h, func() { conn.Close() }
+}
+
+func startServer() {
+	h, err := history.NewLocal(*home)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dl := download.NewLocal(*pth)
+	p, err := play.NewLocal(*pth, *home, play.LocalDownload(dl), play.LocalHistory(h))
+	if err != nil {
+		log.Fatal("unable to create player ", err)
+	}
+
+	f := fetch.NewLocal(*pth)
+	if err := server.Start(p, f, h); err != nil {
+		log.Fatal("unable to start server ", err)
+	}
 }
 
 func local() (play.Player, fetch.Fetcher, history.History, func()) {
@@ -110,7 +110,7 @@ func local() (play.Player, fetch.Fetcher, history.History, func()) {
 	}
 
 	dl := download.NewLocal(*pth)
-	p, err := play.NewLocal(*pth, play.LocalDownload(dl), play.LocalHistory(h))
+	p, err := play.NewLocal(*pth, *home, play.LocalDownload(dl), play.LocalHistory(h))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func local() (play.Player, fetch.Fetcher, history.History, func()) {
 	return p, f, h, func() {}
 }
 
-func doLog(logout string) func() {
+func setupLog(logout string) func() {
 	out := func() {}
 	if logout != "" {
 		f, err := os.Create(logout)

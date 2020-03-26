@@ -48,13 +48,14 @@ type flacSettings struct {
 	Volume float64 `json:"volume"`
 }
 
-func NewLocal(dir string, opts ...func(*Local)) (*Local, error) {
+func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 	e, err := exists(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	pth := fmt.Sprintf("%s/flac.json", dir)
+	pth := fmt.Sprintf("%s/flac.json", home)
+	log.Println("pth", pth)
 
 	var s flacSettings
 	if e {
