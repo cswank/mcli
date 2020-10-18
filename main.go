@@ -91,14 +91,8 @@ func startServer() {
 		log.Fatal(err)
 	}
 
-	dl := download.NewLocal(*pth)
-	p, err := play.NewLocal(*pth, *home, play.LocalDownload(dl), play.LocalHistory(h))
-	if err != nil {
-		log.Fatal("unable to create player ", err)
-	}
-
 	f := fetch.NewLocal(*pth)
-	if err := server.Start(p, f, h); err != nil {
+	if err := server.Start(nil, f, h); err != nil {
 		log.Fatal("unable to start server ", err)
 	}
 }
