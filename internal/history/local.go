@@ -93,7 +93,6 @@ func (b *StormHistory) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results
 
 	out := make([]schema.Result, len(entries))
 	for i, e := range entries {
-
 		e.Result.PlayCount = e.Count
 		out[i] = e.Result
 	}
