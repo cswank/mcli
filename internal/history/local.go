@@ -1,8 +1,12 @@
 package history
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -23,10 +27,10 @@ type StormHistory struct {
 }
 
 func Migrate(dir string) error {
-	// db, err := sql.Open("sqlite3", filepath.Join(dir, "database.sql"))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	db, err := sql.Open("sqlite3", filepath.Join(dir, "database.sql"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	pth := fmt.Sprintf("%s/history.db", dir)
 	fmt.Println(pth)
@@ -50,7 +54,22 @@ func Migrate(dir string) error {
 			continue
 		}
 
-		fmt.Println(pth, entry.Count)
+		parts := strings.Split(pth, "/")
+		if len(parts) < 4 {
+			continue
+		}
+
+		l := len(parts) - 1
+		t := strings.TrimSuffix(parts[l], ".flac")
+		al := parts[l-1]
+		ar := parts[l-2]
+
+		q := `select id from tracks where name = ?;`
+		var id int64
+		if err := db.QueryRow(q, t).Scan(&id); err != nil {
+			return err
+		}
+		fmt.Println(t, al, ar, entry.Count, id)
 	}
 
 	return nil
