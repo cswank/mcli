@@ -39,7 +39,7 @@ func main() {
 	if *srv {
 		startServer()
 	} else if *migrate {
-		history.Migrate(*pth)
+		history.Migrate(*home)
 	} else {
 		defer setupLog(*logout)()
 		startUI()
