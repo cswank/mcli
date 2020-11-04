@@ -45,6 +45,12 @@ func Migrate(dir string) error {
 
 	for _, entry := range entries {
 		fmt.Printf("%+v\n", entry)
+		pth, ok := entry.ID.(string)
+		if !ok {
+			continue
+		}
+
+		fmt.Println(pth, entry.Count)
 	}
 
 	return nil
