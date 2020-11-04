@@ -12,9 +12,9 @@ import (
 )
 
 type StormEntry struct {
-	ID     string `storm:"id"`
-	Count  int    `storm:"index"`
-	Time   string `storm:"index"`
+	ID     interface{} `storm:"id"`
+	Count  int         `storm:"index"`
+	Time   string      `storm:"index"`
 	Result schema.Result
 }
 
@@ -36,7 +36,6 @@ func Migrate(dir string) error {
 	}
 
 	var entries []StormEntry
-	err = st.All(&entries)
 	if err != nil {
 		return err
 	}
