@@ -29,6 +29,7 @@ func Migrate(dir string) error {
 	// }
 
 	pth := fmt.Sprintf("%s/history.db", dir)
+	fmt.Println(pth)
 	st, err := storm.Open(pth)
 	if err != nil {
 		return err
@@ -39,6 +40,8 @@ func Migrate(dir string) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("got entries", entries)
 
 	for _, entry := range entries {
 		fmt.Printf("%+v\n", entry)
