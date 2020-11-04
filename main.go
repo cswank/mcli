@@ -23,6 +23,7 @@ var (
 var (
 	app        = kingpin.New("mcli", "A command-line music player.")
 	srv        = kingpin.Flag("serve", "start the grpc server").Default("false").Bool()
+	migrate    = kingpin.Flag("migrate", "start the grpc server").Default("false").Bool()
 	addr       = kingpin.Flag("address", "address of grpc server").Short('a').Envar("MCLI_HOST").String()
 	pth        = kingpin.Flag("music", "path to the flac files").Short('m').Envar("MCLI_MUSIC_LOCATION").String()
 	home       = kingpin.Flag("home", "path to the directory where the database file lives").Default(homeDir).Envar("MCLI_HOME").String()
@@ -37,6 +38,8 @@ func main() {
 
 	if *srv {
 		startServer()
+	} else if *migrate {
+		history.Migrate(*pth)
 	} else {
 		defer setupLog(*logout)()
 		startUI()

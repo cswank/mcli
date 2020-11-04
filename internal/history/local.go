@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/asdine/storm"
 	"github.com/cswank/mcli/internal/schema"
 )
@@ -18,6 +20,31 @@ type StormEntry struct {
 
 type StormHistory struct {
 	db *storm.DB
+}
+
+func Migrate(dir string) error {
+	// db, err := sql.Open("sqlite3", filepath.Join(dir, "database.sql"))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	pth := fmt.Sprintf("%s/history.db", dir)
+	st, err := storm.Open(pth)
+	if err != nil {
+		return err
+	}
+
+	var entries []StormEntry
+	err = st.Select().Find(&entries)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		fmt.Printf("%+v", entry)
+	}
+
+	return nil
 }
 
 func NewLocal(dir string) (*StormHistory, error) {
