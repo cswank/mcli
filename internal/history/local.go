@@ -32,6 +32,12 @@ func Migrate(dir string) error {
 		log.Fatal(err)
 	}
 
+	sqlStmt := `create table history (id integer not null primary key, count integer);`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		return err
+	}
+
 	pth := fmt.Sprintf("%s/history.db", dir)
 	fmt.Println(pth)
 	st, err := storm.Open(pth)
@@ -62,10 +68,16 @@ func Migrate(dir string) error {
 		var id int64
 		if err := db.QueryRow(q, t).Scan(&id); err != nil {
 			log.Printf("unable to find %s", t)
+			continue
 		}
 
-		fmt.Println(t, entry.Count, id)
+		_, err := db.Exec("insert into history (id, count) values (?, ?);", id, entry.Count)
+		if err != nil {
+			log.Printf("unable to write %s", err)
+		}
 	}
+
+	db.Close()
 
 	return nil
 }
