@@ -45,8 +45,6 @@ func Migrate(dir string) error {
 		return err
 	}
 
-	fmt.Println("got entries", entries)
-
 	for _, entry := range entries {
 		fmt.Printf("%+v\n", entry)
 		pth, ok := entry.ID.(string)
@@ -61,15 +59,14 @@ func Migrate(dir string) error {
 
 		l := len(parts) - 1
 		t := strings.TrimSuffix(parts[l], ".flac")
-		al := parts[l-1]
-		ar := parts[l-2]
 
 		q := `select id from tracks where name = ?;`
 		var id int64
 		if err := db.QueryRow(q, t).Scan(&id); err != nil {
-			return err
+			log.Printf("unable to find %s", t)
 		}
-		fmt.Println(t, al, ar, entry.Count, id)
+
+		fmt.Println(t, entry.Count, id)
 	}
 
 	return nil
