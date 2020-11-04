@@ -15,7 +15,7 @@ type StormEntry struct {
 	ID     interface{} `storm:"id"`
 	Count  int         `storm:"index"`
 	Time   string      `storm:"index"`
-	Result schema.Result
+	Result interface{}
 }
 
 type StormHistory struct {
