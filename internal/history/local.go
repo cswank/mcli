@@ -36,6 +36,7 @@ func Migrate(dir string) error {
 	}
 
 	var entries []StormEntry
+	err = st.All(&entries)
 	if err != nil {
 		return err
 	}
