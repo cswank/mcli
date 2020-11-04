@@ -35,13 +35,13 @@ func Migrate(dir string) error {
 	}
 
 	var entries []StormEntry
-	err = st.Select().Find(&entries)
+	err = st.All(&entries)
 	if err != nil {
 		return err
 	}
 
 	for _, entry := range entries {
-		fmt.Printf("%+v", entry)
+		fmt.Printf("%+v\n", entry)
 	}
 
 	return nil
