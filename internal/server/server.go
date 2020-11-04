@@ -1,9 +1,11 @@
 package server
 
 import (
+	"database/sql"
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 
 	"github.com/cswank/mcli/internal/fetch"
 	"github.com/cswank/mcli/internal/history"
@@ -26,6 +28,12 @@ type client struct {
 }
 
 type server struct {
+	rpc.UnsafePlayerServer
+	rpc.UnsafeFetcherServer
+	rpc.UnsafeDownloaderServer
+	rpc.UnsafeHistoryServer
+	pth                    string
+	db                     *sql.DB
 	cli                    *client
 	nextSongStream         rpc.Player_NextSongServer
 	playProgressStream     rpc.Player_PlayProgressServer
@@ -34,7 +42,7 @@ type server struct {
 	done                   chan bool
 }
 
-func Start(p play.Player, f fetch.Fetcher, h history.History) error {
+func Start(p play.Player, f fetch.Fetcher, h history.History, db *sql.DB, pth string) error {
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -46,6 +54,8 @@ func Start(p play.Player, f fetch.Fetcher, h history.History) error {
 
 	s := &server{
 		cli:  &client{Player: p, Fetcher: f, History: h},
+		db:   db,
+		pth:  pth,
 		done: make(chan bool),
 	}
 
@@ -200,8 +210,8 @@ func (s *server) FindTrack(ctx context.Context, r *rpc.Request) (*rpc.Results, e
 	return rpc.PBFromResults(out), err
 }
 
-func (s *server) GetAlbum(ctx context.Context, st *rpc.String) (*rpc.Results, error) {
-	out, err := s.cli.GetAlbum(st.Value)
+func (s *server) GetAlbum(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
+	out, err := s.cli.GetAlbum(r.Id)
 	return rpc.PBFromResults(out), err
 }
 
@@ -213,10 +223,17 @@ func (s *server) GetAlbum(ctx context.Context, st *rpc.String) (*rpc.Results, er
 // 	return nil
 // }
 
-func (s *server) Download(id *rpc.String, stream rpc.Downloader_DownloadServer) error {
+func (s *server) Download(req *rpc.Request, stream rpc.Downloader_DownloadServer) error {
 	s.getTrackProgressStream = stream
 	buf := make([]byte, 100000)
-	f, err := os.Open(id.Value)
+
+	pth, err := s.track(req.Id)
+	log.Println(pth, err)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(pth)
 	if err != nil {
 		return err
 	}
@@ -242,13 +259,24 @@ func (s *server) Download(id *rpc.String, stream rpc.Downloader_DownloadServer) 
 	return nil
 }
 
+func (s *server) track(id int64) (string, error) {
+	q := `SELECT ar.name, al.name, t.name
+FROM tracks AS t
+JOIN albums AS al ON al.id = t.album_id
+JOIN artists AS ar ON ar.id = al.artist_id
+WHERE t.id = ?;`
+
+	var ar, al, t string
+	err := s.db.QueryRow(q, id).Scan(&ar, &al, &t)
+	return filepath.Join(s.pth, ar, al, t), err
+}
 func (s *server) GetArtistAlbums(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.GetArtistAlbums(r.Term, int(r.N))
+	out, err := s.cli.GetArtistAlbums(r.Id, int(r.N))
 	return rpc.PBFromResults(out), err
 }
 
 func (s *server) GetArtistTracks(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.GetArtistTracks(r.Term, int(r.N))
+	out, err := s.cli.GetArtistTracks(r.Id, int(r.N))
 	return rpc.PBFromResults(out), err
 }
 
@@ -258,6 +286,6 @@ func (s *server) GetPlaylists(ctx context.Context, e *rpc.Empty) (*rpc.Results, 
 }
 
 func (s *server) GetPlaylist(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.GetPlaylist(r.Term, int(r.N))
+	out, err := s.cli.GetPlaylist(r.Id, int(r.N))
 	return rpc.PBFromResults(out), err
 }

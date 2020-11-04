@@ -22,8 +22,8 @@ func NewRemote(conn *grpc.ClientConn) *Remote {
 	}
 }
 
-func (r Remote) Download(id string, w io.Writer, f func(pg schema.Progress)) {
-	stream, err := r.client.Download(context.Background(), &rpc.String{Value: id})
+func (r Remote) Download(id int64, w io.Writer, f func(pg schema.Progress)) {
+	stream, err := r.client.Download(context.Background(), &rpc.Request{Id: id})
 	log.Println("stream", err)
 	if err != nil {
 		log.Fatal("could not get stream for track", err)

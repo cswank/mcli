@@ -13,10 +13,10 @@ type artistDialog struct {
 	selected schema.Result
 
 	searchType string
-	callback   func(string, string) error
+	callback   func(int64, string) error
 }
 
-func newArtistDialog(w, h int, cb func(string, string) error) *artistDialog {
+func newArtistDialog(w, h int, cb func(int64, string) error) *artistDialog {
 	maxX, maxY := g.Size()
 	x1 := maxX/2 - searchWidth/2
 	x2 := maxX/2 + searchWidth/2

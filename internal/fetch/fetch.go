@@ -10,9 +10,9 @@ type Fetcher interface {
 	FindArtist(string, int) (*schema.Results, error)
 	FindAlbum(string, int) (*schema.Results, error)
 	FindTrack(string, int) (*schema.Results, error)
-	GetAlbum(string) (*schema.Results, error)
-	GetArtistAlbums(string, int) (*schema.Results, error)
-	GetArtistTracks(string, int) (*schema.Results, error)
+	GetAlbum(int64) (*schema.Results, error)
+	GetArtistAlbums(int64, int) (*schema.Results, error)
+	GetArtistTracks(int64, int) (*schema.Results, error)
 	GetPlaylists() (*schema.Results, error)
-	GetPlaylist(string, int) (*schema.Results, error)
+	GetPlaylist(int64, int) (*schema.Results, error)
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"io/ioutil"
 	"log"
 	"os"
@@ -23,6 +24,7 @@ var (
 var (
 	app        = kingpin.New("mcli", "A command-line music player.")
 	srv        = kingpin.Flag("serve", "start the grpc server").Default("false").Bool()
+	initDB     = kingpin.Flag("initdb", "initialize the database").Default("false").Bool()
 	addr       = kingpin.Flag("address", "address of grpc server").Short('a').Envar("MCLI_HOST").String()
 	pth        = kingpin.Flag("music", "path to the flac files").Short('m').Envar("MCLI_MUSIC_LOCATION").String()
 	home       = kingpin.Flag("home", "path to the directory where the database file lives").Default(homeDir).Envar("MCLI_HOME").String()
@@ -37,6 +39,8 @@ func main() {
 
 	if *srv {
 		startServer()
+	} else if *initDB {
+		doInitDB()
 	} else {
 		defer setupLog(*logout)()
 		startUI()
@@ -86,30 +90,36 @@ func remote() (play.Player, fetch.Fetcher, history.History, func()) {
 }
 
 func startServer() {
-	h, err := history.NewLocal(*home)
+	db, err := sql.Open("sqlite3", filepath.Join(*home, "database.sql"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f := fetch.NewLocal(*pth)
-	if err := server.Start(nil, f, h); err != nil {
+	h := history.NewLocal(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f := fetch.NewLocal(*pth, db)
+	if err := server.Start(nil, f, h, db, *pth); err != nil {
 		log.Fatal("unable to start server ", err)
 	}
 }
 
 func local() (play.Player, fetch.Fetcher, history.History, func()) {
-	h, err := history.NewLocal(*home)
+	db, err := sql.Open("sqlite3", filepath.Join(*home, "database.sql"))
 	if err != nil {
-		log.Fatal(*addr, err)
+		log.Fatal(err)
 	}
 
-	dl := download.NewLocal(*pth)
+	h := history.NewLocal(db)
+	dl := download.NewLocal(*pth, db)
 	p, err := play.NewLocal(*pth, *home, play.LocalDownload(dl), play.LocalHistory(h))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f := fetch.NewLocal(*pth)
+	f := fetch.NewLocal(*pth, db)
 
 	return p, f, h, func() {}
 }
@@ -131,4 +141,17 @@ func setupLog(logout string) func() {
 	}
 
 	return out
+}
+
+func doInitDB() {
+	db, err := sql.Open("sqlite3", filepath.Join(*pth, "database.sql"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f := fetch.NewLocal(*pth, db)
+	err = f.InitDB()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

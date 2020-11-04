@@ -2,20 +2,26 @@ package fetch
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
-	"strings"
+	"sync"
+
+	"database/sql"
+
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/cswank/mcli/internal/schema"
 )
 
 type Local struct {
-	pth string
+	pth  string
+	db   *sql.DB
+	lock sync.Mutex
 }
 
-func NewLocal(pth string) *Local {
+func NewLocal(pth string, db *sql.DB) *Local {
 	return &Local{
 		pth: pth,
+		db:  db,
 	}
 }
 
@@ -25,41 +31,63 @@ func (l Local) Ping() bool                 { return true }
 func (l Local) AlbumLink() string          { return "" }
 
 func (l Local) FindArtist(term string, n int) (*schema.Results, error) {
-	glob := filepath.Join(l.pth, fmt.Sprintf("*%s*", term))
-	log.Println("find artist", glob)
-	return l.doFind(glob, "artist search")
+	q := `SELECT id, name
+FROM artists
+WHERE name LIKE ?;`
+	return l.doFind(q, fmt.Sprintf("%%%s%%", term), "artist search")
 }
 
 func (l Local) FindAlbum(term string, n int) (*schema.Results, error) {
-	glob := filepath.Join(l.pth, "*", fmt.Sprintf("*%s*", term))
-	return l.doFind(glob, "album search")
+	q := `SELECT ar.id, ar.name, al.id, al.name
+FROM albums AS al
+JOIN artists AS ar ON ar.id = al.artist_id
+WHERE al.name LIKE ?;`
+	return l.doFind(q, fmt.Sprintf("%%%s%%", term), "album search")
 }
 
 func (l Local) FindTrack(term string, n int) (*schema.Results, error) {
-	glob := filepath.Join(l.pth, "*", "*", fmt.Sprintf("*%s*.flac", term))
-	return l.doFind(glob, "album")
+	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
+FROM tracks AS t
+JOIN albums AS al ON al.id = t.album_id
+JOIN artists AS ar ON ar.id = al.artist_id
+WHERE t.name LIKE ?;`
+	return l.doFind(q, fmt.Sprintf("%%%s%%", term), "album")
 }
 
-func (l Local) doFind(glob, t string) (*schema.Results, error) {
-	albums, err := filepath.Glob(glob)
+func (l Local) doFind(q string, term interface{}, t string) (*schema.Results, error) {
+	rows, err := l.db.Query(q, term)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
-	if len(albums) == 0 {
-		return &schema.Results{
-			Error: "no results",
-		}, nil
-	}
-
+	var out []schema.Result
 	var maxTitle int
-	out := make([]schema.Result, len(albums))
-	for i, s := range albums {
-		r := l.resultFromPath(s)
-		if len(r.Album.Title) > maxTitle {
-			maxTitle = len(r.Album.Title)
+
+	for rows.Next() {
+		var args []interface{}
+		var res schema.Result
+		var title string
+		switch t {
+		case "artist search":
+			args = []interface{}{&res.Artist.ID, &res.Artist.Name}
+			title = res.Artist.Name
+		case "album search":
+			args = []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
+			title = res.Album.Title
+		case "album":
+			args = []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
+			title = res.Track.Title
 		}
-		out[i] = r
+
+		if err := rows.Scan(args...); err != nil {
+			return nil, err
+		}
+
+		out = append(out, res)
+
+		if len(title) > maxTitle {
+			maxTitle = len(title)
+		}
 	}
 
 	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
@@ -72,94 +100,124 @@ func (l Local) doFind(glob, t string) (*schema.Results, error) {
 	}, nil
 }
 
-func (l Local) GetAlbum(id string) (*schema.Results, error) {
-	tracks, err := filepath.Glob(filepath.Join(l.pth, id, "*.flac"))
-	if err != nil {
-		return nil, nil
-	}
-
-	if len(tracks) == 0 {
-		return &schema.Results{
-			Error: "invalid album",
-		}, nil
-	}
-
-	out := make([]schema.Result, len(tracks))
-	var maxTitle int
-
-	for i, tr := range tracks {
-		res := l.resultFromPath(tr)
-		if len(res.Track.Title) > maxTitle {
-			maxTitle = len(res.Track.Title)
-		}
-
-		//dur, _ := tr.Duration.Int64() TODO: get duration from flac lib
-		out[i] = res
-	}
-
-	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
-	return &schema.Results{
-		Album:   out[0].Album,
-		Header:  fmt.Sprintf(f, "Title", "Length"),
-		Type:    "album",
-		Fmt:     f,
-		Results: out,
-	}, nil
+func (l Local) GetAlbum(id int64) (*schema.Results, error) {
+	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
+FROM tracks AS t
+JOIN albums AS al ON al.id = t.album_id
+JOIN artists AS ar ON ar.id = al.artist_id
+WHERE al.id = ?;`
+	return l.doFind(q, id, "album")
 }
 
-func (l Local) GetArtistAlbums(id string, n int) (*schema.Results, error) {
-	log.Println("getartistalbums", id)
-	glob := filepath.Join(l.pth, id, "*")
-	return l.doFind(glob, "album search")
+func (l Local) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
+	q := `SELECT ar.id, ar.name, al.id, al.name
+FROM albums AS al
+JOIN artists AS ar ON ar.id = al.artist_id
+WHERE ar.id = ?;`
+	return l.doFind(q, id, "album search")
 }
 
-func (l Local) GetArtistTracks(id string, n int) (*schema.Results, error) {
-	glob := filepath.Join(l.pth, id, "*", "*.flac")
-	return l.doFind(glob, "album")
+func (l Local) GetArtistTracks(id int64, n int) (*schema.Results, error) {
+	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
+FROM tracks AS t
+JOIN albums AS al ON al.id = t.album_id
+JOIN artists AS ar ON ar.id = al.artist_id
+WHERE ar.id = ?;`
+	return l.doFind(q, id, "album")
 }
 
 func (l Local) GetPlaylists() (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (l Local) GetPlaylist(string, int) (*schema.Results, error) {
+func (l Local) GetPlaylist(int64, int) (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (l Local) resultFromPath(pth string) schema.Result {
-	pth = strings.Replace(pth, l.pth, "", -1)
-	if strings.Index(pth, "/") == 0 {
-		pth = pth[1:]
+func (l Local) InitDB() error {
+	q := `create table
+	artists (
+	  id integer not null primary key,
+	  name text
+	);`
+	_, err := l.db.Exec(q)
+	if err != nil {
+		return fmt.Errorf("unable to create artists table: %s", err)
 	}
 
-	parts := strings.Split(pth, string(filepath.Separator))
-
-	var album schema.Album
-	var artist schema.Artist
-	var track schema.Track
-
-	artist = schema.Artist{
-		ID:   parts[0],
-		Name: parts[0],
+	q = `create table
+	albums (
+	  id integer not null primary key,
+	  artist_id integer,
+	  name text
+	);`
+	_, err = l.db.Exec(q)
+	if err != nil {
+		return fmt.Errorf("unable to create albums table: %s", err)
 	}
 
-	if len(parts) >= 2 {
-		album = schema.Album{
-			ID:    filepath.Join(parts[0], parts[1]),
-			Title: parts[1],
+	q = `create table
+	tracks (
+	  id integer not null primary key,
+	  album_id integer,
+	  name text
+	);`
+	_, err = l.db.Exec(q)
+	if err != nil {
+		return fmt.Errorf("unable to create tracks table: %s", err)
+	}
+
+	g := filepath.Join(l.pth, "*", "*", "*.flac")
+	tracks, err := filepath.Glob(g)
+	if err != nil {
+		return err
+	}
+
+	m := map[string]map[string][]string{}
+
+	for _, pth := range tracks {
+		rest, track := filepath.Split(pth)
+		album := filepath.Base(filepath.Dir(rest))
+		artist := filepath.Base(filepath.Dir(rest[:len(rest)-len(album)]))
+		fmt.Printf("track: %s, album: %s, artist: %s\n", track, album, artist)
+
+		art, ok := m[artist]
+		if !ok {
+			art = map[string][]string{}
 		}
+
+		tracks := art[album]
+		tracks = append(tracks, track)
+		art[album] = tracks
+		m[artist] = art
 	}
 
-	if len(parts) >= 3 {
-		track = schema.Track{
-			ID:    filepath.Join(l.pth, parts[0], parts[1], parts[2]),
-			Title: strings.Replace(parts[2], ".flac", "", -1),
+	artID := 1
+	albID := 1
+	trackID := 1
+
+	for artist, albums := range m {
+		_, err := l.db.Exec("insert into artists (id, name) values (?, ?)", artID, artist)
+		if err != nil {
+			return err
 		}
+		for album, tracks := range albums {
+			_, err = l.db.Exec("insert into albums (id, name, artist_id) values (?, ?, ?)", albID, album, artID)
+			if err != nil {
+				return err
+			}
+
+			for _, track := range tracks {
+				_, err = l.db.Exec("insert into tracks (id, name, album_id) values (?, ?, ?)", trackID, track, albID)
+				if err != nil {
+					return err
+				}
+				trackID++
+			}
+			albID++
+		}
+		artID++
 	}
 
-	return schema.Result{
-		Artist: artist,
-		Album:  album,
-		Track:  track,
-	}
+	return l.db.Close()
 }

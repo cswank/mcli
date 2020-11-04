@@ -63,18 +63,18 @@ func (r Remote) FindTrack(term string, n int) (*schema.Results, error) {
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) GetAlbum(id string) (*schema.Results, error) {
-	out, err := r.client.GetAlbum(context.Background(), &rpc.String{Value: id})
+func (r Remote) GetAlbum(id int64) (*schema.Results, error) {
+	out, err := r.client.GetAlbum(context.Background(), &rpc.Request{Id: id})
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) GetArtistAlbums(id string, n int) (*schema.Results, error) {
-	out, err := r.client.GetArtistAlbums(context.Background(), &rpc.Request{Term: id, N: int64(n)})
+func (r Remote) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
+	out, err := r.client.GetArtistAlbums(context.Background(), &rpc.Request{Id: id, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) GetArtistTracks(id string, n int) (*schema.Results, error) {
-	out, err := r.client.GetArtistTracks(context.Background(), &rpc.Request{Term: id, N: int64(n)})
+func (r Remote) GetArtistTracks(id int64, n int) (*schema.Results, error) {
+	out, err := r.client.GetArtistTracks(context.Background(), &rpc.Request{Id: id, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
 
@@ -83,7 +83,7 @@ func (r Remote) GetPlaylists() (*schema.Results, error) {
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) GetPlaylist(id string, n int) (*schema.Results, error) {
-	out, err := r.client.GetPlaylist(context.Background(), &rpc.Request{Term: id, N: int64(n)})
+func (r Remote) GetPlaylist(id int64, n int) (*schema.Results, error) {
+	out, err := r.client.GetPlaylist(context.Background(), &rpc.Request{Id: id, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }

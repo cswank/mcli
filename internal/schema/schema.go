@@ -23,18 +23,18 @@ type Progress struct {
 }
 
 type Track struct {
-	ID       string `json:"id"`
+	ID       int64  `json:"id"`
 	Title    string `json:"title"`
 	Duration int    `json:"duration"`
 }
 
 type Artist struct {
-	ID   string `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
 type Album struct {
-	ID    string `json:"id"`
+	ID    int64  `json:"id"`
 	Title string `json:"title"`
 }
 

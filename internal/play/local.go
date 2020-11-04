@@ -95,14 +95,6 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 		opt(l)
 	}
 
-	if l.history == nil {
-		hist, err := history.NewLocal(dir)
-		if err != nil {
-			return nil, fmt.Errorf("unable to create history: %s", err)
-		}
-		l.history = hist
-	}
-
 	go l.playLoop()
 	go l.downloadLoop()
 	return l, nil

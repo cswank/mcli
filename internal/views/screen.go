@@ -205,7 +205,7 @@ func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 
 func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 	r := s.body.view[s.body.cursor]
-	if r.Album.ID == "" && r.Artist.ID != "" {
+	if r.Album.ID == 0 && r.Artist.ID != 0 {
 		return s.doShowArtist(r.Artist.ID, "albums")
 	}
 	c := s.body.cursor
@@ -324,7 +324,7 @@ func (s *screen) showHistory(sort hist.Sort) error {
 	return nil
 }
 
-func (s *screen) doShowArtist(id, term string) error {
+func (s *screen) doShowArtist(id int64, term string) error {
 	s.view = "body"
 	c := s.body.cursor
 	if term == "albums" {

@@ -1,39 +1,20 @@
 package history
 
 import (
+	"database/sql"
 	"fmt"
-	"os"
+	"log"
 	"time"
 
-	"github.com/asdine/storm"
 	"github.com/cswank/mcli/internal/schema"
 )
 
-type StormEntry struct {
-	ID     string `storm:"id"`
-	Count  int    `storm:"index"`
-	Time   string `storm:"index"`
-	Result schema.Result
-}
-
 type StormHistory struct {
-	db *storm.DB
+	db *sql.DB
 }
 
-func NewLocal(dir string) (*StormHistory, error) {
-	e, err := exists(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	if !e {
-		if err := os.MkdirAll(dir, 0700); err != nil {
-			return nil, err
-		}
-	}
-	pth := fmt.Sprintf("%s/history.db", dir)
-	db, err := storm.Open(pth)
-	return &StormHistory{db: db}, err
+func NewLocal(db *sql.DB) *StormHistory {
+	return &StormHistory{db: db}
 }
 
 func (b *StormHistory) Close() error {
@@ -41,46 +22,44 @@ func (b *StormHistory) Close() error {
 }
 
 func (b *StormHistory) Save(r schema.Result) error {
-	var entry StormEntry
-	err := b.db.One("ID", r.Track.ID, &entry)
-	if err == storm.ErrNotFound {
-		return b.db.Save(&StormEntry{ID: r.Track.ID, Count: 1, Time: time.Now().Format(time.RFC3339), Result: r})
-	}
-
-	if err != nil {
+	var count int64
+	if err := b.db.QueryRow("select count from history where id = ?", r.Track.ID).Scan(&count); err != nil {
 		return err
 	}
 
-	return b.db.Update(&StormEntry{ID: r.Track.ID, Count: entry.Count + 1, Time: time.Now().Format(time.RFC3339), Result: r})
+	_, err := b.db.Exec("update history set count = ?, time = ? where id = ?", count+1, time.Now().Format(time.RFC3339), r.Track.ID)
+	return err
 }
 
 func (b *StormHistory) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
-	var entries []StormEntry
-	err := b.db.Select().OrderBy(string(sortTerm)).Reverse().Limit(pageSize).Skip(page * pageSize).Find(&entries)
+	log.Println("history", page, pageSize, sortTerm)
+	offset := page * pageSize
+
+	q := fmt.Sprintf(`SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, h.count
+FROM history AS h
+JOIN tracks AS t ON t.id = h.id
+JOIN albums AS al ON al.id = t.album_id
+JOIN artists AS ar ON ar.id = al.artist_id
+ORDER BY %s DESC
+LIMIT %d OFFSET %d;`, sortTerm, pageSize, offset)
+
+	rows, err := b.db.Query(q)
 	if err != nil {
 		return nil, err
 	}
 
-	out := make([]schema.Result, len(entries))
-	for i, e := range entries {
+	var out []schema.Result
 
-		e.Result.PlayCount = e.Count
-		out[i] = e.Result
+	for rows.Next() {
+		var res schema.Result
+		if err := rows.Scan(&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title, &res.PlayCount); err != nil {
+			return nil, err
+		}
+		out = append(out, res)
 	}
 
 	return &schema.Results{
 		Type:    "history",
 		Results: out,
 	}, nil
-}
-
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }

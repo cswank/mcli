@@ -10,6 +10,6 @@ type History interface {
 type Sort string
 
 const (
-	Time  Sort = "Time"
-	Count Sort = "Count"
+	Time  Sort = "time"
+	Count Sort = "count"
 )

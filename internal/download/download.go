@@ -7,5 +7,5 @@ import (
 )
 
 type Downloader interface {
-	Download(id string, w io.Writer, f func(pg schema.Progress))
+	Download(id int64, w io.Writer, f func(pg schema.Progress))
 }

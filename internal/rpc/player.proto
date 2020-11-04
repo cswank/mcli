@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package rpc;
 
+option go_package = "github.com/cswank/mcli/internal/rpc;rpc";
+
 service Downloader {
-    rpc Download(String) returns (stream Progress) {}
+    rpc Download(Request) returns (stream Progress) {}
 }
 
 service History {
@@ -35,7 +37,7 @@ service Fetcher {
     rpc FindArtist(Request) returns (Results) {}
 	rpc FindAlbum(Request) returns (Results) {}
 	rpc FindTrack(Request) returns (Results) {}
-	rpc GetAlbum(String) returns (Results) {}	
+	rpc GetAlbum(Request) returns (Results) {}	
 	rpc GetArtistAlbums(Request) returns (Results) {}
 	rpc GetArtistTracks(Request) returns (Results) {}
 	rpc GetPlaylists(Empty) returns (Results) {}
@@ -54,6 +56,7 @@ message UsernamePassword {
 message Request {
     string term = 1;
     int64 n = 2;
+    int64 id = 3;
 }
 
 message Search {
@@ -94,24 +97,24 @@ message Bool {
 }
 
 message Track {
-	string id = 1;
+	int64 id = 1;
 	string title = 2;
 	int64 duration = 3;
 }
 
 message Artist {
-	string id = 1;
+	int64 id = 1;
 	string name = 2;
 }
 
 message Album {
-	string id = 1;
+	int64 id = 1;
 	string title = 2;
 
 }
 
 message Playlist {
-	string id = 1;
+	int64 id = 1;
 	string title = 2;
 }
 
