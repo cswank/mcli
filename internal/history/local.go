@@ -32,7 +32,7 @@ func Migrate(dir string) error {
 		log.Fatal(err)
 	}
 
-	sqlStmt := `create table history (id integer not null primary key, count integer);`
+	sqlStmt := `create table history (id integer not null primary key, count integer, time text);`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func Migrate(dir string) error {
 			continue
 		}
 
-		_, err := db.Exec("insert into history (id, count) values (?, ?);", id, entry.Count)
+		_, err := db.Exec("insert into history (id, count, time) values (?, ?, ?);", id, entry.Count, entry.Time)
 		if err != nil {
 			log.Printf("unable to write %s", err)
 		}
