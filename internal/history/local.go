@@ -57,9 +57,7 @@ func Migrate(dir string) error {
 			continue
 		}
 
-		l := len(parts) - 1
-		t := strings.TrimSuffix(parts[l], ".flac")
-
+		t := parts[len(parts)-1]
 		q := `select id from tracks where name = ?;`
 		var id int64
 		if err := db.QueryRow(q, t).Scan(&id); err != nil {
