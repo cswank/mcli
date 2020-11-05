@@ -1,19 +1,10 @@
 package main
 
 import (
-	"database/sql"
-	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/cswank/mcli/internal/download"
-	"github.com/cswank/mcli/internal/fetch"
-	"github.com/cswank/mcli/internal/history"
-	"github.com/cswank/mcli/internal/play"
-	"github.com/cswank/mcli/internal/server"
-	"github.com/cswank/mcli/internal/views"
-	"google.golang.org/grpc"
+	"github.com/cswank/mcli/internal/app"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -22,7 +13,7 @@ var (
 )
 
 var (
-	app        = kingpin.New("mcli", "A command-line music player.")
+	_          = kingpin.New("mcli", "A command-line music player.")
 	srv        = kingpin.Flag("serve", "start the grpc server").Default("false").Bool()
 	initDB     = kingpin.Flag("initdb", "initialize the database").Default("false").Bool()
 	addr       = kingpin.Flag("address", "address of grpc server").Short('a').Envar("MCLI_HOST").String()
@@ -30,128 +21,19 @@ var (
 	home       = kingpin.Flag("home", "path to the directory where the database file lives").Default(homeDir).Envar("MCLI_HOME").String()
 	remotePlay = kingpin.Flag("remote", "play music on the server").Short('r').Default("false").Bool()
 	logout     = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
-
-	logfile *os.File
 )
 
 func main() {
 	kingpin.Parse()
 
+	cfg := app.NewConfig(*addr, *pth, *home, *logout, *remotePlay)
+
 	if *srv {
-		startServer()
+		app.Serve(cfg)
 	} else if *initDB {
-		doInitDB()
+		app.InitDB(cfg)
 	} else {
-		defer setupLog(*logout)()
-		startUI()
-	}
-}
-
-func startUI() {
-	var f fetch.Fetcher
-	var p play.Player
-	var h history.History
-	var close func()
-
-	switch *addr {
-	case "":
-		p, f, h, close = local()
-	default:
-		p, f, h, close = remote()
-	}
-
-	defer close()
-
-	if err := views.Start(p, f, h); err != nil {
-		log.Println(err)
-	}
-}
-
-func remote() (play.Player, fetch.Fetcher, history.History, func()) {
-	conn, err := grpc.Dial(*addr, grpc.WithInsecure())
-	if err != nil {
-		log.Fatal(*addr, err)
-	}
-
-	h := history.NewRemote(conn)
-	f := fetch.NewRemote(conn)
-
-	var p play.Player
-	if *remotePlay {
-		p = play.NewRemote(conn)
-	} else {
-		p, err = play.NewLocal(*pth, *home, play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
-		if err != nil {
-			log.Fatal(*addr, err)
-		}
-	}
-
-	return p, f, h, func() { conn.Close() }
-}
-
-func startServer() {
-	db, err := sql.Open("sqlite3", filepath.Join(*home, "database.sql"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	h := history.NewLocal(db)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	f := fetch.NewLocal(*pth, db)
-	if err := server.Start(nil, f, h, db, *pth); err != nil {
-		log.Fatal("unable to start server ", err)
-	}
-}
-
-func local() (play.Player, fetch.Fetcher, history.History, func()) {
-	db, err := sql.Open("sqlite3", filepath.Join(*home, "database.sql"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	h := history.NewLocal(db)
-	dl := download.NewLocal(*pth, db)
-	p, err := play.NewLocal(*pth, *home, play.LocalDownload(dl), play.LocalHistory(h))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	f := fetch.NewLocal(*pth, db)
-
-	return p, f, h, func() {}
-}
-
-func setupLog(logout string) func() {
-	out := func() {}
-	if logout != "" {
-		f, err := os.Create(logout)
-		if err != nil {
-			log.Fatal(err)
-		}
-		logfile = f
-		log.SetOutput(f)
-		out = func() {
-			f.Close()
-		}
-	} else {
-		log.SetOutput(ioutil.Discard)
-	}
-
-	return out
-}
-
-func doInitDB() {
-	db, err := sql.Open("sqlite3", filepath.Join(*pth, "database.sql"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	f := fetch.NewLocal(*pth, db)
-	err = f.InitDB()
-	if err != nil {
-		log.Fatal(err)
+		defer app.SetupLog(cfg)()
+		app.UI(cfg)
 	}
 }
