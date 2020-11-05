@@ -200,6 +200,9 @@ func (l *Local) downloadLoop() {
 		r := l.queue.Next()
 		l.onDeckResult = &r
 		song := l.download(&r)
+		if song == nil {
+			continue
+		}
 		l.onDeck <- *song
 		l.onDeckResult = nil
 	}
@@ -210,7 +213,7 @@ func (l *Local) playLoop() {
 		s := <-l.onDeck
 		l.playing = true
 		if err := l.doPlay(s); err != nil {
-			log.Fatal(err)
+			log.Printf("error playing song %+v: %s", s, err)
 		}
 		l.playing = false
 	}
@@ -228,7 +231,7 @@ func (l *Local) doPlay(s song) error {
 	l.callNextSong()
 
 	if err := l.history.Save(s.result); err != nil {
-		return err
+		return fmt.Errorf("unable to save history for result %+v: %s", s.result, err)
 	}
 
 	vol := &effects.Volume{
@@ -240,6 +243,7 @@ func (l *Local) doPlay(s song) error {
 	ctrl := &beep.Ctrl{
 		Streamer: vol,
 	}
+
 	speaker.Play(ctrl)
 
 	var done bool
@@ -291,7 +295,8 @@ func (l *Local) PlayProgress(id string, fn func(schema.Progress)) {
 func (l *Local) download(r *schema.Result) *song {
 	out, err := l.doDownload(*r)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("error downloading song: %s", err)
+		return nil
 	}
 	return out
 }
