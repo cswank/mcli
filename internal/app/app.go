@@ -81,7 +81,7 @@ func remote(cfg Config) (play.Player, fetch.Fetcher, history.History, func()) {
 }
 
 func Serve(cfg Config) {
-	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "database.sql"))
+	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "mcli.db"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func Serve(cfg Config) {
 }
 
 func local(cfg Config) (play.Player, fetch.Fetcher, history.History, func()) {
-	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "database.sql"))
+	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "mcli.db"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func SetupLog(cfg Config) func() {
 }
 
 func InitDB(cfg Config) {
-	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "database.sql"))
+	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "mcli.db"))
 	if err != nil {
 		log.Fatal(err)
 	}
