@@ -3,7 +3,6 @@ package history
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/cswank/mcli/internal/schema"
@@ -32,7 +31,6 @@ func (s *SQLHistory) Save(r schema.Result) error {
 }
 
 func (s *SQLHistory) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
-	log.Println("history", page, pageSize, sortTerm)
 	offset := page * pageSize
 
 	q := fmt.Sprintf(`SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, h.count

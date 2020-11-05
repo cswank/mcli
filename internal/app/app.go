@@ -135,7 +135,7 @@ func SetupLog(cfg Config) func() {
 }
 
 func InitDB(cfg Config) {
-	db, err := sql.Open("sqlite3", filepath.Join(cfg.pth, "database.sql"))
+	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "database.sql"))
 	if err != nil {
 		log.Fatal(err)
 	}

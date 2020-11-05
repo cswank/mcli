@@ -32,6 +32,7 @@ func (l Local) Download(id int64, w io.Writer, f func(pg schema.Progress)) {
 	}
 
 	file, err := os.Open(track)
+	log.Printf("open %s: %v", track, err)
 	if err != nil {
 		log.Println(err)
 		return

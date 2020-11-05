@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -228,7 +229,6 @@ func (s *server) Download(req *rpc.Request, stream rpc.Downloader_DownloadServer
 	buf := make([]byte, 100000)
 
 	pth, err := s.track(req.Id)
-	log.Println(pth, err)
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ WHERE t.id = ?;`
 
 	var ar, al, t string
 	err := s.db.QueryRow(q, id).Scan(&ar, &al, &t)
-	return filepath.Join(s.pth, ar, al, t), err
+	return fmt.Sprintf("%s.flac", filepath.Join(s.pth, ar, al, t)), err
 }
 func (s *server) GetArtistAlbums(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.GetArtistAlbums(r.Id, int(r.N))

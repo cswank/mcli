@@ -55,8 +55,6 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 	}
 
 	pth := fmt.Sprintf("%s/flac.json", home)
-	log.Println("pth", pth)
-
 	var s flacSettings
 	if e {
 		f, err := os.Open(pth)

@@ -3,6 +3,7 @@ package fetch
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"database/sql"
 
@@ -131,12 +132,18 @@ func (l Local) GetPlaylist(int64, int) (*schema.Results, error) {
 }
 
 func (l Local) InitDB() error {
-	q := `create table
+	q := `CREATE TABLE IF NOT EXISTS history (id integer not null primary key, count integer, time text);`
+	_, err := l.db.Exec(q)
+	if err != nil {
+		return fmt.Errorf("unable to create history table: %s", err)
+	}
+
+	q = `create table
 	artists (
 	  id integer not null primary key,
 	  name text
 	);`
-	_, err := l.db.Exec(q)
+	_, err = l.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("unable to create artists table: %s", err)
 	}
@@ -183,7 +190,7 @@ func (l Local) InitDB() error {
 		}
 
 		tracks := art[album]
-		tracks = append(tracks, track)
+		tracks = append(tracks, strings.TrimSuffix(track, ".flac"))
 		art[album] = tracks
 		m[artist] = art
 	}
