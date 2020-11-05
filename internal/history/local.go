@@ -9,29 +9,29 @@ import (
 	"github.com/cswank/mcli/internal/schema"
 )
 
-type StormHistory struct {
+type SQLHistory struct {
 	db *sql.DB
 }
 
-func NewLocal(db *sql.DB) *StormHistory {
-	return &StormHistory{db: db}
+func NewLocal(db *sql.DB) *SQLHistory {
+	return &SQLHistory{db: db}
 }
 
-func (b *StormHistory) Close() error {
-	return b.db.Close()
+func (s *SQLHistory) Close() error {
+	return s.db.Close()
 }
 
-func (b *StormHistory) Save(r schema.Result) error {
+func (s *SQLHistory) Save(r schema.Result) error {
 	var count int64
-	if err := b.db.QueryRow("select count from history where id = ?", r.Track.ID).Scan(&count); err != nil {
+	if err := s.db.QueryRow("select count from history where id = ?", r.Track.ID).Scan(&count); err != nil {
 		return err
 	}
 
-	_, err := b.db.Exec("update history set count = ?, time = ? where id = ?", count+1, time.Now().Format(time.RFC3339), r.Track.ID)
+	_, err := s.db.Exec("update history set count = ?, time = ? where id = ?", count+1, time.Now().Format(time.RFC3339), r.Track.ID)
 	return err
 }
 
-func (b *StormHistory) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
+func (s *SQLHistory) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
 	log.Println("history", page, pageSize, sortTerm)
 	offset := page * pageSize
 
@@ -43,7 +43,7 @@ JOIN artists AS ar ON ar.id = al.artist_id
 ORDER BY %s DESC
 LIMIT %d OFFSET %d;`, sortTerm, pageSize, offset)
 
-	rows, err := b.db.Query(q)
+	rows, err := s.db.Query(q)
 	if err != nil {
 		return nil, err
 	}

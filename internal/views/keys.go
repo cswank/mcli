@@ -55,6 +55,6 @@ func (s *screen) getKeys() []key {
 		{views: []string{"help"}, keys: []interface{}{'h'}, keybinding: s.hideHelp},
 		{views: []string{"body"}, keys: []interface{}{'H'}, keybinding: s.showManual, help: keyHelp{key: "H", body: "toggle manual"}},
 		{views: []string{"manual"}, keys: []interface{}{'H'}, keybinding: s.hideManual},
-		{views: []string{""}, keys: []interface{}{'q', ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c or q)", body: "quit"}},
+		{views: []string{""}, keys: []interface{}{'Q', ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c or Q)", body: "quit"}},
 	}
 }
