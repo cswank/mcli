@@ -66,7 +66,7 @@ func (l Local) doFind(q string, term interface{}, t string) (*schema.Results, er
 
 	for rows.Next() {
 		res, title, args := l.args(t)
-		if err := rows.Scan(args...); err != nil {
+		if err := rows.Scan(args()...); err != nil {
 			return nil, err
 		}
 
@@ -89,15 +89,21 @@ func (l Local) doFind(q string, term interface{}, t string) (*schema.Results, er
 	}, nil
 }
 
-func (l Local) args(t string) (schema.Result, string, []interface{}) {
+func (l Local) args(t string) (schema.Result, string, func() []interface{}) {
 	var res schema.Result
 	switch t {
 	case "artist search":
-		return res, res.Artist.Name, []interface{}{&res.Artist.ID, &res.Artist.Name}
+		return res, res.Artist.Name, func() []interface{} {
+			return []interface{}{&res.Artist.ID, &res.Artist.Name}
+		}
 	case "album search":
-		return res, res.Album.Title, []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
+		return res, res.Album.Title, func() []interface{} {
+			return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
+		}
 	default:
-		return res, res.Track.Title, []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
+		return res, res.Track.Title, func() []interface{} {
+			return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
+		}
 	}
 }
 
