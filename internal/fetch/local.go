@@ -3,7 +3,6 @@ package fetch
 import (
 	"fmt"
 	"path/filepath"
-	"sync"
 
 	"database/sql"
 
@@ -13,9 +12,8 @@ import (
 )
 
 type Local struct {
-	pth  string
-	db   *sql.DB
-	lock sync.Mutex
+	pth string
+	db  *sql.DB
 }
 
 func NewLocal(pth string, db *sql.DB) *Local {
@@ -64,21 +62,7 @@ func (l Local) doFind(q string, term interface{}, t string) (*schema.Results, er
 	var maxTitle int
 
 	for rows.Next() {
-		var args []interface{}
-		var res schema.Result
-		var title string
-		switch t {
-		case "artist search":
-			args = []interface{}{&res.Artist.ID, &res.Artist.Name}
-			title = res.Artist.Name
-		case "album search":
-			args = []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
-			title = res.Album.Title
-		case "album":
-			args = []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
-			title = res.Track.Title
-		}
-
+		res, title, args := l.args(t)
 		if err := rows.Scan(args...); err != nil {
 			return nil, err
 		}
@@ -98,6 +82,18 @@ func (l Local) doFind(q string, term interface{}, t string) (*schema.Results, er
 		Fmt:     f,
 		Results: out,
 	}, nil
+}
+
+func (l Local) args(t string) (schema.Result, string, []interface{}) {
+	var res schema.Result
+	switch t {
+	case "artist search":
+		return res, res.Artist.Name, []interface{}{&res.Artist.ID, &res.Artist.Name}
+	case "album search":
+		return res, res.Album.Title, []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
+	default:
+		return res, res.Track.Title, []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
+	}
 }
 
 func (l Local) GetAlbum(id int64) (*schema.Results, error) {

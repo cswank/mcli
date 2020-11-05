@@ -71,7 +71,6 @@ func (b *body) clear() {
 }
 
 func (b *body) nextPage(g *ui.Gui, v *ui.View) error {
-
 	nPages := ((len(b.results.Results) + b.height - 1) / b.height) - 1
 	if b.page >= nPages {
 		return nil

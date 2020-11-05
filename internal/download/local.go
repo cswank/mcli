@@ -2,6 +2,7 @@ package download
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -70,5 +71,5 @@ JOIN artists AS ar ON ar.id = al.artist_id
 WHERE t.id = ?;`
 
 	var ar, al, t string
-	return filepath.Join(l.pth, ar, al, t), l.db.QueryRow(q, id).Scan(&ar, &al, &t)
+	return fmt.Sprintf("%s.flac", filepath.Join(l.pth, ar, al, t)), l.db.QueryRow(q, id).Scan(&ar, &al, &t)
 }
