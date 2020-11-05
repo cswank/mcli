@@ -70,6 +70,8 @@ func (l Local) doFind(q string, term interface{}, t string) (*schema.Results, er
 			return nil, err
 		}
 
+		log.Println(res, title, args)
+
 		out = append(out, res)
 
 		if len(title) > maxTitle {
