@@ -268,7 +268,8 @@ WHERE t.id = ?;`
 
 	var ar, al, t string
 	err := s.db.QueryRow(q, id).Scan(&ar, &al, &t)
-	return fmt.Sprintf("%s.flac", filepath.Join(s.pth, ar, al, t)), err
+	pth := fmt.Sprintf("%s.flac", filepath.Join(s.pth, ar, al, t))
+	return pth, err
 }
 func (s *server) GetArtistAlbums(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.GetArtistAlbums(r.Id, int(r.N))

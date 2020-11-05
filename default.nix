@@ -10,6 +10,6 @@ stdenv.mkDerivation rec {
     alsaLib
     alsaTools
     avahi
-    sqlite
+    sqlite-interactive
   ];
 }

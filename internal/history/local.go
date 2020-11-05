@@ -22,12 +22,19 @@ func (s *SQLHistory) Close() error {
 
 func (s *SQLHistory) Save(r schema.Result) error {
 	var count int64
-	if err := s.db.QueryRow("select count from history where id = ?", r.Track.ID).Scan(&count); err != nil {
-		return err
+	s.db.QueryRow("select count from history where id = ?", r.Track.ID).Scan(&count)
+	var err error
+	if count == 0 {
+		_, err = s.db.Exec("insert into history (id, count, time) values (?, 1, ?)", r.Track.ID, time.Now().Format(time.RFC3339))
+	} else {
+		_, err = s.db.Exec("update history set count = ?, time = ? where id = ?", count+1, time.Now().Format(time.RFC3339), r.Track.ID)
 	}
 
-	_, err := s.db.Exec("update history set count = ?, time = ? where id = ?", count+1, time.Now().Format(time.RFC3339), r.Track.ID)
-	return err
+	if err != nil {
+		return fmt.Errorf("unable to write to history: %s", err)
+	}
+
+	return nil
 }
 
 func (s *SQLHistory) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
