@@ -217,15 +217,17 @@ func (l *Local) playLoop() {
 }
 
 func (l *Local) doPlay(s song) error {
+	music, format, err := flac.Decode(s.reader())
+	if err != nil {
+		return err
+	}
+
+	ln := music.Len()
+	s.result.Track.Duration = ln / int(format.SampleRate)
 	l.currentResult = &s.result
 	l.callNextSong()
 
 	if err := l.history.Save(s.result); err != nil {
-		return err
-	}
-
-	music, _, err := flac.Decode(s.reader())
-	if err != nil {
 		return err
 	}
 
@@ -242,7 +244,6 @@ func (l *Local) doPlay(s song) error {
 
 	var done bool
 	var paused bool
-	ln := music.Len()
 	var i int
 	for !done {
 		select {
