@@ -2,6 +2,7 @@ package fetch
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -54,6 +55,7 @@ WHERE t.name LIKE ?;`
 }
 
 func (l Local) doFind(q string, term interface{}, t string) (*schema.Results, error) {
+	log.Println(q, term)
 	rows, err := l.db.Query(q, term)
 	if err != nil {
 		return nil, err
