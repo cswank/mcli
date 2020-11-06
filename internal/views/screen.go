@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	hist "github.com/cswank/mcli/internal/history"
+	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/schema"
 	ui "github.com/jroimartin/gocui"
 )
@@ -21,10 +21,11 @@ type screen struct {
 	play         *player
 	buffer       *buffer
 	search       *search
+	albumImport  *albumImport
 	artistDialog *artistDialog
 	history      *history
 	volume       *volume
-	historySort  hist.Sort
+	historySort  repo.Sort
 	help         *help
 
 	keys []key
@@ -43,12 +44,13 @@ func newScreen(width, height int, cli *client) (*screen, error) {
 		view:        "body",
 		width:       width,
 		height:      height,
-		historySort: hist.Time,
+		historySort: repo.Time,
 		play:        newPlay(width, height, id, cli),
 		body:        newBody(width, height, cli.AlbumLink()),
 		buffer:      newBuffer(width, height, id, cli),
 		header:      newHeader(width, height),
 		help:        newHelp(width, height),
+		albumImport: newImport(width, height),
 		volume:      newVolume(width, height, cli.Volume(0.0)),
 		volumeEvent: make(chan bool),
 	}
@@ -307,7 +309,12 @@ func (s *screen) hideManual(g *ui.Gui, v *ui.View) error {
 	return s.help.hide(g, v)
 }
 
-func (s *screen) showHistory(sort hist.Sort) error {
+func (s *screen) startImport(g *ui.Gui, v *ui.View) error {
+
+	return nil
+}
+
+func (s *screen) showHistory(sort repo.Sort) error {
 	g.DeleteView("history-type")
 	s.historySort = sort
 	res, err := s.client.Fetch(0, s.height*10, sort)

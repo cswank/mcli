@@ -3,6 +3,7 @@ package history
 import (
 	"context"
 
+	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/rpc"
 	"github.com/cswank/mcli/internal/schema"
 	"google.golang.org/grpc"
@@ -18,7 +19,7 @@ func NewRemote(conn *grpc.ClientConn) *Remote {
 	}
 }
 
-func (r Remote) Fetch(page, pageSize int, sort Sort) (*schema.Results, error) {
+func (r Remote) Fetch(page, pageSize int, sort repo.Sort) (*schema.Results, error) {
 	out, err := r.client.Fetch(context.Background(), &rpc.Page{Page: int64(page), PageSize: int64(pageSize), Sort: string(sort)})
 	return rpc.ResultsFromPB(out), err
 }

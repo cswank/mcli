@@ -6,6 +6,24 @@ import (
 	"time"
 )
 
+type Config struct {
+	Addr       string
+	Pth        string
+	Home       string
+	Log        string
+	RemotePlay bool
+}
+
+func NewConfig(addr, pth, home, log string, remotePlay bool) Config {
+	return Config{
+		Addr:       addr,
+		Pth:        pth,
+		Home:       home,
+		Log:        log,
+		RemotePlay: remotePlay,
+	}
+}
+
 type Results struct {
 	Album   Album               `json:"album"`
 	Type    string              `json:"type"`

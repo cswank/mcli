@@ -51,10 +51,11 @@ func (s *screen) getKeys() []key {
 		{views: []string{"history-type"}, keys: []interface{}{'p'}, keybinding: s.history.played},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEnter}, keybinding: s.search.exit},
 		{views: []string{"search"}, keys: []interface{}{ui.KeyEsc}, keybinding: s.escapeSearch},
+		{views: []string{"body"}, keys: []interface{}{'i'}, keybinding: s.startImport, help: keyHelp{key: "i", body: "import a new album into the database"}},
 		{views: []string{"body"}, keys: []interface{}{'h'}, keybinding: s.showHelp, help: keyHelp{key: "h", body: "toggle help menu"}},
 		{views: []string{"help"}, keys: []interface{}{'h'}, keybinding: s.hideHelp},
-		{views: []string{"body"}, keys: []interface{}{'H'}, keybinding: s.showManual, help: keyHelp{key: "H", body: "toggle manual"}},
-		{views: []string{"manual"}, keys: []interface{}{'H'}, keybinding: s.hideManual},
+		//{views: []string{"body"}, keys: []interface{}{'H'}, keybinding: s.showManual, help: keyHelp{key: "H", body: "toggle manual"}},
+		//{views: []string{"manual"}, keys: []interface{}{'H'}, keybinding: s.hideManual},
 		{views: []string{""}, keys: []interface{}{'Q', ui.KeyCtrlD, ui.KeyCtrlC}, keybinding: s.quit, help: keyHelp{key: "C-d (or C-c or Q)", body: "quit"}},
 	}
 }

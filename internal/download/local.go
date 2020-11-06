@@ -1,23 +1,21 @@
 package download
 
 import (
-	"database/sql"
-	"fmt"
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 
+	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/schema"
 )
 
 type Local struct {
 	// pth is the location of the flac music files
 	pth string
-	db  *sql.DB
+	db  *repo.Repository
 }
 
-func NewLocal(pth string, db *sql.DB) *Local {
+func NewLocal(pth string, db *repo.Repository) *Local {
 	return &Local{
 		pth: pth,
 		db:  db,
@@ -64,12 +62,5 @@ func (l Local) Download(id int64, w io.Writer, f func(pg schema.Progress)) {
 }
 
 func (l Local) track(id int64) (string, error) {
-	q := `SELECT ar.name, al.name, t.name
-FROM tracks AS t
-JOIN albums AS al ON al.id = t.album_id
-JOIN artists AS ar ON ar.id = al.artist_id
-WHERE t.id = ?;`
-
-	var ar, al, t string
-	return fmt.Sprintf("%s.flac", filepath.Join(l.pth, ar, al, t)), l.db.QueryRow(q, id).Scan(&ar, &al, &t)
+	return l.db.Track(id)
 }

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/cswank/mcli/internal/app"
+	"github.com/cswank/mcli/internal/schema"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -26,7 +27,7 @@ var (
 func main() {
 	kingpin.Parse()
 
-	cfg := app.NewConfig(*addr, *pth, *home, *logout, *remotePlay)
+	cfg := schema.NewConfig(*addr, *pth, *home, *logout, *remotePlay)
 
 	if *srv {
 		app.Serve(cfg)

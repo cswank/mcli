@@ -1,16 +1,14 @@
 package server
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 	"net"
 	"os"
-	"path/filepath"
 
 	"github.com/cswank/mcli/internal/fetch"
 	"github.com/cswank/mcli/internal/history"
 	"github.com/cswank/mcli/internal/play"
+	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/rpc"
 	"github.com/cswank/mcli/internal/schema"
 	"google.golang.org/grpc"
@@ -34,7 +32,7 @@ type server struct {
 	rpc.UnsafeDownloaderServer
 	rpc.UnsafeHistoryServer
 	pth                    string
-	db                     *sql.DB
+	db                     *repo.Repository
 	cli                    *client
 	nextSongStream         rpc.Player_NextSongServer
 	playProgressStream     rpc.Player_PlayProgressServer
@@ -43,7 +41,7 @@ type server struct {
 	done                   chan bool
 }
 
-func Start(p play.Player, f fetch.Fetcher, h history.History, db *sql.DB, pth string) error {
+func Start(p play.Player, f fetch.Fetcher, h history.History, db *repo.Repository, pth string) error {
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -149,7 +147,7 @@ func (s *server) DownloadProgress(id *rpc.String, stream rpc.Player_DownloadProg
 }
 
 func (s *server) Fetch(ctx context.Context, p *rpc.Page) (*rpc.Results, error) {
-	r, err := s.cli.Fetch(int(p.Page), int(p.PageSize), history.Sort(p.Sort))
+	r, err := s.cli.Fetch(int(p.Page), int(p.PageSize), repo.Sort(p.Sort))
 	return rpc.PBFromResults(r), err
 }
 
@@ -260,17 +258,9 @@ func (s *server) Download(req *rpc.Request, stream rpc.Downloader_DownloadServer
 }
 
 func (s *server) track(id int64) (string, error) {
-	q := `SELECT ar.name, al.name, t.name
-FROM tracks AS t
-JOIN albums AS al ON al.id = t.album_id
-JOIN artists AS ar ON ar.id = al.artist_id
-WHERE t.id = ?;`
-
-	var ar, al, t string
-	err := s.db.QueryRow(q, id).Scan(&ar, &al, &t)
-	pth := fmt.Sprintf("%s.flac", filepath.Join(s.pth, ar, al, t))
-	return pth, err
+	return s.db.Track(id)
 }
+
 func (s *server) GetArtistAlbums(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
 	out, err := s.cli.GetArtistAlbums(r.Id, int(r.N))
 	return rpc.PBFromResults(out), err

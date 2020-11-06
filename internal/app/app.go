@@ -1,18 +1,16 @@
 package app
 
 import (
-	"database/sql"
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
-
-	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/cswank/mcli/internal/download"
 	"github.com/cswank/mcli/internal/fetch"
 	"github.com/cswank/mcli/internal/history"
 	"github.com/cswank/mcli/internal/play"
+	"github.com/cswank/mcli/internal/repo"
+	"github.com/cswank/mcli/internal/schema"
 	"github.com/cswank/mcli/internal/server"
 	"github.com/cswank/mcli/internal/views"
 	"google.golang.org/grpc"
@@ -22,31 +20,13 @@ var (
 	logfile *os.File
 )
 
-type Config struct {
-	addr       string
-	pth        string
-	home       string
-	log        string
-	remotePlay bool
-}
-
-func NewConfig(addr, pth, home, log string, remotePlay bool) Config {
-	return Config{
-		addr:       addr,
-		pth:        pth,
-		home:       home,
-		log:        log,
-		remotePlay: remotePlay,
-	}
-}
-
-func UI(cfg Config) {
+func UI(cfg schema.Config) {
 	var f fetch.Fetcher
 	var p play.Player
 	var h history.History
 	var close func()
 
-	switch cfg.addr {
+	switch cfg.Addr {
 	case "":
 		p, f, h, close = local(cfg)
 	default:
@@ -60,30 +40,30 @@ func UI(cfg Config) {
 	}
 }
 
-func remote(cfg Config) (play.Player, fetch.Fetcher, history.History, func()) {
-	conn, err := grpc.Dial(cfg.addr, grpc.WithInsecure())
+func remote(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, func()) {
+	conn, err := grpc.Dial(cfg.Addr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(cfg.addr, err)
+		log.Fatal(cfg.Addr, err)
 	}
 
 	h := history.NewRemote(conn)
 	f := fetch.NewRemote(conn)
 
 	var p play.Player
-	if cfg.remotePlay {
+	if cfg.RemotePlay {
 		p = play.NewRemote(conn)
 	} else {
-		p, err = play.NewLocal(cfg.pth, cfg.home, play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
+		p, err = play.NewLocal(cfg.Pth, cfg.Home, play.LocalDownload(download.NewRemote(conn)), play.LocalHistory(h))
 		if err != nil {
-			log.Fatal(cfg.addr, err)
+			log.Fatal(cfg.Addr, err)
 		}
 	}
 
 	return p, f, h, func() { conn.Close() }
 }
 
-func Serve(cfg Config) {
-	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "mcli.db"))
+func Serve(cfg schema.Config) {
+	db, err := repo.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,34 +73,34 @@ func Serve(cfg Config) {
 		log.Fatal(err)
 	}
 
-	f := fetch.NewLocal(cfg.pth, db)
-	if err := server.Start(nil, f, h, db, cfg.pth); err != nil {
+	f := fetch.NewLocal(cfg.Pth, db)
+	if err := server.Start(nil, f, h, db, cfg.Pth); err != nil {
 		log.Fatal("unable to start server ", err)
 	}
 }
 
-func local(cfg Config) (play.Player, fetch.Fetcher, history.History, func()) {
-	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "mcli.db"))
+func local(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, func()) {
+	db, err := repo.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	h := history.NewLocal(db)
-	dl := download.NewLocal(cfg.pth, db)
-	p, err := play.NewLocal(cfg.pth, cfg.home, play.LocalDownload(dl), play.LocalHistory(h))
+	dl := download.NewLocal(cfg.Pth, db)
+	p, err := play.NewLocal(cfg.Pth, cfg.Home, play.LocalDownload(dl), play.LocalHistory(h))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f := fetch.NewLocal(cfg.pth, db)
+	f := fetch.NewLocal(cfg.Pth, db)
 
 	return p, f, h, func() {}
 }
 
-func SetupLog(cfg Config) func() {
+func SetupLog(cfg schema.Config) func() {
 	out := func() {}
-	if cfg.log != "" {
-		f, err := os.Create(cfg.log)
+	if cfg.Log != "" {
+		f, err := os.Create(cfg.Log)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -136,14 +116,13 @@ func SetupLog(cfg Config) func() {
 	return out
 }
 
-func InitDB(cfg Config) {
-	db, err := sql.Open("sqlite3", filepath.Join(cfg.home, "mcli.db"))
+func InitDB(cfg schema.Config) {
+	db, err := repo.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f := fetch.NewLocal(cfg.pth, db)
-	err = f.InitDB()
+	err = db.Init()
 	if err != nil {
 		log.Fatal(err)
 	}
