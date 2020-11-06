@@ -6,10 +6,10 @@ import (
 )
 
 type SQLHistory struct {
-	db *repo.Repository
+	db *repo.SQLLite
 }
 
-func NewLocal(db *repo.Repository) *SQLHistory {
+func NewLocal(db *repo.SQLLite) *SQLHistory {
 	return &SQLHistory{db: db}
 }
 

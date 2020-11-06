@@ -9,10 +9,10 @@ import (
 
 type Local struct {
 	pth string
-	db  *repo.Repository
+	db  *repo.SQLLite
 }
 
-func NewLocal(pth string, db *repo.Repository) *Local {
+func NewLocal(pth string, db *repo.SQLLite) *Local {
 	return &Local{
 		pth: pth,
 		db:  db,

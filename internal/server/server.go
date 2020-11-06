@@ -32,7 +32,7 @@ type server struct {
 	rpc.UnsafeDownloaderServer
 	rpc.UnsafeHistoryServer
 	pth                    string
-	db                     *repo.Repository
+	db                     *repo.SQLLite
 	cli                    *client
 	nextSongStream         rpc.Player_NextSongServer
 	playProgressStream     rpc.Player_PlayProgressServer
@@ -41,7 +41,7 @@ type server struct {
 	done                   chan bool
 }
 
-func Start(p play.Player, f fetch.Fetcher, h history.History, db *repo.Repository, pth string) error {
+func Start(p play.Player, f fetch.Fetcher, h history.History, db *repo.SQLLite, pth string) error {
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

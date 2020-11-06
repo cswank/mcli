@@ -19,89 +19,89 @@ const (
 	Count Sort = "count"
 )
 
-type Repository struct {
+type SQLLite struct {
 	db  *sql.DB
 	pth string
 }
 
-func New(cfg schema.Config) (*Repository, error) {
+func New(cfg schema.Config) (*SQLLite, error) {
 	db, err := sql.Open("sqlite3", filepath.Join(cfg.Home, "mcli.db"))
-	return &Repository{
+	return &SQLLite{
 		db:  db,
 		pth: cfg.Pth,
 	}, err
 }
 
-func (r Repository) FindArtist(term string, n int) (*schema.Results, error) {
+func (s SQLLite) FindArtist(term string, n int) (*schema.Results, error) {
 	q := `SELECT id, name
 FROM artists
 WHERE name LIKE ?;`
-	return r.doFind(q, fmt.Sprintf("%%%s%%", term), "artist search")
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "artist search")
 }
 
-func (r Repository) FindAlbum(term string, n int) (*schema.Results, error) {
+func (s SQLLite) FindAlbum(term string, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE al.name LIKE ?;`
-	return r.doFind(q, fmt.Sprintf("%%%s%%", term), "album search")
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "album search")
 }
 
-func (r Repository) FindTrack(term string, n int) (*schema.Results, error) {
+func (s SQLLite) FindTrack(term string, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE t.name LIKE ?;`
-	return r.doFind(q, fmt.Sprintf("%%%s%%", term), "album")
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "album")
 }
 
-func (r Repository) GetAlbum(id int64) (*schema.Results, error) {
+func (s SQLLite) GetAlbum(id int64) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE al.id = ?;`
-	return r.doFind(q, id, "album")
+	return s.doFind(q, id, "album")
 }
 
-func (r Repository) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
+func (s SQLLite) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE ar.id = ?;`
-	return r.doFind(q, id, "album search")
+	return s.doFind(q, id, "album search")
 }
 
-func (r Repository) GetArtistTracks(id int64, n int) (*schema.Results, error) {
+func (s SQLLite) GetArtistTracks(id int64, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE ar.id = ?;`
-	return r.doFind(q, id, "album")
+	return s.doFind(q, id, "album")
 }
 
-func (r Repository) GetPlaylists() (*schema.Results, error) {
+func (s SQLLite) GetPlaylists() (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (r Repository) GetPlaylist(int64, int) (*schema.Results, error) {
+func (s SQLLite) GetPlaylist(int64, int) (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (r *Repository) Close() error {
-	return r.db.Close()
+func (s *SQLLite) Close() error {
+	return s.db.Close()
 }
 
-func (r *Repository) Save(res schema.Result) error {
+func (s *SQLLite) Save(res schema.Result) error {
 	var count int64
-	r.db.QueryRow("select count from history where id = ?", res.Track.ID).Scan(&count)
+	s.db.QueryRow("select count from history where id = ?", res.Track.ID).Scan(&count)
 	var err error
 	if count == 0 {
-		_, err = r.db.Exec("insert into history (id, count, time) values (?, 1, ?)", res.Track.ID, time.Now().Format(time.RFC3339))
+		_, err = s.db.Exec("insert into history (id, count, time) values (?, 1, ?)", res.Track.ID, time.Now().Format(time.RFC3339))
 	} else {
-		_, err = r.db.Exec("update history set count = ?, time = ? where id = ?", count+1, time.Now().Format(time.RFC3339), res.Track.ID)
+		_, err = s.db.Exec("update history set count = ?, time = ? where id = ?", count+1, time.Now().Format(time.RFC3339), res.Track.ID)
 	}
 
 	if err != nil {
@@ -111,7 +111,7 @@ func (r *Repository) Save(res schema.Result) error {
 	return nil
 }
 
-func (s *Repository) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
+func (s *SQLLite) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
 	offset := page * pageSize
 
 	q := fmt.Sprintf(`SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, h.count
@@ -143,8 +143,8 @@ LIMIT %d OFFSET %d;`, sortTerm, pageSize, offset)
 	}, nil
 }
 
-func (r Repository) doFind(q string, term interface{}, t string) (*schema.Results, error) {
-	rows, err := r.db.Query(q, term)
+func (s SQLLite) doFind(q string, term interface{}, t string) (*schema.Results, error) {
+	rows, err := s.db.Query(q, term)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (r Repository) doFind(q string, term interface{}, t string) (*schema.Result
 
 	for rows.Next() {
 		var res schema.Result
-		title, args := r.args(&res, t)
+		title, args := s.args(&res, t)
 		if err := rows.Scan(args...); err != nil {
 			return nil, err
 		}
@@ -175,7 +175,7 @@ func (r Repository) doFind(q string, term interface{}, t string) (*schema.Result
 	}, nil
 }
 
-func (r Repository) args(res *schema.Result, t string) (*string, []interface{}) {
+func (s SQLLite) args(res *schema.Result, t string) (*string, []interface{}) {
 	switch t {
 	case "artist search":
 		return &res.Artist.Name, []interface{}{&res.Artist.ID, &res.Artist.Name}
@@ -186,7 +186,7 @@ func (r Repository) args(res *schema.Result, t string) (*string, []interface{}) 
 	}
 }
 
-func (r *Repository) Track(id int64) (string, error) {
+func (s *SQLLite) Track(id int64) (string, error) {
 	q := `SELECT ar.name, al.name, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
@@ -194,14 +194,14 @@ JOIN artists AS ar ON ar.id = al.artist_id
 WHERE t.id = ?;`
 
 	var ar, al, t string
-	err := r.db.QueryRow(q, id).Scan(&ar, &al, &t)
-	pth := fmt.Sprintf("%s.flac", filepath.Join(r.pth, ar, al, t))
+	err := s.db.QueryRow(q, id).Scan(&ar, &al, &t)
+	pth := fmt.Sprintf("%s.flac", filepath.Join(s.pth, ar, al, t))
 	return pth, err
 }
 
-func (r Repository) Init() error {
+func (s SQLLite) Init() error {
 	q := `CREATE TABLE IF NOT EXISTS history (id integer not null primary key, count integer, time text);`
-	_, err := r.db.Exec(q)
+	_, err := s.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("unable to create history table: %s", err)
 	}
@@ -211,7 +211,7 @@ func (r Repository) Init() error {
 	  id integer not null primary key,
 	  name text
 	);`
-	_, err = r.db.Exec(q)
+	_, err = s.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("unable to create artists table: %s", err)
 	}
@@ -222,7 +222,7 @@ func (r Repository) Init() error {
 	  artist_id integer,
 	  name text
 	);`
-	_, err = r.db.Exec(q)
+	_, err = s.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("unable to create albums table: %s", err)
 	}
@@ -233,12 +233,12 @@ func (r Repository) Init() error {
 	  album_id integer,
 	  name text
 	);`
-	_, err = r.db.Exec(q)
+	_, err = s.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("unable to create tracks table: %s", err)
 	}
 
-	g := filepath.Join(r.pth, "*", "*", "*.flac")
+	g := filepath.Join(s.pth, "*", "*", "*.flac")
 	tracks, err := filepath.Glob(g)
 	if err != nil {
 		return err
@@ -268,18 +268,18 @@ func (r Repository) Init() error {
 	trackID := 1
 
 	for artist, albums := range m {
-		_, err := r.db.Exec("insert into artists (id, name) values (?, ?)", artID, artist)
+		_, err := s.db.Exec("insert into artists (id, name) values (?, ?)", artID, artist)
 		if err != nil {
 			return err
 		}
 		for album, tracks := range albums {
-			_, err = r.db.Exec("insert into albums (id, name, artist_id) values (?, ?, ?)", albID, album, artID)
+			_, err = s.db.Exec("insert into albums (id, name, artist_id) values (?, ?, ?)", albID, album, artID)
 			if err != nil {
 				return err
 			}
 
 			for _, track := range tracks {
-				_, err = r.db.Exec("insert into tracks (id, name, album_id) values (?, ?, ?)", trackID, track, albID)
+				_, err = s.db.Exec("insert into tracks (id, name, album_id) values (?, ?, ?)", trackID, track, albID)
 				if err != nil {
 					return err
 				}
@@ -290,5 +290,5 @@ func (r Repository) Init() error {
 		artID++
 	}
 
-	return r.db.Close()
+	return s.db.Close()
 }
