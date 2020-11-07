@@ -855,6 +855,7 @@ type FetcherClient interface {
 	GetArtistTracks(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
 	GetPlaylists(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error)
 	GetPlaylist(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Results, error)
+	Import(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Fetcher_ImportClient, error)
 }
 
 type fetcherClient struct {
@@ -973,6 +974,38 @@ func (c *fetcherClient) GetPlaylist(ctx context.Context, in *Request, opts ...gr
 	return out, nil
 }
 
+func (c *fetcherClient) Import(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Fetcher_ImportClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Fetcher_serviceDesc.Streams[0], "/rpc.Fetcher/Import", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &fetcherImportClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Fetcher_ImportClient interface {
+	Recv() (*Progress, error)
+	grpc.ClientStream
+}
+
+type fetcherImportClient struct {
+	grpc.ClientStream
+}
+
+func (x *fetcherImportClient) Recv() (*Progress, error) {
+	m := new(Progress)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // FetcherServer is the server API for Fetcher service.
 // All implementations must embed UnimplementedFetcherServer
 // for forward compatibility
@@ -989,6 +1022,7 @@ type FetcherServer interface {
 	GetArtistTracks(context.Context, *Request) (*Results, error)
 	GetPlaylists(context.Context, *Empty) (*Results, error)
 	GetPlaylist(context.Context, *Request) (*Results, error)
+	Import(*Empty, Fetcher_ImportServer) error
 	mustEmbedUnimplementedFetcherServer()
 }
 
@@ -1031,6 +1065,9 @@ func (UnimplementedFetcherServer) GetPlaylists(context.Context, *Empty) (*Result
 }
 func (UnimplementedFetcherServer) GetPlaylist(context.Context, *Request) (*Results, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlaylist not implemented")
+}
+func (UnimplementedFetcherServer) Import(*Empty, Fetcher_ImportServer) error {
+	return status.Errorf(codes.Unimplemented, "method Import not implemented")
 }
 func (UnimplementedFetcherServer) mustEmbedUnimplementedFetcherServer() {}
 
@@ -1261,6 +1298,27 @@ func _Fetcher_GetPlaylist_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Fetcher_Import_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(FetcherServer).Import(m, &fetcherImportServer{stream})
+}
+
+type Fetcher_ImportServer interface {
+	Send(*Progress) error
+	grpc.ServerStream
+}
+
+type fetcherImportServer struct {
+	grpc.ServerStream
+}
+
+func (x *fetcherImportServer) Send(m *Progress) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 var _Fetcher_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "rpc.Fetcher",
 	HandlerType: (*FetcherServer)(nil),
@@ -1314,6 +1372,12 @@ var _Fetcher_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Fetcher_GetPlaylist_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Import",
+			Handler:       _Fetcher_Import_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "player.proto",
 }
