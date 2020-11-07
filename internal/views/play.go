@@ -41,6 +41,16 @@ func (p *player) removeFromQueue(i int) {
 	p.client.RemoveFromQueue([]int{i})
 }
 
+func (p *player) emptyQueue() {
+	q := p.getQueue()
+	ints := make([]int, len(q))
+	for i := range q {
+		ints[i] = i
+	}
+	p.client.RemoveFromQueue(ints)
+	p.client.FastForward()
+}
+
 func (p *player) getQueue() []schema.Result {
 	return p.client.Queue().Results
 }

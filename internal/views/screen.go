@@ -21,7 +21,6 @@ type screen struct {
 	play         *player
 	buffer       *buffer
 	search       *search
-	albumImport  *albumImport
 	artistDialog *artistDialog
 	history      *history
 	volume       *volume
@@ -50,7 +49,6 @@ func newScreen(width, height int, cli *client) (*screen, error) {
 		buffer:      newBuffer(width, height, id, cli),
 		header:      newHeader(width, height),
 		help:        newHelp(width, height),
-		albumImport: newImport(width, height),
 		volume:      newVolume(width, height, cli.Volume(0.0)),
 		volumeEvent: make(chan bool),
 	}
@@ -125,6 +123,14 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 	case "playlist":
 		s.play.play(r)
 	}
+	return nil
+}
+
+func (s *screen) importMusic(g *ui.Gui, v *ui.View) error {
+	s.play.emptyQueue()
+	s.play.client.Import(func(p schema.Progress) {
+		s.play.client.playProgress(p)
+	})
 	return nil
 }
 
@@ -307,11 +313,6 @@ func (s *screen) showManual(g *ui.Gui, v *ui.View) error {
 func (s *screen) hideManual(g *ui.Gui, v *ui.View) error {
 	s.view = "body"
 	return s.help.hide(g, v)
-}
-
-func (s *screen) startImport(g *ui.Gui, v *ui.View) error {
-
-	return nil
 }
 
 func (s *screen) showHistory(sort repo.Sort) error {

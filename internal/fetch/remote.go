@@ -2,7 +2,9 @@ package fetch
 
 import (
 	"context"
+	"io"
 	"log"
+	"time"
 
 	"github.com/cswank/mcli/internal/rpc"
 	"github.com/cswank/mcli/internal/schema"
@@ -89,5 +91,22 @@ func (r Remote) GetPlaylist(id int64, n int) (*schema.Results, error) {
 }
 
 func (r Remote) Import(fn func(schema.Progress)) error {
+	go func() {
+		stream, err := r.client.Import(context.Background(), &rpc.Empty{})
+		if err != nil {
+			log.Fatal("could not get stream for importing new songs", err)
+		}
+		for {
+			p, err := stream.Recv()
+			if err == io.EOF {
+				time.Sleep(time.Second)
+			} else if err != nil {
+				log.Println(err)
+			} else {
+				fn(rpc.ProgressFromPB(p))
+			}
+		}
+	}()
+
 	return nil
 }
