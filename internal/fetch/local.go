@@ -16,6 +16,7 @@ type Local struct {
 }
 
 func NewLocal(pth string, db *repo.SQLLite) *Local {
+	db.Init()
 	return &Local{
 		pth: pth,
 		db:  db,
@@ -60,10 +61,6 @@ func (l Local) GetPlaylist(int64, int) (*schema.Results, error) {
 }
 
 func (l Local) Import(fn func(schema.Progress)) error {
-	if err := l.db.Init(); err != nil {
-		return err
-	}
-
 	g := filepath.Join(l.pth, "*", "*", "*.flac")
 	tracks, err := filepath.Glob(g)
 	if err != nil {
