@@ -87,3 +87,7 @@ func (r Remote) GetPlaylist(id int64, n int) (*schema.Results, error) {
 	out, err := r.client.GetPlaylist(context.Background(), &rpc.Request{Id: id, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
+
+func (r Remote) Import(fn func(schema.Progress)) error {
+	return nil
+}

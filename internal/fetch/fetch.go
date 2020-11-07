@@ -15,4 +15,5 @@ type Fetcher interface {
 	GetArtistTracks(int64, int) (*schema.Results, error)
 	GetPlaylists() (*schema.Results, error)
 	GetPlaylist(int64, int) (*schema.Results, error)
+	Import(fn func(schema.Progress)) error
 }

@@ -42,6 +42,7 @@ service Fetcher {
 	rpc GetArtistTracks(Request) returns (Results) {}
 	rpc GetPlaylists(Empty) returns (Results) {}
 	rpc GetPlaylist(Request) returns (Results) {}
+    rpc Import(Empty) returns (stream Progress) {}
 }
 
 message Empty {

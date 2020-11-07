@@ -242,52 +242,19 @@ func (s SQLLite) Init() error {
 		return fmt.Errorf("unable to create tracks table: %s", err)
 	}
 
-	g := filepath.Join(s.pth, "*", "*", "*.flac")
-	tracks, err := filepath.Glob(g)
-	if err != nil {
-		return err
-	}
+	return nil
+}
 
-	m := map[string]map[string][]string{}
+func (s SQLLite) InsertOrGetArtist(name string) (int, error) {
+	return s.insertOrGet("artists", "insert into artists (name) values (?)", name)
+}
 
-	for _, pth := range tracks {
-		rest, track := filepath.Split(pth)
-		album := filepath.Base(filepath.Dir(rest))
-		artist := filepath.Base(filepath.Dir(rest[:len(rest)-len(album)]))
-		fmt.Printf("track: %s, album: %s, artist: %s\n", track, album, artist)
+func (s SQLLite) InsertOrGetAlbum(name string, artistID int) (int, error) {
+	return s.insertOrGet("albums", "insert into albums (name, artist_id) values (?, ?)", name, artistID)
+}
 
-		art, ok := m[artist]
-		if !ok {
-			art = map[string][]string{}
-		}
-
-		tracks := art[album]
-		tracks = append(tracks, strings.TrimSuffix(track, ".flac"))
-		art[album] = tracks
-		m[artist] = art
-	}
-
-	for artist, albums := range m {
-		artID, err := s.insertOrGet("artists", "insert into artists (name) values (?)", artist)
-		if err != nil {
-			return err
-		}
-		for album, tracks := range albums {
-			albID, err := s.insertOrGet("albums", "insert into albums (name, artist_id) values (?, ?)", album, artID)
-			if err != nil {
-				return err
-			}
-
-			for _, track := range tracks {
-				_, err = s.insertOrGet("tracks", "insert into tracks (name, album_id) values (?, ?)", track, albID)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	return s.db.Close()
+func (s SQLLite) InsertOrGetTrack(name string, albumID int) (int, error) {
+	return s.insertOrGet("tracks", "insert into tracks (name, album_id) values (?, ?)", name, albumID)
 }
 
 func (s SQLLite) insertOrGet(table, q string, name string, args ...interface{}) (int, error) {
