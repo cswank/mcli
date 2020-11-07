@@ -19,6 +19,10 @@ const (
 	Count Sort = "count"
 )
 
+var (
+	empty struct{}
+)
+
 type SQLLite struct {
 	db  *sql.DB
 	pth string
@@ -206,32 +210,32 @@ func (s SQLLite) Init() error {
 		return fmt.Errorf("unable to create history table: %s", err)
 	}
 
-	q = `create table
+	q = `CREATE TABLE IF NOT EXISTS
 	artists (
-	  id integer not null primary key,
-	  name text
+	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+	  name TEXT NOT NULL
 	);`
 	_, err = s.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("unable to create artists table: %s", err)
 	}
 
-	q = `create table
+	q = `CREATE TABLE IF NOT EXISTS
 	albums (
-	  id integer not null primary key,
-	  artist_id integer,
-	  name text
+	  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	  artist_id INTEGER NOT NULL,
+	  name TEXT NOT NULL
 	);`
 	_, err = s.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("unable to create albums table: %s", err)
 	}
 
-	q = `create table
+	q = `CREATE TABLE IF NOT EXISTS
 	tracks (
-	  id integer not null primary key,
-	  album_id integer,
-	  name text
+	  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	  album_id INTEGER NOT NULL,
+	  name TEXT NOT NULL
 	);`
 	_, err = s.db.Exec(q)
 	if err != nil {
@@ -263,32 +267,45 @@ func (s SQLLite) Init() error {
 		m[artist] = art
 	}
 
-	artID := 1
-	albID := 1
-	trackID := 1
-
 	for artist, albums := range m {
-		_, err := s.db.Exec("insert into artists (id, name) values (?, ?)", artID, artist)
+		artID, err := s.insertOrGet("artists", "insert into artists (name) values (?)", artist)
 		if err != nil {
 			return err
 		}
 		for album, tracks := range albums {
-			_, err = s.db.Exec("insert into albums (id, name, artist_id) values (?, ?, ?)", albID, album, artID)
+			albID, err := s.insertOrGet("albums", "insert into albums (name, artist_id) values (?, ?)", album, artID)
 			if err != nil {
 				return err
 			}
 
 			for _, track := range tracks {
-				_, err = s.db.Exec("insert into tracks (id, name, album_id) values (?, ?, ?)", trackID, track, albID)
+				_, err = s.insertOrGet("tracks", "insert into tracks (name, album_id) values (?, ?)", track, albID)
 				if err != nil {
 					return err
 				}
-				trackID++
 			}
-			albID++
 		}
-		artID++
 	}
 
 	return s.db.Close()
+}
+
+func (s SQLLite) insertOrGet(table, q string, name string, args ...interface{}) (int, error) {
+	var id int
+	err := s.db.QueryRow(fmt.Sprintf("select id from %s where name = ?", table), name).Scan(&id)
+	if err == nil {
+		return id, nil
+	}
+
+	if err != nil && !strings.Contains(err.Error(), "no rows") {
+		return 0, err
+	}
+
+	args = append([]interface{}{name}, args...)
+	_, err = s.db.Exec(q, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	return s.insertOrGet(table, q, name, args)
 }
