@@ -146,6 +146,13 @@ func (s *server) DownloadProgress(id *rpc.String, stream rpc.Player_DownloadProg
 	return nil
 }
 
+func (s *server) Import(_ *rpc.Empty, stream rpc.Fetcher_ImportServer) error {
+	s.playProgressStream = stream
+	s.cli.Import(s.playProgress)
+	<-s.done
+	return nil
+}
+
 func (s *server) Fetch(ctx context.Context, p *rpc.Page) (*rpc.Results, error) {
 	r, err := s.cli.Fetch(int(p.Page), int(p.PageSize), repo.Sort(p.Sort))
 	return rpc.PBFromResults(r), err

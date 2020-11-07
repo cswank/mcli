@@ -129,7 +129,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 func (s *screen) importMusic(g *ui.Gui, v *ui.View) error {
 	s.play.emptyQueue()
 	s.play.client.Import(func(p schema.Progress) {
-		s.play.client.playProgress(p)
+		s.play.playProgress(p)
 	})
 	return nil
 }
