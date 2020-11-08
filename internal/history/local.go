@@ -5,11 +5,18 @@ import (
 	"github.com/cswank/mcli/internal/schema"
 )
 
-type SQLHistory struct {
-	db *repo.SQLLite
-}
+type (
+	fetcher interface {
+		Save(r schema.Result) error
+		Fetch(page, pageSize int, sortTerm repo.Sort) (*schema.Results, error)
+	}
 
-func NewLocal(db *repo.SQLLite) *SQLHistory {
+	SQLHistory struct {
+		db fetcher
+	}
+)
+
+func NewLocal(db fetcher) *SQLHistory {
 	return &SQLHistory{db: db}
 }
 

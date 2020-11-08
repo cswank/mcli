@@ -23,27 +23,27 @@ var (
 	empty struct{}
 )
 
-type SQLLite struct {
+type SQLite struct {
 	db  *sql.DB
 	pth string
 }
 
-func New(cfg schema.Config) (*SQLLite, error) {
+func NewSQL(cfg schema.Config) (*SQLite, error) {
 	db, err := sql.Open("sqlite3", filepath.Join(cfg.Home, "mcli.db"))
-	return &SQLLite{
+	return &SQLite{
 		db:  db,
 		pth: cfg.Pth,
 	}, err
 }
 
-func (s SQLLite) FindArtist(term string, n int) (*schema.Results, error) {
+func (s SQLite) FindArtist(term string, n int) (*schema.Results, error) {
 	q := `SELECT id, name
 FROM artists
 WHERE name LIKE ?;`
 	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "artist search")
 }
 
-func (s SQLLite) FindAlbum(term string, n int) (*schema.Results, error) {
+func (s SQLite) FindAlbum(term string, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
@@ -51,7 +51,7 @@ WHERE al.name LIKE ?;`
 	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "album search")
 }
 
-func (s SQLLite) FindTrack(term string, n int) (*schema.Results, error) {
+func (s SQLite) FindTrack(term string, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
@@ -60,7 +60,7 @@ WHERE t.name LIKE ?;`
 	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "album")
 }
 
-func (s SQLLite) GetAlbum(id int64) (*schema.Results, error) {
+func (s SQLite) GetAlbum(id int64) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
@@ -69,7 +69,7 @@ WHERE al.id = ?;`
 	return s.doFind(q, id, "album")
 }
 
-func (s SQLLite) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
+func (s SQLite) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
@@ -77,7 +77,7 @@ WHERE ar.id = ?;`
 	return s.doFind(q, id, "album search")
 }
 
-func (s SQLLite) GetArtistTracks(id int64, n int) (*schema.Results, error) {
+func (s SQLite) GetArtistTracks(id int64, n int) (*schema.Results, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
@@ -86,19 +86,19 @@ WHERE ar.id = ?;`
 	return s.doFind(q, id, "album")
 }
 
-func (s SQLLite) GetPlaylists() (*schema.Results, error) {
+func (s SQLite) GetPlaylists() (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (s SQLLite) GetPlaylist(int64, int) (*schema.Results, error) {
+func (s SQLite) GetPlaylist(int64, int) (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 
-func (s *SQLLite) Close() error {
+func (s *SQLite) Close() error {
 	return s.db.Close()
 }
 
-func (s *SQLLite) Save(res schema.Result) error {
+func (s *SQLite) Save(res schema.Result) error {
 	var count int64
 	s.db.QueryRow("select count from history where id = ?", res.Track.ID).Scan(&count)
 	var err error
@@ -115,7 +115,7 @@ func (s *SQLLite) Save(res schema.Result) error {
 	return nil
 }
 
-func (s *SQLLite) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
+func (s *SQLite) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
 	offset := page * pageSize
 
 	q := fmt.Sprintf(`SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, h.count
@@ -147,7 +147,7 @@ LIMIT %d OFFSET %d;`, sortTerm, pageSize, offset)
 	}, nil
 }
 
-func (s SQLLite) doFind(q string, term interface{}, t string) (*schema.Results, error) {
+func (s SQLite) doFind(q string, term interface{}, t string) (*schema.Results, error) {
 	rows, err := s.db.Query(q, term)
 	if err != nil {
 		return nil, err
@@ -179,7 +179,7 @@ func (s SQLLite) doFind(q string, term interface{}, t string) (*schema.Results, 
 	}, nil
 }
 
-func (s SQLLite) args(res *schema.Result, t string) (*string, []interface{}) {
+func (s SQLite) args(res *schema.Result, t string) (*string, []interface{}) {
 	switch t {
 	case "artist search":
 		return &res.Artist.Name, []interface{}{&res.Artist.ID, &res.Artist.Name}
@@ -190,7 +190,7 @@ func (s SQLLite) args(res *schema.Result, t string) (*string, []interface{}) {
 	}
 }
 
-func (s *SQLLite) Track(id int64) (string, error) {
+func (s *SQLite) Track(id int64) (string, error) {
 	q := `SELECT ar.name, al.name, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
@@ -203,7 +203,7 @@ WHERE t.id = ?;`
 	return pth, err
 }
 
-func (s SQLLite) Init() error {
+func (s SQLite) Init() error {
 	q := `CREATE TABLE IF NOT EXISTS history (id integer not null primary key, count integer, time text);`
 	_, err := s.db.Exec(q)
 	if err != nil {
@@ -245,19 +245,19 @@ func (s SQLLite) Init() error {
 	return nil
 }
 
-func (s SQLLite) InsertOrGetArtist(name string) (int, error) {
-	return s.insertOrGet("artists", "insert into artists (name) values (?)", name)
-}
-
-func (s SQLLite) InsertOrGetAlbum(name string, artistID int) (int, error) {
-	return s.insertOrGet("albums", "insert into albums (name, artist_id) values (?, ?)", name, artistID)
-}
-
-func (s SQLLite) InsertOrGetTrack(name string, albumID int) (int, error) {
+func (s SQLite) InsertOrGetTrack(name string, albumID int) (int, error) {
 	return s.insertOrGet("tracks", "insert into tracks (name, album_id) values (?, ?)", name, albumID)
 }
 
-func (s SQLLite) insertOrGet(table, q string, name string, args ...interface{}) (int, error) {
+func (s SQLite) InsertOrGetArtist(name string) (int, error) {
+	return s.insertOrGet("artists", "insert into artists (name) values (?)", name)
+}
+
+func (s SQLite) InsertOrGetAlbum(name string, artistID int) (int, error) {
+	return s.insertOrGet("albums", "insert into albums (name, artist_id) values (?, ?)", name, artistID)
+}
+
+func (s SQLite) insertOrGet(table, q string, name string, args ...interface{}) (int, error) {
 	var id int
 	err := s.db.QueryRow(fmt.Sprintf("select id from %s where name = ?", table), name).Scan(&id)
 	if err == nil {

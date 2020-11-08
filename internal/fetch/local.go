@@ -6,21 +6,33 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/schema"
 )
 
-type Local struct {
-	pth string
-	db  *repo.SQLLite
-}
-
-func NewLocal(pth string, db *repo.SQLLite) *Local {
-	db.Init()
-	return &Local{
-		pth: pth,
-		db:  db,
+type (
+	fetcher interface {
+		FindArtist(term string, n int) (*schema.Results, error)
+		FindAlbum(term string, n int) (*schema.Results, error)
+		FindTrack(term string, n int) (*schema.Results, error)
+		GetAlbum(id int64) (*schema.Results, error)
+		GetArtistAlbums(id int64, n int) (*schema.Results, error)
+		GetArtistTracks(id int64, n int) (*schema.Results, error)
+		GetPlaylists() (*schema.Results, error)
+		GetPlaylist(int64, int) (*schema.Results, error)
+		InsertOrGetArtist(name string) (int, error)
+		InsertOrGetAlbum(name string, artistID int) (int, error)
+		InsertOrGetTrack(name string, albumID int) (int, error)
+		Init() error
 	}
+
+	Local struct {
+		pth string
+		db  fetcher
+	}
+)
+
+func NewLocal(pth string, db fetcher) (*Local, error) {
+	return &Local{pth: pth, db: db}, db.Init()
 }
 
 func (l Local) Name() string               { return "disk" }

@@ -20,28 +20,34 @@ const (
 	port = ":50051"
 )
 
-type client struct {
-	play.Player
-	fetch.Fetcher
-	history.History
-}
+type (
+	tracker interface {
+		Track(int64) (string, error)
+	}
 
-type server struct {
-	rpc.UnsafePlayerServer
-	rpc.UnsafeFetcherServer
-	rpc.UnsafeDownloaderServer
-	rpc.UnsafeHistoryServer
-	pth                    string
-	db                     *repo.SQLLite
-	cli                    *client
-	nextSongStream         rpc.Player_NextSongServer
-	playProgressStream     rpc.Player_PlayProgressServer
-	downloadProgressStream rpc.Player_DownloadProgressServer
-	getTrackProgressStream rpc.Downloader_DownloadServer
-	done                   chan bool
-}
+	client struct {
+		play.Player
+		fetch.Fetcher
+		history.History
+	}
 
-func Start(p play.Player, f fetch.Fetcher, h history.History, db *repo.SQLLite, pth string) error {
+	server struct {
+		rpc.UnsafePlayerServer
+		rpc.UnsafeFetcherServer
+		rpc.UnsafeDownloaderServer
+		rpc.UnsafeHistoryServer
+		pth                    string
+		db                     tracker
+		cli                    *client
+		nextSongStream         rpc.Player_NextSongServer
+		playProgressStream     rpc.Player_PlayProgressServer
+		downloadProgressStream rpc.Player_DownloadProgressServer
+		getTrackProgressStream rpc.Downloader_DownloadServer
+		done                   chan bool
+	}
+)
+
+func Start(p play.Player, f fetch.Fetcher, h history.History, db tracker, pth string) error {
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

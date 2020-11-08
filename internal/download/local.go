@@ -5,17 +5,21 @@ import (
 	"log"
 	"os"
 
-	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/schema"
 )
 
-type Local struct {
-	// pth is the location of the flac music files
-	pth string
-	db  *repo.SQLLite
-}
+type (
+	tracker interface {
+		Track(int64) (string, error)
+	}
 
-func NewLocal(pth string, db *repo.SQLLite) *Local {
+	Local struct {
+		pth string
+		db  tracker
+	}
+)
+
+func NewLocal(pth string, db tracker) *Local {
 	return &Local{
 		pth: pth,
 		db:  db,

@@ -63,7 +63,8 @@ func remote(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, fun
 }
 
 func Serve(cfg schema.Config) {
-	db, err := repo.New(cfg)
+	//db, err := repo.NewSQL(cfg)
+	db, err := repo.NewStorm(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -73,14 +74,18 @@ func Serve(cfg schema.Config) {
 		log.Fatal(err)
 	}
 
-	f := fetch.NewLocal(cfg.Pth, db)
+	f, err := fetch.NewLocal(cfg.Pth, db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if err := server.Start(nil, f, h, db, cfg.Pth); err != nil {
 		log.Fatal("unable to start server ", err)
 	}
 }
 
 func local(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, func()) {
-	db, err := repo.New(cfg)
+	db, err := repo.NewSQL(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,7 +97,10 @@ func local(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, func
 		log.Fatal(err)
 	}
 
-	f := fetch.NewLocal(cfg.Pth, db)
+	f, err := fetch.NewLocal(cfg.Pth, db)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return p, f, h, func() {}
 }
@@ -117,7 +125,7 @@ func SetupLog(cfg schema.Config) func() {
 }
 
 func InitDB(cfg schema.Config) {
-	db, err := repo.New(cfg)
+	db, err := repo.NewSQL(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
