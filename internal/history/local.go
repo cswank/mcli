@@ -11,19 +11,19 @@ type (
 		Fetch(page, pageSize int, sortTerm repo.Sort) (*schema.Results, error)
 	}
 
-	SQLHistory struct {
+	LocalHistory struct {
 		db fetcher
 	}
 )
 
-func NewLocal(db fetcher) *SQLHistory {
-	return &SQLHistory{db: db}
+func NewLocal(db fetcher) *LocalHistory {
+	return &LocalHistory{db: db}
 }
 
-func (s *SQLHistory) Save(r schema.Result) error {
-	return s.db.Save(r)
+func (l *LocalHistory) Save(r schema.Result) error {
+	return l.db.Save(r)
 }
 
-func (s *SQLHistory) Fetch(page, pageSize int, sortTerm repo.Sort) (*schema.Results, error) {
-	return s.db.Fetch(page, pageSize, sortTerm)
+func (l *LocalHistory) Fetch(page, pageSize int, sortTerm repo.Sort) (*schema.Results, error) {
+	return l.db.Fetch(page, pageSize, sortTerm)
 }

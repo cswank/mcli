@@ -85,7 +85,7 @@ func (s *Storm) Save(res schema.Result) error {
 }
 
 func (s *Storm) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
-	var entries []Track
+	var entries []track
 	err := s.db.Select().OrderBy(string(sortTerm)).Reverse().Limit(pageSize).Skip(page * pageSize).Find(&entries)
 	if err != nil {
 		return nil, err
@@ -93,8 +93,7 @@ func (s *Storm) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error
 
 	out := make([]schema.Result, len(entries))
 	for i, e := range entries {
-		e.Result.PlayCount = e.Count
-		out[i] = e.Result
+		out[i] = schema.Result{}
 	}
 
 	return &schema.Results{
