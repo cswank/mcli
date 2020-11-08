@@ -16,22 +16,22 @@ type (
 	}
 
 	artist struct {
-		ID   int    `storm:"unique,index"`
+		ID   int64  `storm:"unique,index"`
 		Name string `storm:"unique,index"`
 	}
 
 	album struct {
-		ID       int    `storm:"unique,index"`
+		ID       int64  `storm:"unique,index"`
 		Name     string `storm:"index"`
-		ArtistID int    `storm:"index"`
+		ArtistID int64  `storm:"index"`
 	}
 
 	track struct {
-		ID       int    `storm:"unique,index"`
+		ID       int64  `storm:"unique,index"`
 		Name     string `storm:"index"`
-		AlbumID  int    `storm:"index"`
-		ArtistID int    `storm:"index"`
-		Count    int    `storm:"index"`
+		AlbumID  int64  `storm:"index"`
+		ArtistID int64  `storm:"index"`
+		Count    int64  `storm:"index"`
 		Time     string `storm:"index"`
 	}
 )
@@ -92,8 +92,10 @@ func (s *Storm) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error
 	}
 
 	out := make([]schema.Result, len(entries))
-	for i, e := range entries {
-		out[i] = schema.Result{}
+	for i, t := range entries {
+		out[i] = schema.Result{
+			Track: schema.Track{ID: t.ID, Title: t.Name},
+		}
 	}
 
 	return &schema.Results{
@@ -119,17 +121,17 @@ func (s Storm) Init() error {
 	return nil
 }
 
-func (s Storm) InsertOrGetArtist(name string) (int, error) {
+func (s Storm) InsertOrGetArtist(name string) (int64, error) {
 	var a artist
 	return a.ID, s.insertOrGet(name, &a)
 }
 
-func (s Storm) InsertOrGetAlbum(name string, artistID int) (int, error) {
+func (s Storm) InsertOrGetAlbum(name string, artistID int64) (int64, error) {
 	a := album{ArtistID: artistID}
 	return a.ID, s.insertOrGet(name, &a)
 }
 
-func (s Storm) InsertOrGetTrack(name string, albumID int) (int, error) {
+func (s Storm) InsertOrGetTrack(name string, albumID int64) (int64, error) {
 	t := track{AlbumID: albumID}
 	return t.ID, s.insertOrGet(name, &t)
 }

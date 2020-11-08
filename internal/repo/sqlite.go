@@ -245,20 +245,20 @@ func (s SQLite) Init() error {
 	return nil
 }
 
-func (s SQLite) InsertOrGetTrack(name string, albumID int) (int, error) {
+func (s SQLite) InsertOrGetTrack(name string, albumID int64) (int64, error) {
 	return s.insertOrGet("tracks", "insert into tracks (name, album_id) values (?, ?)", name, albumID)
 }
 
-func (s SQLite) InsertOrGetArtist(name string) (int, error) {
+func (s SQLite) InsertOrGetArtist(name string) (int64, error) {
 	return s.insertOrGet("artists", "insert into artists (name) values (?)", name)
 }
 
-func (s SQLite) InsertOrGetAlbum(name string, artistID int) (int, error) {
+func (s SQLite) InsertOrGetAlbum(name string, artistID int64) (int64, error) {
 	return s.insertOrGet("albums", "insert into albums (name, artist_id) values (?, ?)", name, artistID)
 }
 
-func (s SQLite) insertOrGet(table, q string, name string, args ...interface{}) (int, error) {
-	var id int
+func (s SQLite) insertOrGet(table, q string, name string, args ...interface{}) (int64, error) {
+	var id int64
 	err := s.db.QueryRow(fmt.Sprintf("select id from %s where name = ?", table), name).Scan(&id)
 	if err == nil {
 		return id, nil
