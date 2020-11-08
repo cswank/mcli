@@ -1,6 +1,7 @@
 package fetch
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -11,17 +12,17 @@ import (
 
 type (
 	fetcher interface {
-		FindArtist(term string, n int) (*schema.Results, error)
-		FindAlbum(term string, n int) (*schema.Results, error)
-		FindTrack(term string, n int) (*schema.Results, error)
-		GetAlbum(id int64) (*schema.Results, error)
-		GetArtistAlbums(id int64, n int) (*schema.Results, error)
-		GetArtistTracks(id int64, n int) (*schema.Results, error)
-		GetPlaylists() (*schema.Results, error)
-		GetPlaylist(int64, int) (*schema.Results, error)
-		InsertOrGetArtist(name string) (int, error)
-		InsertOrGetAlbum(name string, artistID int) (int, error)
-		InsertOrGetTrack(name string, albumID int) (int, error)
+		FindArtist(term string, n int) ([]schema.Result, error)
+		FindAlbum(term string, n int) ([]schema.Result, error)
+		FindTrack(term string, n int) ([]schema.Result, error)
+		GetAlbum(id int64) ([]schema.Result, error)
+		GetArtistAlbums(id int64, n int) ([]schema.Result, error)
+		GetArtistTracks(id int64, n int) ([]schema.Result, error)
+		GetPlaylists() ([]schema.Result, error)
+		GetPlaylist(int64, int) ([]schema.Result, error)
+		InsertOrGetArtist(name string) (int64, error)
+		InsertOrGetAlbum(name string, artistID int64) (int64, error)
+		InsertOrGetTrack(name string, albumID int64) (int64, error)
 		Init() error
 	}
 
@@ -41,31 +42,55 @@ func (l Local) Ping() bool                 { return true }
 func (l Local) AlbumLink() string          { return "" }
 
 func (l Local) FindArtist(term string, n int) (*schema.Results, error) {
-	return l.db.FindArtist(term, n)
+	r, err := l.db.FindArtist(term, n)
+	return l.doFind(r, "artist search", err, albumTitle)
 }
 
 func (l Local) FindAlbum(term string, n int) (*schema.Results, error) {
-	return l.db.FindAlbum(term, n)
+	r, err := l.db.FindAlbum(term, n)
+	return l.doFind(r, "album search", err, albumTitle)
 }
 
 func (l Local) FindTrack(term string, n int) (*schema.Results, error) {
-	return l.db.FindTrack(term, n)
+	r, err := l.db.FindTrack(term, n)
+	return l.doFind(r, "album", err, trackTitle)
 }
 
 func (l Local) GetAlbum(id int64) (*schema.Results, error) {
-	return l.db.GetAlbum(id)
+	r, err := l.db.GetAlbum(id)
+	return l.doFind(r, "album", err, trackTitle)
 }
 
 func (l Local) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
-	return l.db.GetArtistAlbums(id, n)
+	r, err := l.db.GetArtistAlbums(id, n)
+	return l.doFind(r, "album search", err, albumTitle)
 }
 
 func (l Local) GetArtistTracks(id int64, n int) (*schema.Results, error) {
-	return l.db.GetArtistTracks(id, n)
+	r, err := l.db.GetArtistTracks(id, n)
+	return l.doFind(r, "album", err, trackTitle)
 }
 
 func (l Local) GetPlaylists() (*schema.Results, error) {
 	return &schema.Results{}, nil
+}
+
+func (l Local) doFind(res []schema.Result, t string, err error, f func(schema.Result) string) (*schema.Results, error) {
+	var maxTitle int
+	for _, r := range res {
+		if len(f(r)) > maxTitle {
+			maxTitle = len(f(r))
+		}
+	}
+
+	tpl := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
+
+	return &schema.Results{
+		Header:  fmt.Sprintf(tpl, "Title", "Artist"),
+		Type:    t,
+		Fmt:     tpl,
+		Results: res,
+	}, err
 }
 
 func (l Local) GetPlaylist(int64, int) (*schema.Results, error) {
@@ -126,4 +151,16 @@ func (l Local) Import(fn func(schema.Progress)) error {
 	}
 
 	return nil
+}
+
+func albumTitle(r schema.Result) string {
+	return r.Album.Title
+}
+
+func artistName(r schema.Result) string {
+	return r.Artist.Name
+}
+
+func trackTitle(r schema.Result) string {
+	return r.Track.Title
 }

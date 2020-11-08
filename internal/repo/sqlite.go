@@ -36,62 +36,62 @@ func NewSQL(cfg schema.Config) (*SQLite, error) {
 	}, err
 }
 
-func (s SQLite) FindArtist(term string, n int) (*schema.Results, error) {
+func (s SQLite) FindArtist(term string, n int) ([]schema.Result, error) {
 	q := `SELECT id, name
 FROM artists
 WHERE name LIKE ?;`
-	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "artist search")
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), artistArgs)
 }
 
-func (s SQLite) FindAlbum(term string, n int) (*schema.Results, error) {
+func (s SQLite) FindAlbum(term string, n int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE al.name LIKE ?;`
-	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "album search")
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), albumArgs)
 }
 
-func (s SQLite) FindTrack(term string, n int) (*schema.Results, error) {
+func (s SQLite) FindTrack(term string, n int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE t.name LIKE ?;`
-	return s.doFind(q, fmt.Sprintf("%%%s%%", term), "album")
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), trackArgs)
 }
 
-func (s SQLite) GetAlbum(id int64) (*schema.Results, error) {
+func (s SQLite) GetAlbum(id int64) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE al.id = ?;`
-	return s.doFind(q, id, "album")
+	return s.doFind(q, id, trackArgs)
 }
 
-func (s SQLite) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
+func (s SQLite) GetArtistAlbums(id int64, n int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE ar.id = ?;`
-	return s.doFind(q, id, "album search")
+	return s.doFind(q, id, artistArgs)
 }
 
-func (s SQLite) GetArtistTracks(id int64, n int) (*schema.Results, error) {
+func (s SQLite) GetArtistTracks(id int64, n int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE ar.id = ?;`
-	return s.doFind(q, id, "album")
+	return s.doFind(q, id, trackArgs)
 }
 
-func (s SQLite) GetPlaylists() (*schema.Results, error) {
-	return &schema.Results{}, nil
+func (s SQLite) GetPlaylists() ([]schema.Result, error) {
+	return nil, nil
 }
 
-func (s SQLite) GetPlaylist(int64, int) (*schema.Results, error) {
-	return &schema.Results{}, nil
+func (s SQLite) GetPlaylist(int64, int) ([]schema.Result, error) {
+	return nil, nil
 }
 
 func (s *SQLite) Close() error {
@@ -147,47 +147,23 @@ LIMIT %d OFFSET %d;`, sortTerm, pageSize, offset)
 	}, nil
 }
 
-func (s SQLite) doFind(q string, term interface{}, t string) (*schema.Results, error) {
+func (s SQLite) doFind(q string, term interface{}, f func(schema.Result) []interface{}) ([]schema.Result, error) {
 	rows, err := s.db.Query(q, term)
 	if err != nil {
 		return nil, err
 	}
 
 	var out []schema.Result
-	var maxTitle int
-
 	for rows.Next() {
 		var res schema.Result
-		title, args := s.args(&res, t)
+		args := f(res)
 		if err := rows.Scan(args...); err != nil {
 			return nil, err
 		}
-
 		out = append(out, res)
-		if len(*title) > maxTitle {
-			maxTitle = len(*title)
-		}
 	}
 
-	f := fmt.Sprintf("%%-%ds%%s\n", maxTitle+4)
-
-	return &schema.Results{
-		Header:  fmt.Sprintf(f, "Title", "Artist"),
-		Type:    t,
-		Fmt:     f,
-		Results: out,
-	}, nil
-}
-
-func (s SQLite) args(res *schema.Result, t string) (*string, []interface{}) {
-	switch t {
-	case "artist search":
-		return &res.Artist.Name, []interface{}{&res.Artist.ID, &res.Artist.Name}
-	case "album search":
-		return &res.Album.Title, []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
-	default:
-		return &res.Track.Title, []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
-	}
+	return out, nil
 }
 
 func (s *SQLite) Track(id int64) (string, error) {
@@ -275,4 +251,16 @@ func (s SQLite) insertOrGet(table, q string, name string, args ...interface{}) (
 	}
 
 	return s.insertOrGet(table, q, name, args)
+}
+
+func artistArgs(res schema.Result) []interface{} {
+	return []interface{}{&res.Artist.ID, &res.Artist.Name}
+}
+
+func albumArgs(res schema.Result) []interface{} {
+	return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
+}
+
+func trackArgs(res schema.Result) []interface{} {
+	return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
 }
