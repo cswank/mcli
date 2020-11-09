@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 type Config struct {
@@ -78,8 +79,9 @@ func (r *Results) PrintPlaylists() func(res Result) string {
 func (r *Results) PrintAlbum() func(res Result) string {
 	var maxTitle int
 	for _, res := range r.Results {
-		if len(res.Track.Title) > maxTitle {
-			maxTitle = len(res.Track.Title)
+		c := utf8.RuneCountInString(res.Track.Title)
+		if c > maxTitle {
+			maxTitle = c
 		}
 	}
 
@@ -96,8 +98,9 @@ func (r *Results) PrintArtist() func(res Result) string {
 	var maxTitle int
 
 	for _, res := range r.Results {
-		if len(res.Album.Title) > maxTitle && len(res.Album.Title) < 50 {
-			maxTitle = len(res.Album.Title)
+		c := utf8.RuneCountInString(res.Album.Title)
+		if c > maxTitle && c < 50 {
+			maxTitle = c
 		}
 	}
 
@@ -105,7 +108,7 @@ func (r *Results) PrintArtist() func(res Result) string {
 	r.Header = fmt.Sprintf(r.Fmt, "Title", "Artist")
 	return func(res Result) string {
 		title := res.Album.Title
-		end := len(title)
+		end := utf8.RuneCountInString(title)
 		if end > 50 {
 			end = 48
 		}
@@ -116,8 +119,9 @@ func (r *Results) PrintArtist() func(res Result) string {
 func (r *Results) PrintAlbumTracks() func(res Result) string {
 	var maxTitle int
 	for _, res := range r.Results {
-		if len(res.Track.Title) > maxTitle {
-			maxTitle = len(res.Track.Title)
+		c := utf8.RuneCountInString(res.Track.Title)
+		if c > maxTitle {
+			maxTitle = c
 		}
 	}
 
@@ -132,8 +136,9 @@ func (r *Results) PrintAlbumTracks() func(res Result) string {
 func (r *Results) PrintArtists() func(res Result) string {
 	var max int
 	for _, res := range r.Results {
-		if len(res.Artist.Name) > max {
-			max = len(res.Artist.Name)
+		c := utf8.RuneCountInString(res.Artist.Name)
+		if c > max {
+			max = c
 		}
 	}
 
@@ -149,11 +154,13 @@ func (r *Results) PrintTracks() func(res Result) string {
 	var maxAlbum int
 
 	for _, res := range r.Results {
-		if len(res.Track.Title) > maxTitle {
-			maxTitle = len(res.Track.Title)
+		c := utf8.RuneCountInString(res.Track.Title)
+		if c > maxTitle {
+			maxTitle = c
 		}
-		if len(res.Album.Title) > maxAlbum {
-			maxAlbum = len(res.Album.Title)
+		c = utf8.RuneCountInString(res.Album.Title)
+		if c > maxAlbum {
+			maxAlbum = c
 		}
 	}
 
@@ -168,8 +175,9 @@ func (r *Results) PrintArtistTracks() func(res Result) string {
 	var maxTitle int
 
 	for _, res := range r.Results {
-		if len(res.Track.Title) > maxTitle {
-			maxTitle = len(res.Track.Title)
+		c := utf8.RuneCountInString(res.Track.Title)
+		if c > maxTitle {
+			maxTitle = c
 		}
 	}
 
@@ -191,8 +199,9 @@ func (r *Results) PrintHistory() func(res Result) string {
 }
 
 func truncate(s string, l int) string {
-	if len(s) < l {
-		l = len(s)
+	c := utf8.RuneCountInString(s)
+	if c < l {
+		l = c
 	}
 	return s[:l]
 }
