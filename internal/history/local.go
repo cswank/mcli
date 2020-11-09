@@ -8,7 +8,7 @@ import (
 type (
 	fetcher interface {
 		Save(r schema.Result) error
-		Fetch(page, pageSize int, sortTerm repo.Sort) (*schema.Results, error)
+		History(page, pageSize int, sortTerm repo.Sort) ([]schema.Result, error)
 	}
 
 	LocalHistory struct {
@@ -25,5 +25,9 @@ func (l *LocalHistory) Save(r schema.Result) error {
 }
 
 func (l *LocalHistory) Fetch(page, pageSize int, sortTerm repo.Sort) (*schema.Results, error) {
-	return l.db.Fetch(page, pageSize, sortTerm)
+	r, err := l.db.History(page, pageSize, sortTerm)
+	return &schema.Results{
+		Type:    "history",
+		Results: r,
+	}, err
 }

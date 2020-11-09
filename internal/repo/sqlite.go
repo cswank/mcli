@@ -115,7 +115,7 @@ func (s *SQLite) Save(res schema.Result) error {
 	return nil
 }
 
-func (s *SQLite) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
+func (s *SQLite) History(page, pageSize int, sortTerm Sort) ([]schema.Result, error) {
 	offset := page * pageSize
 
 	q := fmt.Sprintf(`SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, h.count
@@ -141,13 +141,10 @@ LIMIT %d OFFSET %d;`, sortTerm, pageSize, offset)
 		out = append(out, res)
 	}
 
-	return &schema.Results{
-		Type:    "history",
-		Results: out,
-	}, nil
+	return out, nil
 }
 
-func (s SQLite) doFind(q string, term interface{}, f func(schema.Result) []interface{}) ([]schema.Result, error) {
+func (s SQLite) doFind(q string, term interface{}, f func(*schema.Result) []interface{}) ([]schema.Result, error) {
 	rows, err := s.db.Query(q, term)
 	if err != nil {
 		return nil, err
@@ -156,10 +153,11 @@ func (s SQLite) doFind(q string, term interface{}, f func(schema.Result) []inter
 	var out []schema.Result
 	for rows.Next() {
 		var res schema.Result
-		args := f(res)
+		args := f(&res)
 		if err := rows.Scan(args...); err != nil {
 			return nil, err
 		}
+		fmt.Printf("%+v", res)
 		out = append(out, res)
 	}
 
@@ -253,14 +251,14 @@ func (s SQLite) insertOrGet(table, q string, name string, args ...interface{}) (
 	return s.insertOrGet(table, q, name, args)
 }
 
-func artistArgs(res schema.Result) []interface{} {
+func artistArgs(res *schema.Result) []interface{} {
 	return []interface{}{&res.Artist.ID, &res.Artist.Name}
 }
 
-func albumArgs(res schema.Result) []interface{} {
+func albumArgs(res *schema.Result) []interface{} {
 	return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title}
 }
 
-func trackArgs(res schema.Result) []interface{} {
+func trackArgs(res *schema.Result) []interface{} {
 	return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
 }

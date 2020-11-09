@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -78,8 +79,9 @@ func (l Local) GetPlaylists() (*schema.Results, error) {
 func (l Local) doFind(res []schema.Result, t string, err error, f func(schema.Result) string) (*schema.Results, error) {
 	var maxTitle int
 	for _, r := range res {
-		if len(f(r)) > maxTitle {
-			maxTitle = len(f(r))
+		c := utf8.RuneCountInString(f(r))
+		if c > maxTitle {
+			maxTitle = c
 		}
 	}
 

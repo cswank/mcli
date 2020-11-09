@@ -3,6 +3,8 @@ package repo
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/asdine/storm"
 	"github.com/asdine/storm/q"
@@ -35,6 +37,7 @@ type (
 		ArtistID int64  `storm:"index"`
 		Count    int64  `storm:"index"`
 		Time     string `storm:"index"`
+		Duration int
 	}
 )
 
@@ -65,11 +68,43 @@ func (s Storm) FindArtist(term string, n int) ([]schema.Result, error) {
 }
 
 func (s Storm) FindAlbum(term string, n int) ([]schema.Result, error) {
-	return nil, nil
+	var a []album
+	if err := s.db.Select(q.Re("Name", term)).Find(&a); err != nil {
+		if err == storm.ErrNotFound {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	out := make([]schema.Result, len(a))
+	for i, alb := range a {
+		out[i] = schema.Result{Album: schema.Album{ID: alb.ID, Title: alb.Name}}
+	}
+
+	return out, nil
 }
 
 func (s Storm) FindTrack(term string, n int) ([]schema.Result, error) {
-	return nil, nil
+	var t []track
+	if err := s.db.Select(q.Re("Name", term)).Find(&t); err != nil {
+		if err == storm.ErrNotFound {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	out := make([]schema.Result, len(t))
+	for i, tr := range t {
+		out[i] = schema.Result{
+			Track:  schema.Track{ID: tr.ID, Title: tr.Name},
+			Album:  schema.Album{ID: tr.AlbumID},
+			Artist: schema.Artist{ID: tr.ArtistID},
+		}
+	}
+
+	return out, nil
 }
 
 func (s Storm) GetAlbum(id int64) ([]schema.Result, error) {
@@ -105,6 +140,11 @@ func (s Storm) GetAlbum(id int64) ([]schema.Result, error) {
 }
 
 func (s Storm) GetArtistAlbums(id int64, n int) ([]schema.Result, error) {
+	var ar artist
+	if err := s.db.One("ID", id, &ar); err != nil {
+		return nil, err
+	}
+
 	var a []album
 	if err := s.db.Select(q.Eq("ArtistID", id)).Find(&a); err != nil {
 		if err == storm.ErrNotFound {
@@ -116,14 +156,46 @@ func (s Storm) GetArtistAlbums(id int64, n int) ([]schema.Result, error) {
 
 	out := make([]schema.Result, len(a))
 	for i, alb := range a {
-		out[i] = schema.Result{Album: schema.Album{ID: alb.ID, Title: alb.Name}}
+		out[i] = schema.Result{
+			Album:  schema.Album{ID: alb.ID, Title: alb.Name},
+			Artist: schema.Artist{ID: ar.ID, Name: ar.Name},
+		}
 	}
 
 	return out, nil
 }
 
 func (s Storm) GetArtistTracks(id int64, n int) ([]schema.Result, error) {
-	return nil, nil
+	var ar artist
+	if err := s.db.One("ID", id, &ar); err != nil {
+		return nil, err
+	}
+
+	var a []album
+	if err := s.db.Select(q.Eq("ArtistID", id)).Find(&a); err != nil {
+		if err == storm.ErrNotFound {
+			return []schema.Result{}, nil
+		}
+
+		return nil, err
+	}
+
+	var out []schema.Result
+	for _, alb := range a {
+		var t []track
+		if err := s.db.Select(q.Eq("AlbumID", alb.ID)).Find(&t); err != nil {
+			return nil, err
+		}
+		for _, tr := range t {
+			out = append(out, schema.Result{
+				Album:  schema.Album{ID: alb.ID, Title: alb.Name},
+				Artist: schema.Artist{ID: ar.ID, Name: ar.Name},
+				Track:  schema.Track{ID: tr.ID, Title: tr.Name},
+			})
+		}
+	}
+
+	return out, nil
 }
 
 func (s Storm) GetPlaylists() ([]schema.Result, error) {
@@ -135,35 +207,52 @@ func (s Storm) GetPlaylist(int64, int) ([]schema.Result, error) {
 }
 
 func (s *Storm) Close() error {
-	return nil
+	return s.db.Close()
 }
 
 func (s *Storm) Save(res schema.Result) error {
-	return nil
+	var t track
+	if err := s.db.One("ID", res.Track.ID, &t); err != nil {
+		return err
+	}
+
+	t.Count++
+	t.Time = time.Now().Format(time.RFC3339)
+	t.Duration = res.Track.Duration
+	return s.db.Save(&t)
 }
 
-func (s *Storm) Fetch(page, pageSize int, sortTerm Sort) (*schema.Results, error) {
+func (s *Storm) History(page, pageSize int, sortTerm Sort) ([]schema.Result, error) {
 	var entries []track
-	err := s.db.Select().OrderBy(string(sortTerm)).Reverse().Limit(pageSize).Skip(page * pageSize).Find(&entries)
+	err := s.db.Select().OrderBy(strings.Title(string(sortTerm))).Reverse().Limit(pageSize).Skip(page * pageSize).Find(&entries)
 	if err != nil {
 		return nil, err
 	}
 
 	out := make([]schema.Result, len(entries))
 	for i, t := range entries {
+		var a album
+		if err := s.db.One("ID", t.AlbumID, &a); err != nil {
+			return nil, err
+		}
+
+		var ar artist
+		if err := s.db.One("ID", a.ArtistID, &ar); err != nil {
+			return nil, err
+		}
+
 		out[i] = schema.Result{
-			Track: schema.Track{ID: t.ID, Title: t.Name},
+			PlayCount: int(t.Count),
+			Track:     schema.Track{ID: t.ID, Title: t.Name, Duration: t.Duration},
+			Album:     schema.Album{ID: a.ID, Title: a.Name},
+			Artist:    schema.Artist{ID: ar.ID, Name: ar.Name},
 		}
 	}
 
-	return &schema.Results{
-		Type:    "history",
-		Results: out,
-	}, nil
+	return out, nil
 }
 
 func (s Storm) doFind(q string, term interface{}, t string) (*schema.Results, error) {
-
 	return &schema.Results{
 		Type:    t,
 		Fmt:     "",
@@ -198,7 +287,6 @@ func (s Storm) Init() error {
 func (s Storm) InsertOrGetArtist(name string) (int64, error) {
 	a := artist{Name: name}
 	err := s.db.One("Name", name, &a)
-	fmt.Println("not found artist?", err == storm.ErrNotFound)
 	if err == storm.ErrNotFound {
 		return a.ID, s.db.Save(&a)
 	}
