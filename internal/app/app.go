@@ -63,8 +63,8 @@ func remote(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, fun
 }
 
 func Serve(cfg schema.Config) {
-	//db, err := repo.NewSQL(cfg)
-	db, err := repo.NewStorm(cfg)
+	db, err := repo.NewSQL(cfg)
+	//db, err := repo.NewStorm(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}

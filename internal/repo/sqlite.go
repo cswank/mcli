@@ -74,7 +74,7 @@ func (s SQLite) GetArtistAlbums(id int64, n int) ([]schema.Result, error) {
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE ar.id = ?;`
-	return s.doFind(q, id, artistArgs)
+	return s.doFind(q, id, albumArgs)
 }
 
 func (s SQLite) GetArtistTracks(id int64, n int) ([]schema.Result, error) {
@@ -99,9 +99,12 @@ func (s *SQLite) Close() error {
 }
 
 func (s *SQLite) Save(res schema.Result) error {
-	var count int64
-	s.db.QueryRow("select count from history where id = ?", res.Track.ID).Scan(&count)
-	var err error
+	var count, duration int64
+	err := s.db.QueryRow("select count, duration from history join tracks on tracks.id = history.id where tracks.id = ?", res.Track.ID).Scan(&count, &duration)
+	if err != nil && !strings.Contains(err.Error(), "no rows in result") {
+		return fmt.Errorf("unable to query history: %s", err)
+	}
+
 	if count == 0 {
 		_, err = s.db.Exec("insert into history (id, count, time) values (?, 1, ?)", res.Track.ID, time.Now().Format(time.RFC3339))
 	} else {
@@ -112,7 +115,11 @@ func (s *SQLite) Save(res schema.Result) error {
 		return fmt.Errorf("unable to write to history: %s", err)
 	}
 
-	return nil
+	if duration == 0 {
+		_, err = s.db.Exec("update tracks set duration = ? where id = ?", res.Track.Duration, res.Track.ID)
+	}
+
+	return err
 }
 
 func (s *SQLite) History(page, pageSize int, sortTerm Sort) ([]schema.Result, error) {
@@ -157,7 +164,6 @@ func (s SQLite) doFind(q string, term interface{}, f func(*schema.Result) []inte
 		if err := rows.Scan(args...); err != nil {
 			return nil, err
 		}
-		fmt.Printf("%+v", res)
 		out = append(out, res)
 	}
 
@@ -209,7 +215,8 @@ func (s SQLite) Init() error {
 	tracks (
 	  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	  album_id INTEGER NOT NULL,
-	  name TEXT NOT NULL
+	  name TEXT NOT NULL,
+      duration INTEGER NOT NULL DEFAULT 0
 	);`
 	_, err = s.db.Exec(q)
 	if err != nil {
