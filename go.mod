@@ -9,6 +9,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/asdine/storm v1.1.0
 	github.com/atotto/clipboard v0.0.0-20171229224153-bc5958e1c833
+	github.com/awesome-gocui/gocui v0.6.0
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/faiface/beep v1.0.2

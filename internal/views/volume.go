@@ -3,7 +3,7 @@ package views
 import (
 	"fmt"
 
-	ui "github.com/jroimartin/gocui"
+	ui "github.com/awesome-gocui/gocui"
 )
 
 const (

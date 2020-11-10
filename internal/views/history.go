@@ -1,8 +1,8 @@
 package views
 
 import (
+	ui "github.com/awesome-gocui/gocui"
 	"github.com/cswank/mcli/internal/repo"
-	ui "github.com/jroimartin/gocui"
 )
 
 const (

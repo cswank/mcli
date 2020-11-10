@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	ui "github.com/awesome-gocui/gocui"
 	"github.com/cswank/mcli/internal/schema"
-	ui "github.com/jroimartin/gocui"
 )
 
 type player struct {

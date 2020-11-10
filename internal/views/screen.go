@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
+	ui "github.com/awesome-gocui/gocui"
 	"github.com/cswank/mcli/internal/repo"
 	"github.com/cswank/mcli/internal/schema"
-	ui "github.com/jroimartin/gocui"
 )
 
 type screen struct {
@@ -457,7 +457,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 		case "volume":
-			v, err := g.SetView(s.view, s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2)
+			v, err := g.SetView(s.view, s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2, 0)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
@@ -466,7 +466,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 		case "history-type":
-			v, err := g.SetView(s.view, s.history.coords.x1, s.history.coords.y1, s.history.coords.x2, s.history.coords.y2)
+			v, err := g.SetView(s.view, s.history.coords.x1, s.history.coords.y1, s.history.coords.x2, s.history.coords.y2, 0)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
@@ -478,7 +478,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if s.view == "search" {
 				g.Cursor = true
 			}
-			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2)
+			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2, 0)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
@@ -487,7 +487,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 		case "artist-dialog":
-			v, err := g.SetView(s.view, s.artistDialog.coords.x1, s.artistDialog.coords.y1, s.artistDialog.coords.x2, s.artistDialog.coords.y2)
+			v, err := g.SetView(s.view, s.artistDialog.coords.x1, s.artistDialog.coords.y1, s.artistDialog.coords.x2, s.artistDialog.coords.y2, 0)
 			if err != nil && err != ui.ErrUnknownView {
 				return err
 			}
@@ -499,8 +499,8 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			g.DeleteView("search")
 			g.DeleteView("search-type")
 			g.DeleteView("artist-dialog")
-			v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2)
-			if err != nil && err != ui.ErrUnknownView {
+			v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2, 0)
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 
@@ -509,8 +509,8 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 
-			v, err = g.SetView("body", s.body.coords.x1, s.body.coords.y1, s.body.coords.x2, s.body.coords.y2)
-			if err != nil && err != ui.ErrUnknownView {
+			v, err = g.SetView("body", s.body.coords.x1, s.body.coords.y1, s.body.coords.x2, s.body.coords.y2, 0)
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 
@@ -520,15 +520,15 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				return err
 			}
 
-			v, err = g.SetView("play", s.play.coords.x1, s.play.coords.y1, s.play.coords.x2, s.play.coords.y2)
-			if err != nil && err != ui.ErrUnknownView {
+			v, err = g.SetView("play", s.play.coords.x1, s.play.coords.y1, s.play.coords.x2, s.play.coords.y2, 0)
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 			v.Frame = false
 			v.Editable = true
 
-			v, err = g.SetView("buffer", s.buffer.coords.x1, s.buffer.coords.y1, s.buffer.coords.x2, s.buffer.coords.y2)
-			if err != nil && err != ui.ErrUnknownView {
+			v, err = g.SetView("buffer", s.buffer.coords.x1, s.buffer.coords.y1, s.buffer.coords.x2, s.buffer.coords.y2, 0)
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 			v.Frame = false

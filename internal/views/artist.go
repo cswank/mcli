@@ -1,8 +1,8 @@
 package views
 
 import (
+	ui "github.com/awesome-gocui/gocui"
 	"github.com/cswank/mcli/internal/schema"
-	ui "github.com/jroimartin/gocui"
 )
 
 //artistDialog is a dialog that lets you choos between showing the albums

@@ -1,6 +1,6 @@
 package views
 
-import ui "github.com/jroimartin/gocui"
+import ui "github.com/awesome-gocui/gocui"
 
 type keyHelp struct {
 	key  string

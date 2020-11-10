@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
+	ui "github.com/awesome-gocui/gocui"
 	"github.com/cswank/mcli/internal/colors"
 	"github.com/cswank/mcli/internal/fetch"
 	hist "github.com/cswank/mcli/internal/history"
 	"github.com/cswank/mcli/internal/play"
-	ui "github.com/jroimartin/gocui"
 )
 
 var (
@@ -36,7 +36,7 @@ func Start(p play.Player, f fetch.Fetcher, hist hist.History) error {
 	cli := &client{Player: p, Fetcher: f, History: hist}
 
 	var err error
-	g, err = ui.NewGui(ui.Output256)
+	g, err = ui.NewGui(ui.Output256, false)
 	if err != nil {
 		return fmt.Errorf("could not create gui: %s", err)
 	}

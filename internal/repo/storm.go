@@ -98,7 +98,7 @@ func (s Storm) FindTrack(term string, n int) ([]schema.Result, error) {
 	out := make([]schema.Result, len(t))
 	for i, tr := range t {
 		out[i] = schema.Result{
-			Track:  schema.Track{ID: tr.ID, Title: tr.Name},
+			Track:  schema.Track{ID: tr.ID, Title: tr.Name, Duration: tr.Duration},
 			Album:  schema.Album{ID: tr.AlbumID},
 			Artist: schema.Artist{ID: tr.ArtistID},
 		}
@@ -130,7 +130,7 @@ func (s Storm) GetAlbum(id int64) ([]schema.Result, error) {
 	out := make([]schema.Result, len(t))
 	for i, track := range t {
 		out[i] = schema.Result{
-			Track:  schema.Track{ID: track.ID, Title: track.Name},
+			Track:  schema.Track{ID: track.ID, Title: track.Name, Duration: track.Duration},
 			Album:  schema.Album{ID: alb.ID, Title: alb.Name},
 			Artist: schema.Artist{ID: art.ID, Name: art.Name},
 		}
@@ -190,7 +190,7 @@ func (s Storm) GetArtistTracks(id int64, n int) ([]schema.Result, error) {
 			out = append(out, schema.Result{
 				Album:  schema.Album{ID: alb.ID, Title: alb.Name},
 				Artist: schema.Artist{ID: ar.ID, Name: ar.Name},
-				Track:  schema.Track{ID: tr.ID, Title: tr.Name},
+				Track:  schema.Track{ID: tr.ID, Title: tr.Name, Duration: tr.Duration},
 			})
 		}
 	}

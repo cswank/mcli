@@ -1,7 +1,7 @@
 package views
 
 import (
-	ui "github.com/jroimartin/gocui"
+	ui "github.com/awesome-gocui/gocui"
 )
 
 const (

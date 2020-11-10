@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	ui "github.com/jroimartin/gocui"
+	ui "github.com/awesome-gocui/gocui"
 )
 
 type header struct {

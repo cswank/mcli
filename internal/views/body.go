@@ -3,8 +3,8 @@ package views
 import (
 	"fmt"
 
+	ui "github.com/awesome-gocui/gocui"
 	"github.com/cswank/mcli/internal/schema"
-	ui "github.com/jroimartin/gocui"
 )
 
 type body struct {

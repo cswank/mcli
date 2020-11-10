@@ -52,7 +52,7 @@ WHERE al.name LIKE ?;`
 }
 
 func (s SQLite) FindTrack(term string, n int) ([]schema.Result, error) {
-	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
+	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, t.duration
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
@@ -61,7 +61,7 @@ WHERE t.name LIKE ?;`
 }
 
 func (s SQLite) GetAlbum(id int64) ([]schema.Result, error) {
-	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
+	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, t.duration
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
@@ -78,7 +78,7 @@ WHERE ar.id = ?;`
 }
 
 func (s SQLite) GetArtistTracks(id int64, n int) ([]schema.Result, error) {
-	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name
+	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, t.duration
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
@@ -260,5 +260,5 @@ func albumArgs(res *schema.Result) []interface{} {
 }
 
 func trackArgs(res *schema.Result) []interface{} {
-	return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title}
+	return []interface{}{&res.Artist.ID, &res.Artist.Name, &res.Album.ID, &res.Album.Title, &res.Track.ID, &res.Track.Title, &res.Track.Duration}
 }
