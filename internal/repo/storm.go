@@ -280,6 +280,23 @@ func (s *Storm) Track(id int64) (string, error) {
 	return filepath.Join(s.pth, ar.Name, al.Name, fmt.Sprintf("%s.flac", t.Name)), nil
 }
 
+func (s *Storm) AllTracks() ([]int64, error) {
+	var t []track
+	if err := s.db.All(&t); err != nil {
+		return nil, err
+	}
+	var out := make([]int64, len(t))
+	for i, track := range t {
+		out[i] = track.ID
+	}
+
+	return out, nil
+}
+
+func (s Storm) SaveDuration(id int64, duration int) error {
+	return s.db.UpdateField(track{ID: id}, duration, "Duration")
+}
+
 func (s Storm) Init() error {
 	return nil
 }

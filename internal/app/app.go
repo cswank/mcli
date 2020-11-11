@@ -139,7 +139,8 @@ func InitDB(cfg schema.Config) {
 }
 
 func Duration(cfg schema.Config) {
-	db, err := repo.NewSQL(cfg)
+	//db, err := repo.NewSQL(cfg)
+	db, err := repo.NewStorm(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
