@@ -164,7 +164,8 @@ func Duration(cfg schema.Config) {
 
 		music, format, err := flac.Decode(f)
 		if err != nil {
-			log.Fatalf("unable to parse %s: %s", pth, err)
+			log.Printf("unable to parse %s: %s", pth, err)
+			continue
 		}
 
 		ln := music.Len()
@@ -173,6 +174,8 @@ func Duration(cfg schema.Config) {
 		if err := db.SaveDuration(id, d); err != nil {
 			log.Fatalf("unable to save duration for %s: %s", pth, err)
 		}
+
+		music.Close()
 		bar.Increment()
 	}
 	bar.Finish()
