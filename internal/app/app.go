@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/cswank/beep/flac"
 	"github.com/cswank/mcli/internal/download"
 	"github.com/cswank/mcli/internal/fetch"
 	"github.com/cswank/mcli/internal/history"
@@ -14,6 +15,7 @@ import (
 	"github.com/cswank/mcli/internal/server"
 	"github.com/cswank/mcli/internal/views"
 	"google.golang.org/grpc"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 var (
@@ -134,4 +136,44 @@ func InitDB(cfg schema.Config) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func Duration(cfg schema.Config) {
+	db, err := repo.NewSQL(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ids, err := db.AllTracks()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bar := pb.StartNew(len(ids))
+
+	for _, id := range ids {
+		pth, err := db.Track(id)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		f, err := os.Open(pth)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		music, format, err := flac.Decode(f)
+		if err != nil {
+			log.Fatalf("unable to parse %s: %s", pth, err)
+		}
+
+		ln := music.Len()
+		d := ln / int(format.SampleRate)
+
+		if err := db.SaveDuration(id, d); err != nil {
+			log.Fatalf("unable to save duration for %s: %s", pth, err)
+		}
+		bar.Increment()
+	}
+	bar.Finish()
 }

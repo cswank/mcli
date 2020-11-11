@@ -258,6 +258,28 @@ func (s SQLite) insertOrGet(table, q string, name string, args ...interface{}) (
 	return s.insertOrGet(table, q, name, args)
 }
 
+func (s SQLite) AllTracks() ([]int64, error) {
+	rows, err := s.db.Query(`SELECT id FROM tracks`)
+	if err != nil {
+		return nil, err
+	}
+
+	var out []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out = append(out, id)
+	}
+	return out, nil
+}
+
+func (s SQLite) SaveDuration(id int64, duration int) error {
+	_, err := s.db.Exec(`UPDATE tracks SET duration = ? WHERE id = ?`, duration, id)
+	return err
+}
+
 func artistArgs(res *schema.Result) []interface{} {
 	return []interface{}{&res.Artist.ID, &res.Artist.Name}
 }

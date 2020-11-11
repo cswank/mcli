@@ -2,7 +2,6 @@ package views
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	ui "github.com/awesome-gocui/gocui"
@@ -73,7 +72,6 @@ func (s *screen) playAlbum(g *ui.Gui, v *ui.View) error {
 func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 	r := s.body.view[s.body.cursor]
 	c := s.body.cursor
-	log.Printf("type: %s, results: %+v", s.body.results.Type, r)
 	switch s.body.results.Type {
 	case "album search":
 		s.body.cursor = 0
@@ -458,7 +456,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			}
 		case "volume":
 			v, err := g.SetView(s.view, s.volume.coords.x1, s.volume.coords.y1, s.volume.coords.x2, s.volume.coords.y2, 0)
-			if err != nil && err != ui.ErrUnknownView {
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 
@@ -467,7 +465,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			}
 		case "history-type":
 			v, err := g.SetView(s.view, s.history.coords.x1, s.history.coords.y1, s.history.coords.x2, s.history.coords.y2, 0)
-			if err != nil && err != ui.ErrUnknownView {
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 
@@ -479,7 +477,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 				g.Cursor = true
 			}
 			v, err := g.SetView(s.view, s.search.coords.x1, s.search.coords.y1, s.search.coords.x2, s.search.coords.y2, 0)
-			if err != nil && err != ui.ErrUnknownView {
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 
@@ -488,7 +486,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			}
 		case "artist-dialog":
 			v, err := g.SetView(s.view, s.artistDialog.coords.x1, s.artistDialog.coords.y1, s.artistDialog.coords.x2, s.artistDialog.coords.y2, 0)
-			if err != nil && err != ui.ErrUnknownView {
+			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
 
