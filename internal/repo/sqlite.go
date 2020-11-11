@@ -112,7 +112,7 @@ func (s *SQLite) Save(res schema.Result) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("unable to write to history: %s", err)
+		return fmt.Errorf("unable to write to history for track %d: %s", res.Track.ID, err)
 	}
 
 	if duration == 0 {
