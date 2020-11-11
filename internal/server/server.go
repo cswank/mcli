@@ -21,7 +21,7 @@ const (
 )
 
 type (
-	tracker interface {
+	Tracker interface {
 		Track(int64) (string, error)
 	}
 
@@ -37,7 +37,7 @@ type (
 		rpc.UnsafeDownloaderServer
 		rpc.UnsafeHistoryServer
 		pth                    string
-		db                     tracker
+		db                     Tracker
 		cli                    *client
 		nextSongStream         rpc.Player_NextSongServer
 		playProgressStream     rpc.Player_PlayProgressServer
@@ -47,7 +47,7 @@ type (
 	}
 )
 
-func Start(p play.Player, f fetch.Fetcher, h history.History, db tracker, pth string) error {
+func Start(p play.Player, f fetch.Fetcher, h history.History, db Tracker, pth string) error {
 	log.Println("rpc listening on ", port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

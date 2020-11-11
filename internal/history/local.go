@@ -6,17 +6,17 @@ import (
 )
 
 type (
-	historian interface {
+	Historian interface {
 		Save(r schema.Result) error
 		History(page, pageSize int, sortTerm repo.Sort) ([]schema.Result, error)
 	}
 
 	LocalHistory struct {
-		db historian
+		db Historian
 	}
 )
 
-func NewLocal(db historian) *LocalHistory {
+func NewLocal(db Historian) *LocalHistory {
 	return &LocalHistory{db: db}
 }
 

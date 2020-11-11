@@ -65,8 +65,22 @@ func remote(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, fun
 }
 
 func Serve(cfg schema.Config) {
-	db, err := repo.NewSQL(cfg)
-	//db, err := repo.NewStorm(cfg)
+	type repository interface {
+		history.Historian
+		fetch.Repository
+		server.Tracker
+	}
+
+	var db repository
+
+	var err error
+	switch cfg.DB {
+	case "sqlite":
+		db, err = repo.NewSQL(cfg)
+	case "storm":
+		db, err = repo.NewStorm(cfg)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,7 +174,8 @@ func Duration(cfg schema.Config) {
 
 		f, err := os.Open(pth)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("unable to open %s: %s", pth, err)
+			continue
 		}
 
 		music, format, err := flac.Decode(f)

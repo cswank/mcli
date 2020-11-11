@@ -12,15 +12,17 @@ type Config struct {
 	Pth        string
 	Home       string
 	Log        string
+	DB         string
 	RemotePlay bool
 }
 
-func NewConfig(addr, pth, home, log string, remotePlay bool) Config {
+func NewConfig(addr, pth, home, log, db string, remotePlay bool) Config {
 	return Config{
 		Addr:       addr,
 		Pth:        pth,
 		Home:       home,
 		Log:        log,
+		DB:         db,
 		RemotePlay: remotePlay,
 	}
 }

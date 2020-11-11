@@ -285,7 +285,7 @@ func (s *Storm) AllTracks() ([]int64, error) {
 	if err := s.db.All(&t); err != nil {
 		return nil, err
 	}
-	var out := make([]int64, len(t))
+	out := make([]int64, len(t))
 	for i, track := range t {
 		out[i] = track.ID
 	}
@@ -294,7 +294,7 @@ func (s *Storm) AllTracks() ([]int64, error) {
 }
 
 func (s Storm) SaveDuration(id int64, duration int) error {
-	return s.db.UpdateField(track{ID: id}, duration, "Duration")
+	return s.db.UpdateField(&track{ID: id}, "Duration", duration)
 }
 
 func (s Storm) Init() error {

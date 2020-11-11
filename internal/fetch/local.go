@@ -12,7 +12,7 @@ import (
 )
 
 type (
-	fetcher interface {
+	Repository interface {
 		FindArtist(term string, n int) ([]schema.Result, error)
 		FindAlbum(term string, n int) ([]schema.Result, error)
 		FindTrack(term string, n int) ([]schema.Result, error)
@@ -29,11 +29,11 @@ type (
 
 	Local struct {
 		pth string
-		db  fetcher
+		db  Repository
 	}
 )
 
-func NewLocal(pth string, db fetcher) (*Local, error) {
+func NewLocal(pth string, db Repository) (*Local, error) {
 	return &Local{pth: pth, db: db}, db.Init()
 }
 
