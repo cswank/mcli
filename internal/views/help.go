@@ -40,7 +40,7 @@ func getHelpCoords(g *ui.Gui) coords {
 func (h *help) show(g *ui.Gui, keys []key) error {
 	coords := getHelpCoords(g)
 	v, err := g.SetView("help", coords.x1, coords.y1, coords.x2, coords.y2, 0)
-	if err != ui.ErrUnknownView {
+	if !ui.IsUnknownView(err) {
 		return err
 	}
 
