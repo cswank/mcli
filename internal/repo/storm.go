@@ -312,27 +312,28 @@ func (s Storm) InsertOrGetArtist(name string) (int64, error) {
 }
 
 func (s Storm) InsertOrGetAlbum(name string, artistID int64) (int64, error) {
-	a := album{Name: name, ArtistID: artistID}
-	err := s.db.One("Name", name, &a)
-	if err == storm.ErrNotFound {
+	var albums []album
+	err := s.db.Select(q.Eq("ArtistID", artistID), q.Eq("Name", name)).Find(&albums)
+	if len(albums) == 0 {
+		a := album{Name: name, ArtistID: artistID}
 		return a.ID, s.db.Save(&a)
 	}
 
-	return a.ID, err
+	return albums[0].ID, err
 }
 
 func (s Storm) InsertOrGetTrack(name string, albumID int64) (int64, error) {
-	t := track{Name: name, AlbumID: albumID}
-	err := s.db.One("Name", name, &t)
-	if err == storm.ErrNotFound {
+	var tracks []track
+	err := s.db.Select(q.Eq("AlbumID", albumID), q.Eq("Name", name)).Find(&tracks)
+	if len(tracks) == 0 {
 		var a album
 		if err := s.db.One("ID", albumID, &a); err != nil {
 			return 0, err
 		}
 
-		t.ArtistID = a.ArtistID
+		t := track{Name: name, AlbumID: albumID, ArtistID: a.ArtistID}
 		return t.ID, s.db.Save(&t)
 	}
 
-	return t.ID, err
+	return tracks[0].ID, err
 }
