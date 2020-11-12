@@ -22,6 +22,16 @@ var (
 	logfile *os.File
 )
 
+type (
+	repository interface {
+		history.Historian
+		fetch.Repository
+		server.Tracker
+		AllTracks() ([]int64, error)
+		SaveDuration(id int64, dur int) error
+	}
+)
+
 func UI(cfg schema.Config) {
 	var f fetch.Fetcher
 	var p play.Player
@@ -65,55 +75,40 @@ func remote(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, fun
 }
 
 func Serve(cfg schema.Config) {
-	type repository interface {
-		history.Historian
-		fetch.Repository
-		server.Tracker
-	}
-
-	var db repository
-
-	var err error
-	switch cfg.DB {
-	case "sqlite":
-		db, err = repo.NewSQL(cfg)
-	case "storm":
-		db, err = repo.NewStorm(cfg)
-	}
-
+	r, err := db(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	h := history.NewLocal(db)
+	h := history.NewLocal(r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f, err := fetch.NewLocal(cfg.Pth, db)
+	f, err := fetch.NewLocal(cfg.Pth, r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := server.Start(nil, f, h, db, cfg.Pth); err != nil {
+	if err := server.Start(nil, f, h, r, cfg.Pth); err != nil {
 		log.Fatal("unable to start server ", err)
 	}
 }
 
 func local(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, func()) {
-	db, err := repo.NewSQL(cfg)
+	r, err := db(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	h := history.NewLocal(db)
-	dl := download.NewLocal(cfg.Pth, db)
+	h := history.NewLocal(r)
+	dl := download.NewLocal(cfg.Pth, r)
 	p, err := play.NewLocal(cfg.Pth, cfg.Home, play.LocalDownload(dl), play.LocalHistory(h))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f, err := fetch.NewLocal(cfg.Pth, db)
+	f, err := fetch.NewLocal(cfg.Pth, r)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,27 +116,8 @@ func local(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, func
 	return p, f, h, func() {}
 }
 
-func SetupLog(cfg schema.Config) func() {
-	out := func() {}
-	if cfg.Log != "" {
-		f, err := os.Create(cfg.Log)
-		if err != nil {
-			log.Fatal(err)
-		}
-		logfile = f
-		log.SetOutput(f)
-		out = func() {
-			f.Close()
-		}
-	} else {
-		log.SetOutput(ioutil.Discard)
-	}
-
-	return out
-}
-
 func InitDB(cfg schema.Config) {
-	db, err := repo.NewSQL(cfg)
+	db, err := db(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -153,8 +129,7 @@ func InitDB(cfg schema.Config) {
 }
 
 func Duration(cfg schema.Config) {
-	//db, err := repo.NewSQL(cfg)
-	db, err := repo.NewStorm(cfg)
+	db, err := db(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -195,4 +170,32 @@ func Duration(cfg schema.Config) {
 		bar.Increment()
 	}
 	bar.Finish()
+}
+
+func SetupLog(cfg schema.Config) func() {
+	out := func() {}
+	if cfg.Log != "" {
+		f, err := os.Create(cfg.Log)
+		if err != nil {
+			log.Fatal(err)
+		}
+		logfile = f
+		log.SetOutput(f)
+		out = func() {
+			f.Close()
+		}
+	} else {
+		log.SetOutput(ioutil.Discard)
+	}
+
+	return out
+}
+
+func db(cfg schema.Config) (repository, error) {
+	switch cfg.DB {
+	case "storm":
+		return repo.NewStorm(cfg)
+	default:
+		return repo.NewSQL(cfg)
+	}
 }
