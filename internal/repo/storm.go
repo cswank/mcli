@@ -49,7 +49,7 @@ func NewStorm(cfg schema.Config) (*Storm, error) {
 	}, err
 }
 
-func (s Storm) FindArtist(term string, n int) ([]schema.Result, error) {
+func (s Storm) FindArtist(term string, p, ps int) ([]schema.Result, error) {
 	var a []artist
 	if err := s.db.Select(q.Re("Name", term)).Find(&a); err != nil {
 		if err == storm.ErrNotFound {
@@ -67,7 +67,7 @@ func (s Storm) FindArtist(term string, n int) ([]schema.Result, error) {
 	return out, nil
 }
 
-func (s Storm) FindAlbum(term string, n int) ([]schema.Result, error) {
+func (s Storm) FindAlbum(term string, p, ps int) ([]schema.Result, error) {
 	var a []album
 	if err := s.db.Select(q.Re("Name", term)).Find(&a); err != nil {
 		if err == storm.ErrNotFound {
@@ -85,7 +85,7 @@ func (s Storm) FindAlbum(term string, n int) ([]schema.Result, error) {
 	return out, nil
 }
 
-func (s Storm) FindTrack(term string, n int) ([]schema.Result, error) {
+func (s Storm) FindTrack(term string, p, ps int) ([]schema.Result, error) {
 	var t []track
 	if err := s.db.Select(q.Re("Name", term)).Find(&t); err != nil {
 		if err == storm.ErrNotFound {
@@ -139,7 +139,7 @@ func (s Storm) GetAlbum(id int64) ([]schema.Result, error) {
 	return out, nil
 }
 
-func (s Storm) GetArtistAlbums(id int64, n int) ([]schema.Result, error) {
+func (s Storm) GetArtistAlbums(id int64, p, ps int) ([]schema.Result, error) {
 	var ar artist
 	if err := s.db.One("ID", id, &ar); err != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func (s Storm) GetArtistAlbums(id int64, n int) ([]schema.Result, error) {
 	return out, nil
 }
 
-func (s Storm) GetArtistTracks(id int64, n int) ([]schema.Result, error) {
+func (s Storm) GetArtistTracks(id int64, p, ps int) ([]schema.Result, error) {
 	var ar artist
 	if err := s.db.One("ID", id, &ar); err != nil {
 		return nil, err

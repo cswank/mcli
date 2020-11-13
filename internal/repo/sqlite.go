@@ -37,12 +37,11 @@ func NewSQL(cfg schema.Config) (*SQLite, error) {
 }
 
 func (s SQLite) FindArtist(term string, p, ps int) ([]schema.Result, error) {
-	offset := p * ps
 	q := `SELECT id, name
 FROM artists
 WHERE name LIKE ?
 LIMIT ? OFFSET ?;`
-	return s.doFind(q, fmt.Sprintf("%%%s%%", term), artistArgs)
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), artistArgs, p, ps)
 }
 
 func (s SQLite) FindAlbum(term string, p, ps int) ([]schema.Result, error) {
@@ -50,7 +49,7 @@ func (s SQLite) FindAlbum(term string, p, ps int) ([]schema.Result, error) {
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE al.name LIKE ?;`
-	return s.doFind(q, fmt.Sprintf("%%%s%%", term), albumArgs)
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), albumArgs, p, ps)
 }
 
 func (s SQLite) FindTrack(term string, p, ps int) ([]schema.Result, error) {
@@ -59,7 +58,7 @@ FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE t.name LIKE ?;`
-	return s.doFind(q, fmt.Sprintf("%%%s%%", term), trackArgs)
+	return s.doFind(q, fmt.Sprintf("%%%s%%", term), trackArgs, p, ps)
 }
 
 func (s SQLite) GetAlbum(id int64) ([]schema.Result, error) {
@@ -68,7 +67,7 @@ FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE al.id = ?;`
-	return s.doFind(q, id, trackArgs)
+	return s.doFind(q, id, trackArgs, -1, -1)
 }
 
 func (s SQLite) GetArtistAlbums(id int64, p, ps int) ([]schema.Result, error) {
@@ -76,7 +75,7 @@ func (s SQLite) GetArtistAlbums(id int64, p, ps int) ([]schema.Result, error) {
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE ar.id = ?;`
-	return s.doFind(q, id, albumArgs)
+	return s.doFind(q, id, albumArgs, p, ps)
 }
 
 func (s SQLite) GetArtistTracks(id int64, p, ps int) ([]schema.Result, error) {
@@ -85,7 +84,7 @@ FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
 JOIN artists AS ar ON ar.id = al.artist_id
 WHERE ar.id = ?;`
-	return s.doFind(q, id, trackArgs)
+	return s.doFind(q, id, trackArgs, p, ps)
 }
 
 func (s SQLite) GetPlaylists() ([]schema.Result, error) {
@@ -153,8 +152,13 @@ LIMIT %d OFFSET %d;`, sortTerm, pageSize, offset)
 	return out, nil
 }
 
-func (s SQLite) doFind(q string, term interface{}, f func(*schema.Result) []interface{}) ([]schema.Result, error) {
-	rows, err := s.db.Query(q, term)
+func (s SQLite) doFind(q string, term interface{}, f func(*schema.Result) []interface{}, p, ps int) ([]schema.Result, error) {
+	a := []interface{}{term}
+	if p >= 0 {
+		o := p * ps
+		a = append(a, ps, o)
+	}
+	rows, err := s.db.Query(q, a...)
 	if err != nil {
 		return nil, err
 	}

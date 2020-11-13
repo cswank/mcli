@@ -13,12 +13,12 @@ import (
 
 type (
 	Repository interface {
-		FindArtist(term string, n int) ([]schema.Result, error)
-		FindAlbum(term string, n int) ([]schema.Result, error)
-		FindTrack(term string, n int) ([]schema.Result, error)
+		FindArtist(term string, p, ps int) ([]schema.Result, error)
+		FindAlbum(term string, p, ps int) ([]schema.Result, error)
+		FindTrack(term string, p, ps int) ([]schema.Result, error)
 		GetAlbum(id int64) ([]schema.Result, error)
-		GetArtistAlbums(id int64, n int) ([]schema.Result, error)
-		GetArtistTracks(id int64, n int) ([]schema.Result, error)
+		GetArtistAlbums(id int64, p, ps int) ([]schema.Result, error)
+		GetArtistTracks(id int64, p, ps int) ([]schema.Result, error)
 		GetPlaylists() ([]schema.Result, error)
 		GetPlaylist(int64, int) ([]schema.Result, error)
 		InsertOrGetArtist(name string) (int64, error)
@@ -42,18 +42,18 @@ func (l Local) Login(string, string) error { return nil }
 func (l Local) Ping() bool                 { return true }
 func (l Local) AlbumLink() string          { return "" }
 
-func (l Local) FindArtist(term string, n int) (*schema.Results, error) {
-	r, err := l.db.FindArtist(term, n)
+func (l Local) FindArtist(term string, p, ps int) (*schema.Results, error) {
+	r, err := l.db.FindArtist(term, p, ps)
 	return l.doFind(r, "artist search", err, albumTitle)
 }
 
-func (l Local) FindAlbum(term string, n int) (*schema.Results, error) {
-	r, err := l.db.FindAlbum(term, n)
+func (l Local) FindAlbum(term string, p, ps int) (*schema.Results, error) {
+	r, err := l.db.FindAlbum(term, p, ps)
 	return l.doFind(r, "album search", err, albumTitle)
 }
 
-func (l Local) FindTrack(term string, n int) (*schema.Results, error) {
-	r, err := l.db.FindTrack(term, n)
+func (l Local) FindTrack(term string, p, ps int) (*schema.Results, error) {
+	r, err := l.db.FindTrack(term, p, ps)
 	return l.doFind(r, "album", err, trackTitle)
 }
 
@@ -62,13 +62,13 @@ func (l Local) GetAlbum(id int64) (*schema.Results, error) {
 	return l.doFind(r, "album", err, trackTitle)
 }
 
-func (l Local) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
-	r, err := l.db.GetArtistAlbums(id, n)
+func (l Local) GetArtistAlbums(id int64, p, ps int) (*schema.Results, error) {
+	r, err := l.db.GetArtistAlbums(id, p, ps)
 	return l.doFind(r, "album search", err, albumTitle)
 }
 
-func (l Local) GetArtistTracks(id int64, n int) (*schema.Results, error) {
-	r, err := l.db.GetArtistTracks(id, n)
+func (l Local) GetArtistTracks(id int64, p, ps int) (*schema.Results, error) {
+	r, err := l.db.GetArtistTracks(id, p, ps)
 	return l.doFind(r, "album", err, trackTitle)
 }
 

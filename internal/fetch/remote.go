@@ -50,17 +50,17 @@ func (r *Remote) AlbumLink() string {
 	return ""
 }
 
-func (r Remote) FindArtist(term string, n int) (*schema.Results, error) {
+func (r Remote) FindArtist(term string, p, ps int) (*schema.Results, error) {
 	out, err := r.client.FindArtist(context.Background(), &rpc.Request{Term: term, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) FindAlbum(term string, n int) (*schema.Results, error) {
+func (r Remote) FindAlbum(term string, p, ps int) (*schema.Results, error) {
 	out, err := r.client.FindAlbum(context.Background(), &rpc.Request{Term: term, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) FindTrack(term string, n int) (*schema.Results, error) {
+func (r Remote) FindTrack(term string, p, ps int) (*schema.Results, error) {
 	out, err := r.client.FindTrack(context.Background(), &rpc.Request{Term: term, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
@@ -70,12 +70,12 @@ func (r Remote) GetAlbum(id int64) (*schema.Results, error) {
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) GetArtistAlbums(id int64, n int) (*schema.Results, error) {
+func (r Remote) GetArtistAlbums(id int64, p, ps int) (*schema.Results, error) {
 	out, err := r.client.GetArtistAlbums(context.Background(), &rpc.Request{Id: id, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) GetArtistTracks(id int64, n int) (*schema.Results, error) {
+func (r Remote) GetArtistTracks(id int64, p, ps int) (*schema.Results, error) {
 	out, err := r.client.GetArtistTracks(context.Background(), &rpc.Request{Id: id, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
@@ -85,7 +85,7 @@ func (r Remote) GetPlaylists() (*schema.Results, error) {
 	return rpc.ResultsFromPB(out), err
 }
 
-func (r Remote) GetPlaylist(id int64, n int) (*schema.Results, error) {
+func (r Remote) GetPlaylist(id int64, p, ps int) (*schema.Results, error) {
 	out, err := r.client.GetPlaylist(context.Background(), &rpc.Request{Id: id, N: int64(n)})
 	return rpc.ResultsFromPB(out), err
 }
