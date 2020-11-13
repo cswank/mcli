@@ -54,17 +54,6 @@ func (b *body) newResults(r *schema.Results) {
 	b.makeView()
 }
 
-func (b *body) albumLink(g *ui.Gui, v *ui.View) error {
-	// if b.results == nil {
-	// 	return nil
-	// }
-	// c, _ := v.Cursor()
-	// r := b.results.Results[c]
-	// l := path.Join(b.albumURL, r.Album.ID)
-	// return clipboard.WriteAll(l)
-	return nil
-}
-
 func (b *body) clear() {
 	v, _ := g.View("body")
 	v.Clear()
