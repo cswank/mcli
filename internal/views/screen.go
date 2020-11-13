@@ -372,13 +372,17 @@ func (s *screen) doSearch(searchType, term string) error {
 		s.view = "body"
 		switch searchType {
 		case "album":
-			results, err = s.client.FindAlbum(term, s.body.height*5)
+			results, err = s.client.FindAlbum(term, s.body.height)
 			results.Print = results.PrintArtist()
+			var page int
+			results.Page = func(i int) (*schema.Results, error) {
+				page += i
+			}
 		case "artist":
-			results, err = s.client.FindArtist(term, s.body.height*5)
+			results, err = s.client.FindArtist(term, s.body.height)
 			results.Print = results.PrintArtists()
 		case "track":
-			results, err = s.client.FindTrack(term, s.body.height*5)
+			results, err = s.client.FindTrack(term, s.body.height)
 			results.Print = results.PrintTracks()
 		}
 		if err != nil {

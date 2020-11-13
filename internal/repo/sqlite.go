@@ -36,14 +36,16 @@ func NewSQL(cfg schema.Config) (*SQLite, error) {
 	}, err
 }
 
-func (s SQLite) FindArtist(term string, n int) ([]schema.Result, error) {
+func (s SQLite) FindArtist(term string, p, ps int) ([]schema.Result, error) {
+	offset := p * ps
 	q := `SELECT id, name
 FROM artists
-WHERE name LIKE ?;`
+WHERE name LIKE ?
+LIMIT ? OFFSET ?;`
 	return s.doFind(q, fmt.Sprintf("%%%s%%", term), artistArgs)
 }
 
-func (s SQLite) FindAlbum(term string, n int) ([]schema.Result, error) {
+func (s SQLite) FindAlbum(term string, p, ps int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
@@ -51,7 +53,7 @@ WHERE al.name LIKE ?;`
 	return s.doFind(q, fmt.Sprintf("%%%s%%", term), albumArgs)
 }
 
-func (s SQLite) FindTrack(term string, n int) ([]schema.Result, error) {
+func (s SQLite) FindTrack(term string, p, ps int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, t.duration
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id
@@ -69,7 +71,7 @@ WHERE al.id = ?;`
 	return s.doFind(q, id, trackArgs)
 }
 
-func (s SQLite) GetArtistAlbums(id int64, n int) ([]schema.Result, error) {
+func (s SQLite) GetArtistAlbums(id int64, p, ps int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name
 FROM albums AS al
 JOIN artists AS ar ON ar.id = al.artist_id
@@ -77,7 +79,7 @@ WHERE ar.id = ?;`
 	return s.doFind(q, id, albumArgs)
 }
 
-func (s SQLite) GetArtistTracks(id int64, n int) ([]schema.Result, error) {
+func (s SQLite) GetArtistTracks(id int64, p, ps int) ([]schema.Result, error) {
 	q := `SELECT ar.id, ar.name, al.id, al.name, t.id, t.name, t.duration
 FROM tracks AS t
 JOIN albums AS al ON al.id = t.album_id

@@ -28,13 +28,14 @@ func NewConfig(addr, pth, home, log, db string, remotePlay bool) Config {
 }
 
 type Results struct {
-	Album   Album               `json:"album"`
-	Type    string              `json:"type"`
-	Header  string              `json:"header"`
-	Results []Result            `json:"results"`
-	Error   string              `json:"error"`
-	Fmt     string              `json:"fmt"`
-	Print   func(Result) string `json:"-" template:"-"`
+	Album   Album                         `json:"album"`
+	Type    string                        `json:"type"`
+	Header  string                        `json:"header"`
+	Results []Result                      `json:"results"`
+	Error   string                        `json:"error"`
+	Fmt     string                        `json:"fmt"`
+	Print   func(Result) string           `json:"-" template:"-"`
+	Page    func(i int) (*Results, error) `json:"-" template:"-"`
 }
 
 type Progress struct {
