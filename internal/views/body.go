@@ -63,7 +63,11 @@ func (b *body) nextPage(g *ui.Gui, v *ui.View) error {
 	b.cursor = 0
 	b.page++
 
+	p := b.results.Print
+	pg := b.results.Page
 	results, err := b.results.Page(b.page)
+	results.Print = p
+	results.Page = pg
 	b.results = results
 	b.makeView()
 	return err
@@ -76,20 +80,23 @@ func (b *body) prevPage(g *ui.Gui, v *ui.View) error {
 
 	b.cursor = 0
 	b.page--
+	p := b.results.Print
+	pg := b.results.Page
 	results, err := b.results.Page(b.page)
+	results.Print = p
+	results.Page = pg
 	b.results = results
 	b.makeView()
 	return err
 }
 
 func (b *body) makeView() {
-	start := b.page * b.height
-	end := start + b.height
+	end := b.height
 	if end >= len(b.results.Results) {
 		end = len(b.results.Results)
 	}
 
-	b.view = b.results.Results[start:end]
+	b.view = b.results.Results[0:end]
 }
 
 func (b *body) next(g *ui.Gui, v *ui.View) error {

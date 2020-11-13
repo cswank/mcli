@@ -329,13 +329,16 @@ func (s *screen) hideManual(g *ui.Gui, v *ui.View) error {
 func (s *screen) showHistory(sort repo.Sort) error {
 	g.DeleteView("history-type")
 	s.historySort = sort
-	res, err := s.client.Fetch(0, s.height*10, sort)
+	res, err := s.client.Fetch(0, s.body.height, sort)
 	if err != nil {
 		return err
 	}
 
 	s.view = "body"
 	res.Print = res.PrintHistory()
+	res.Page = func(p int) (*schema.Results, error) {
+		return s.client.Fetch(p, s.body.height, sort)
+	}
 	s.header.header = res.Header
 	s.body.newResults(res)
 	s.stack.add(res, s.body.cursor)
@@ -463,9 +466,12 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if !s.client.Ping() {
 		// show error message
 	} else {
-		res, err := s.client.Fetch(0, s.height*10, s.historySort)
+		res, err := s.client.Fetch(0, s.body.height, s.historySort)
 		if err == nil && len(res.Results) > 0 {
 			res.Print = res.PrintHistory()
+			res.Page = func(p int) (*schema.Results, error) {
+				return s.client.Fetch(p, s.body.height, s.historySort)
+			}
 			s.header.header = res.Header
 			s.body.newResults(res)
 			s.stack.add(res, 0)
