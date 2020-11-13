@@ -208,17 +208,17 @@ func (s *server) AlbumLink(ctx context.Context, _ *rpc.Empty) (*rpc.String, erro
 }
 
 func (s *server) FindArtist(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.FindArtist(r.Term, int(r.N))
+	out, err := s.cli.FindArtist(r.Term, int(r.Page.Page), int(r.Page.PageSize))
 	return rpc.PBFromResults(out), err
 }
 
 func (s *server) FindAlbum(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.FindAlbum(r.Term, int(r.N))
+	out, err := s.cli.FindAlbum(r.Term, int(r.Page.Page), int(r.Page.PageSize))
 	return rpc.PBFromResults(out), err
 }
 
 func (s *server) FindTrack(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.FindTrack(r.Term, int(r.N))
+	out, err := s.cli.FindTrack(r.Term, int(r.Page.Page), int(r.Page.PageSize))
 	return rpc.PBFromResults(out), err
 }
 
@@ -275,12 +275,12 @@ func (s *server) track(id int64) (string, error) {
 }
 
 func (s *server) GetArtistAlbums(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.GetArtistAlbums(r.Id, int(r.N))
+	out, err := s.cli.GetArtistAlbums(r.Id, int(r.Page.Page), int(r.Page.PageSize))
 	return rpc.PBFromResults(out), err
 }
 
 func (s *server) GetArtistTracks(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.GetArtistTracks(r.Id, int(r.N))
+	out, err := s.cli.GetArtistTracks(r.Id, int(r.Page.Page), int(r.Page.PageSize))
 	return rpc.PBFromResults(out), err
 }
 
@@ -290,6 +290,6 @@ func (s *server) GetPlaylists(ctx context.Context, e *rpc.Empty) (*rpc.Results, 
 }
 
 func (s *server) GetPlaylist(ctx context.Context, r *rpc.Request) (*rpc.Results, error) {
-	out, err := s.cli.GetPlaylist(r.Id, int(r.N))
+	out, err := s.cli.GetPlaylist(r.Id, int(r.Page.Page), int(r.Page.PageSize))
 	return rpc.PBFromResults(out), err
 }

@@ -85,11 +85,15 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.stack.add(results, c)
 	case "artist search":
 		s.body.cursor = 0
-		results, err := s.client.GetArtistAlbums(r.Artist.ID, s.height*5)
+		results, err := s.client.GetArtistAlbums(r.Artist.ID, 0, s.height)
 		if err != nil {
 			return err
 		}
 		results.Print = results.PrintArtist()
+		results.Page = func(p int) (*schema.Results, error) {
+			return s.client.GetArtistAlbums(r.Artist.ID, p, s.body.height)
+		}
+
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -101,16 +105,22 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		}
 
 		results.Print = results.PrintAlbum()
+		results.Page = func(p int) (*schema.Results, error) {
+			return results, err
+		}
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
 	case "playlists":
 		s.body.cursor = 0
-		results, err := s.client.GetPlaylist(r.Album.ID, s.height)
+		results, err := s.client.GetPlaylist(r.Album.ID, 0, s.body.height)
 		if err != nil {
 			return err
 		}
 		results.Print = results.PrintAlbum()
+		results.Page = func(p int) (*schema.Results, error) {
+			return s.client.GetPlaylist(r.Album.ID, p, s.body.height)
+		}
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -238,12 +248,15 @@ func (s *screen) goToArtist(g *ui.Gui, v *ui.View) error {
 func (s *screen) goToArtistTracks(g *ui.Gui, v *ui.View) error {
 	r := s.body.view[s.body.cursor]
 	c := s.body.cursor
-	results, err := s.client.GetArtistTracks(r.Artist.ID, s.height)
+	results, err := s.client.GetArtistTracks(r.Artist.ID, 0, s.height)
 	if err != nil {
 		return err
 	}
 
 	results.Print = results.PrintArtistTracks()
+	results.Page = func(p int) (*schema.Results, error) {
+		return s.client.GetArtistTracks(r.Artist.ID, p, s.body.height)
+	}
 	s.body.newResults(results)
 	s.header.header = results.Header
 	s.stack.add(results, c)
@@ -335,11 +348,14 @@ func (s *screen) doShowArtist(id int64, term string) error {
 	c := s.body.cursor
 	if term == "albums" {
 		s.body.cursor = 0
-		results, err := s.client.GetArtistAlbums(id, s.height*5)
+		results, err := s.client.GetArtistAlbums(id, 0, s.body.height)
 		if err != nil {
 			return err
 		}
 		results.Print = results.PrintArtist()
+		results.Page = func(p int) (*schema.Results, error) {
+			return s.client.GetArtistAlbums(id, p, s.body.height)
+		}
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
@@ -348,12 +364,15 @@ func (s *screen) doShowArtist(id int64, term string) error {
 
 	//must be tracks
 	s.body.cursor = 0
-	results, err := s.client.GetArtistTracks(id, s.height*5)
+	results, err := s.client.GetArtistTracks(id, 0, s.height)
 	if err != nil {
 		return err
 	}
 
 	results.Print = results.PrintTracks()
+	results.Page = func(p int) (*schema.Results, error) {
+		return s.client.GetArtistTracks(id, p, s.body.height)
+	}
 	s.body.newResults(results)
 	s.header.header = results.Header
 	s.stack.add(results, c)
@@ -372,18 +391,23 @@ func (s *screen) doSearch(searchType, term string) error {
 		s.view = "body"
 		switch searchType {
 		case "album":
-			results, err = s.client.FindAlbum(term, s.body.height)
+			results, err = s.client.FindAlbum(term, 0, s.body.height)
 			results.Print = results.PrintArtist()
-			var page int
-			results.Page = func(i int) (*schema.Results, error) {
-				page += i
+			results.Page = func(p int) (*schema.Results, error) {
+				return s.client.FindAlbum(term, p, s.body.height)
 			}
 		case "artist":
-			results, err = s.client.FindArtist(term, s.body.height)
+			results, err = s.client.FindArtist(term, 0, s.body.height)
 			results.Print = results.PrintArtists()
+			results.Page = func(p int) (*schema.Results, error) {
+				return s.client.FindArtist(term, p, s.body.height)
+			}
 		case "track":
-			results, err = s.client.FindTrack(term, s.body.height)
+			results, err = s.client.FindTrack(term, 0, s.body.height)
 			results.Print = results.PrintTracks()
+			results.Page = func(p int) (*schema.Results, error) {
+				return s.client.FindTrack(term, p, s.body.height)
+			}
 		}
 		if err != nil {
 			return err

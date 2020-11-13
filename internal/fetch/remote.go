@@ -51,17 +51,17 @@ func (r *Remote) AlbumLink() string {
 }
 
 func (r Remote) FindArtist(term string, p, ps int) (*schema.Results, error) {
-	out, err := r.client.FindArtist(context.Background(), &rpc.Request{Term: term, N: int64(n)})
+	out, err := r.client.FindArtist(context.Background(), &rpc.Request{Term: term, Page: &rpc.Page{Page: int64(p), PageSize: int64(ps)}})
 	return rpc.ResultsFromPB(out), err
 }
 
 func (r Remote) FindAlbum(term string, p, ps int) (*schema.Results, error) {
-	out, err := r.client.FindAlbum(context.Background(), &rpc.Request{Term: term, N: int64(n)})
+	out, err := r.client.FindAlbum(context.Background(), &rpc.Request{Term: term, Page: &rpc.Page{Page: int64(p), PageSize: int64(ps)}})
 	return rpc.ResultsFromPB(out), err
 }
 
 func (r Remote) FindTrack(term string, p, ps int) (*schema.Results, error) {
-	out, err := r.client.FindTrack(context.Background(), &rpc.Request{Term: term, N: int64(n)})
+	out, err := r.client.FindTrack(context.Background(), &rpc.Request{Term: term, Page: &rpc.Page{Page: int64(p), PageSize: int64(ps)}})
 	return rpc.ResultsFromPB(out), err
 }
 
@@ -71,12 +71,12 @@ func (r Remote) GetAlbum(id int64) (*schema.Results, error) {
 }
 
 func (r Remote) GetArtistAlbums(id int64, p, ps int) (*schema.Results, error) {
-	out, err := r.client.GetArtistAlbums(context.Background(), &rpc.Request{Id: id, N: int64(n)})
+	out, err := r.client.GetArtistAlbums(context.Background(), &rpc.Request{Id: id, Page: &rpc.Page{Page: int64(p), PageSize: int64(ps)}})
 	return rpc.ResultsFromPB(out), err
 }
 
 func (r Remote) GetArtistTracks(id int64, p, ps int) (*schema.Results, error) {
-	out, err := r.client.GetArtistTracks(context.Background(), &rpc.Request{Id: id, N: int64(n)})
+	out, err := r.client.GetArtistTracks(context.Background(), &rpc.Request{Id: id, Page: &rpc.Page{Page: int64(p), PageSize: int64(ps)}})
 	return rpc.ResultsFromPB(out), err
 }
 
@@ -86,7 +86,7 @@ func (r Remote) GetPlaylists() (*schema.Results, error) {
 }
 
 func (r Remote) GetPlaylist(id int64, p, ps int) (*schema.Results, error) {
-	out, err := r.client.GetPlaylist(context.Background(), &rpc.Request{Id: id, N: int64(n)})
+	out, err := r.client.GetPlaylist(context.Background(), &rpc.Request{Id: id, Page: &rpc.Page{Page: int64(p), PageSize: int64(ps)}})
 	return rpc.ResultsFromPB(out), err
 }
 

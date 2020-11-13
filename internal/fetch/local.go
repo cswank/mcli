@@ -20,7 +20,7 @@ type (
 		GetArtistAlbums(id int64, p, ps int) ([]schema.Result, error)
 		GetArtistTracks(id int64, p, ps int) ([]schema.Result, error)
 		GetPlaylists() ([]schema.Result, error)
-		GetPlaylist(int64, int) ([]schema.Result, error)
+		GetPlaylist(int64, int, int) ([]schema.Result, error)
 		InsertOrGetArtist(name string) (int64, error)
 		InsertOrGetAlbum(name string, artistID int64) (int64, error)
 		InsertOrGetTrack(name string, albumID int64) (int64, error)
@@ -95,7 +95,7 @@ func (l Local) doFind(res []schema.Result, t string, err error, f func(schema.Re
 	}, err
 }
 
-func (l Local) GetPlaylist(int64, int) (*schema.Results, error) {
+func (l Local) GetPlaylist(int64, int, int) (*schema.Results, error) {
 	return &schema.Results{}, nil
 }
 

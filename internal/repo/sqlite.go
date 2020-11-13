@@ -91,7 +91,7 @@ func (s SQLite) GetPlaylists() ([]schema.Result, error) {
 	return nil, nil
 }
 
-func (s SQLite) GetPlaylist(int64, int) ([]schema.Result, error) {
+func (s SQLite) GetPlaylist(int64, int, int) ([]schema.Result, error) {
 	return nil, nil
 }
 
