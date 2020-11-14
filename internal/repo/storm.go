@@ -51,7 +51,7 @@ func NewStorm(cfg schema.Config) (*Storm, error) {
 
 func (s Storm) FindArtist(term string, p, ps int) ([]schema.Result, error) {
 	var a []artist
-	if err := s.db.Select(q.Re("Name", term)).Find(&a); err != nil {
+	if err := s.db.Select(q.Re("Name", term)).Skip(p * ps).Limit(ps).Find(&a); err != nil {
 		if err == storm.ErrNotFound {
 			return nil, nil
 		}
@@ -69,7 +69,7 @@ func (s Storm) FindArtist(term string, p, ps int) ([]schema.Result, error) {
 
 func (s Storm) FindAlbum(term string, p, ps int) ([]schema.Result, error) {
 	var a []album
-	if err := s.db.Select(q.Re("Name", term)).Find(&a); err != nil {
+	if err := s.db.Select(q.Re("Name", term)).Skip(p * ps).Limit(ps).Find(&a); err != nil {
 		if err == storm.ErrNotFound {
 			return nil, nil
 		}
@@ -87,7 +87,7 @@ func (s Storm) FindAlbum(term string, p, ps int) ([]schema.Result, error) {
 
 func (s Storm) FindTrack(term string, p, ps int) ([]schema.Result, error) {
 	var t []track
-	if err := s.db.Select(q.Re("Name", term)).Find(&t); err != nil {
+	if err := s.db.Select(q.Re("Name", term)).Skip(p * ps).Limit(ps).Find(&t); err != nil {
 		if err == storm.ErrNotFound {
 			return nil, nil
 		}
@@ -146,7 +146,7 @@ func (s Storm) GetArtistAlbums(id int64, p, ps int) ([]schema.Result, error) {
 	}
 
 	var a []album
-	if err := s.db.Select(q.Eq("ArtistID", id)).Find(&a); err != nil {
+	if err := s.db.Select(q.Eq("ArtistID", id)).Skip(p * ps).Limit(ps).Find(&a); err != nil {
 		if err == storm.ErrNotFound {
 			return []schema.Result{}, nil
 		}
@@ -180,18 +180,24 @@ func (s Storm) GetArtistTracks(id int64, p, ps int) ([]schema.Result, error) {
 		return nil, err
 	}
 
-	var out []schema.Result
+	m := make(map[int64]string)
+	ors := make([]q.Matcher, len(a))
 	for _, alb := range a {
-		var t []track
-		if err := s.db.Select(q.Eq("AlbumID", alb.ID)).Find(&t); err != nil {
-			return nil, err
-		}
-		for _, tr := range t {
-			out = append(out, schema.Result{
-				Album:  schema.Album{ID: alb.ID, Title: alb.Name},
-				Artist: schema.Artist{ID: ar.ID, Name: ar.Name},
-				Track:  schema.Track{ID: tr.ID, Title: tr.Name, Duration: tr.Duration},
-			})
+		m[alb.ID] = alb.Name
+		ors = append(ors, q.Eq("AlbumID", alb.ID))
+	}
+
+	var t []track
+	if err := s.db.Select(ors...).Find(&t); err != nil {
+		return nil, err
+	}
+
+	out := make([]schema.Result, len(t))
+	for i, tr := range t {
+		out[i] = schema.Result{
+			Album:  schema.Album{ID: tr.AlbumID, Title: m[tr.AlbumID]},
+			Artist: schema.Artist{ID: ar.ID, Name: ar.Name},
+			Track:  schema.Track{ID: tr.ID, Title: tr.Name, Duration: tr.Duration},
 		}
 	}
 

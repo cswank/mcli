@@ -60,9 +60,12 @@ func (b *body) clear() {
 }
 
 func (b *body) nextPage(g *ui.Gui, v *ui.View) error {
+	if b.results.Page == nil {
+		return nil
+	}
+
 	b.cursor = 0
 	b.page++
-
 	p := b.results.Print
 	pg := b.results.Page
 	results, err := b.results.Page(b.page)
@@ -74,7 +77,7 @@ func (b *body) nextPage(g *ui.Gui, v *ui.View) error {
 }
 
 func (b *body) prevPage(g *ui.Gui, v *ui.View) error {
-	if b.page == 0 {
+	if b.page == 0 || b.results.Page == nil {
 		return nil
 	}
 
