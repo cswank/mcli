@@ -80,6 +80,11 @@ func (p *player) next() {
 	p.clear()
 }
 
+func (p *player) seek(i int) {
+	p.client.Seek(i)
+	p.clear()
+}
+
 func (p *player) rewind() {
 	p.client.Rewind()
 	p.clear()

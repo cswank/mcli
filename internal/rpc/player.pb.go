@@ -1101,7 +1101,7 @@ var file_player_proto_rawDesc = []byte{
 	0x65, 0x1a, 0x0c, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x73, 0x22,
 	0x00, 0x12, 0x21, 0x0a, 0x04, 0x53, 0x61, 0x76, 0x65, 0x12, 0x0b, 0x2e, 0x72, 0x70, 0x63, 0x2e,
 	0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x1a, 0x0a, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x22, 0x00, 0x32, 0x8f, 0x04, 0x0a, 0x06, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x12,
+	0x74, 0x79, 0x22, 0x00, 0x32, 0xaf, 0x04, 0x0a, 0x06, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x12,
 	0x21, 0x0a, 0x04, 0x50, 0x6c, 0x61, 0x79, 0x12, 0x0b, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x52, 0x65,
 	0x73, 0x75, 0x6c, 0x74, 0x1a, 0x0a, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
 	0x22, 0x00, 0x12, 0x27, 0x0a, 0x09, 0x50, 0x6c, 0x61, 0x79, 0x41, 0x6c, 0x62, 0x75, 0x6d, 0x12,
@@ -1113,6 +1113,8 @@ var file_player_proto_rawDesc = []byte{
 	0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0a, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
 	0x22, 0x00, 0x12, 0x27, 0x0a, 0x0b, 0x46, 0x61, 0x73, 0x74, 0x46, 0x6f, 0x72, 0x77, 0x61, 0x72,
 	0x64, 0x12, 0x0a, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0a, 0x2e,
+	0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x1e, 0x0a, 0x04, 0x53,
+	0x65, 0x65, 0x6b, 0x12, 0x08, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x49, 0x6e, 0x74, 0x1a, 0x0a, 0x2e,
 	0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x22, 0x0a, 0x06, 0x52,
 	0x65, 0x77, 0x69, 0x6e, 0x64, 0x12, 0x0a, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74,
 	0x79, 0x1a, 0x0a, 0x2e, 0x72, 0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12,
@@ -1224,58 +1226,60 @@ var file_player_proto_depIdxs = []int32{
 	6,  // 13: rpc.Player.Volume:input_type -> rpc.Float
 	0,  // 14: rpc.Player.Pause:input_type -> rpc.Empty
 	0,  // 15: rpc.Player.FastForward:input_type -> rpc.Empty
-	0,  // 16: rpc.Player.Rewind:input_type -> rpc.Empty
-	0,  // 17: rpc.Player.Queue:input_type -> rpc.Empty
-	8,  // 18: rpc.Player.RemoveFromQueue:input_type -> rpc.Ints
-	9,  // 19: rpc.Player.NextSong:input_type -> rpc.String
-	9,  // 20: rpc.Player.PlayProgress:input_type -> rpc.String
-	9,  // 21: rpc.Player.DownloadProgress:input_type -> rpc.String
-	9,  // 22: rpc.Player.Done:input_type -> rpc.String
-	0,  // 23: rpc.Player.Close:input_type -> rpc.Empty
-	0,  // 24: rpc.Fetcher.Name:input_type -> rpc.Empty
-	1,  // 25: rpc.Fetcher.Login:input_type -> rpc.UsernamePassword
-	0,  // 26: rpc.Fetcher.Ping:input_type -> rpc.Empty
-	0,  // 27: rpc.Fetcher.AlbumLink:input_type -> rpc.Empty
-	3,  // 28: rpc.Fetcher.FindArtist:input_type -> rpc.Request
-	3,  // 29: rpc.Fetcher.FindAlbum:input_type -> rpc.Request
-	3,  // 30: rpc.Fetcher.FindTrack:input_type -> rpc.Request
-	3,  // 31: rpc.Fetcher.GetAlbum:input_type -> rpc.Request
-	3,  // 32: rpc.Fetcher.GetArtistAlbums:input_type -> rpc.Request
-	3,  // 33: rpc.Fetcher.GetArtistTracks:input_type -> rpc.Request
-	0,  // 34: rpc.Fetcher.GetPlaylists:input_type -> rpc.Empty
-	3,  // 35: rpc.Fetcher.GetPlaylist:input_type -> rpc.Request
-	0,  // 36: rpc.Fetcher.Import:input_type -> rpc.Empty
-	5,  // 37: rpc.Downloader.Download:output_type -> rpc.Progress
-	16, // 38: rpc.History.Fetch:output_type -> rpc.Results
-	0,  // 39: rpc.History.Save:output_type -> rpc.Empty
-	0,  // 40: rpc.Player.Play:output_type -> rpc.Empty
-	0,  // 41: rpc.Player.PlayAlbum:output_type -> rpc.Empty
-	6,  // 42: rpc.Player.Volume:output_type -> rpc.Float
-	0,  // 43: rpc.Player.Pause:output_type -> rpc.Empty
-	0,  // 44: rpc.Player.FastForward:output_type -> rpc.Empty
-	0,  // 45: rpc.Player.Rewind:output_type -> rpc.Empty
-	16, // 46: rpc.Player.Queue:output_type -> rpc.Results
-	16, // 47: rpc.Player.RemoveFromQueue:output_type -> rpc.Results
-	15, // 48: rpc.Player.NextSong:output_type -> rpc.Result
-	5,  // 49: rpc.Player.PlayProgress:output_type -> rpc.Progress
-	5,  // 50: rpc.Player.DownloadProgress:output_type -> rpc.Progress
-	0,  // 51: rpc.Player.Done:output_type -> rpc.Empty
-	0,  // 52: rpc.Player.Close:output_type -> rpc.Empty
-	9,  // 53: rpc.Fetcher.Name:output_type -> rpc.String
-	0,  // 54: rpc.Fetcher.Login:output_type -> rpc.Empty
-	10, // 55: rpc.Fetcher.Ping:output_type -> rpc.Bool
-	9,  // 56: rpc.Fetcher.AlbumLink:output_type -> rpc.String
-	16, // 57: rpc.Fetcher.FindArtist:output_type -> rpc.Results
-	16, // 58: rpc.Fetcher.FindAlbum:output_type -> rpc.Results
-	16, // 59: rpc.Fetcher.FindTrack:output_type -> rpc.Results
-	16, // 60: rpc.Fetcher.GetAlbum:output_type -> rpc.Results
-	16, // 61: rpc.Fetcher.GetArtistAlbums:output_type -> rpc.Results
-	16, // 62: rpc.Fetcher.GetArtistTracks:output_type -> rpc.Results
-	16, // 63: rpc.Fetcher.GetPlaylists:output_type -> rpc.Results
-	16, // 64: rpc.Fetcher.GetPlaylist:output_type -> rpc.Results
-	5,  // 65: rpc.Fetcher.Import:output_type -> rpc.Progress
-	37, // [37:66] is the sub-list for method output_type
-	8,  // [8:37] is the sub-list for method input_type
+	7,  // 16: rpc.Player.Seek:input_type -> rpc.Int
+	0,  // 17: rpc.Player.Rewind:input_type -> rpc.Empty
+	0,  // 18: rpc.Player.Queue:input_type -> rpc.Empty
+	8,  // 19: rpc.Player.RemoveFromQueue:input_type -> rpc.Ints
+	9,  // 20: rpc.Player.NextSong:input_type -> rpc.String
+	9,  // 21: rpc.Player.PlayProgress:input_type -> rpc.String
+	9,  // 22: rpc.Player.DownloadProgress:input_type -> rpc.String
+	9,  // 23: rpc.Player.Done:input_type -> rpc.String
+	0,  // 24: rpc.Player.Close:input_type -> rpc.Empty
+	0,  // 25: rpc.Fetcher.Name:input_type -> rpc.Empty
+	1,  // 26: rpc.Fetcher.Login:input_type -> rpc.UsernamePassword
+	0,  // 27: rpc.Fetcher.Ping:input_type -> rpc.Empty
+	0,  // 28: rpc.Fetcher.AlbumLink:input_type -> rpc.Empty
+	3,  // 29: rpc.Fetcher.FindArtist:input_type -> rpc.Request
+	3,  // 30: rpc.Fetcher.FindAlbum:input_type -> rpc.Request
+	3,  // 31: rpc.Fetcher.FindTrack:input_type -> rpc.Request
+	3,  // 32: rpc.Fetcher.GetAlbum:input_type -> rpc.Request
+	3,  // 33: rpc.Fetcher.GetArtistAlbums:input_type -> rpc.Request
+	3,  // 34: rpc.Fetcher.GetArtistTracks:input_type -> rpc.Request
+	0,  // 35: rpc.Fetcher.GetPlaylists:input_type -> rpc.Empty
+	3,  // 36: rpc.Fetcher.GetPlaylist:input_type -> rpc.Request
+	0,  // 37: rpc.Fetcher.Import:input_type -> rpc.Empty
+	5,  // 38: rpc.Downloader.Download:output_type -> rpc.Progress
+	16, // 39: rpc.History.Fetch:output_type -> rpc.Results
+	0,  // 40: rpc.History.Save:output_type -> rpc.Empty
+	0,  // 41: rpc.Player.Play:output_type -> rpc.Empty
+	0,  // 42: rpc.Player.PlayAlbum:output_type -> rpc.Empty
+	6,  // 43: rpc.Player.Volume:output_type -> rpc.Float
+	0,  // 44: rpc.Player.Pause:output_type -> rpc.Empty
+	0,  // 45: rpc.Player.FastForward:output_type -> rpc.Empty
+	0,  // 46: rpc.Player.Seek:output_type -> rpc.Empty
+	0,  // 47: rpc.Player.Rewind:output_type -> rpc.Empty
+	16, // 48: rpc.Player.Queue:output_type -> rpc.Results
+	16, // 49: rpc.Player.RemoveFromQueue:output_type -> rpc.Results
+	15, // 50: rpc.Player.NextSong:output_type -> rpc.Result
+	5,  // 51: rpc.Player.PlayProgress:output_type -> rpc.Progress
+	5,  // 52: rpc.Player.DownloadProgress:output_type -> rpc.Progress
+	0,  // 53: rpc.Player.Done:output_type -> rpc.Empty
+	0,  // 54: rpc.Player.Close:output_type -> rpc.Empty
+	9,  // 55: rpc.Fetcher.Name:output_type -> rpc.String
+	0,  // 56: rpc.Fetcher.Login:output_type -> rpc.Empty
+	10, // 57: rpc.Fetcher.Ping:output_type -> rpc.Bool
+	9,  // 58: rpc.Fetcher.AlbumLink:output_type -> rpc.String
+	16, // 59: rpc.Fetcher.FindArtist:output_type -> rpc.Results
+	16, // 60: rpc.Fetcher.FindAlbum:output_type -> rpc.Results
+	16, // 61: rpc.Fetcher.FindTrack:output_type -> rpc.Results
+	16, // 62: rpc.Fetcher.GetAlbum:output_type -> rpc.Results
+	16, // 63: rpc.Fetcher.GetArtistAlbums:output_type -> rpc.Results
+	16, // 64: rpc.Fetcher.GetArtistTracks:output_type -> rpc.Results
+	16, // 65: rpc.Fetcher.GetPlaylists:output_type -> rpc.Results
+	16, // 66: rpc.Fetcher.GetPlaylist:output_type -> rpc.Results
+	5,  // 67: rpc.Fetcher.Import:output_type -> rpc.Progress
+	38, // [38:68] is the sub-list for method output_type
+	8,  // [8:38] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name

@@ -109,6 +109,11 @@ func (s *server) FastForward(ctx context.Context, r *rpc.Empty) (*rpc.Empty, err
 	return &rpc.Empty{}, nil
 }
 
+func (s *server) Seek(ctx context.Context, i *rpc.Int) (*rpc.Empty, error) {
+	s.cli.Seek(int(i.Value))
+	return &rpc.Empty{}, nil
+}
+
 func (s *server) Rewind(ctx context.Context, r *rpc.Empty) (*rpc.Empty, error) {
 	s.cli.Rewind()
 	return &rpc.Empty{}, nil

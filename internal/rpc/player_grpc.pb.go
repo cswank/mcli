@@ -251,6 +251,7 @@ type PlayerClient interface {
 	Volume(ctx context.Context, in *Float, opts ...grpc.CallOption) (*Float, error)
 	Pause(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	FastForward(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+	Seek(ctx context.Context, in *Int, opts ...grpc.CallOption) (*Empty, error)
 	Rewind(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	Queue(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Results, error)
 	RemoveFromQueue(ctx context.Context, in *Ints, opts ...grpc.CallOption) (*Results, error)
@@ -308,6 +309,15 @@ func (c *playerClient) Pause(ctx context.Context, in *Empty, opts ...grpc.CallOp
 func (c *playerClient) FastForward(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/rpc.Player/FastForward", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playerClient) Seek(ctx context.Context, in *Int, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/rpc.Player/Seek", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -464,6 +474,7 @@ type PlayerServer interface {
 	Volume(context.Context, *Float) (*Float, error)
 	Pause(context.Context, *Empty) (*Empty, error)
 	FastForward(context.Context, *Empty) (*Empty, error)
+	Seek(context.Context, *Int) (*Empty, error)
 	Rewind(context.Context, *Empty) (*Empty, error)
 	Queue(context.Context, *Empty) (*Results, error)
 	RemoveFromQueue(context.Context, *Ints) (*Results, error)
@@ -493,6 +504,9 @@ func (UnimplementedPlayerServer) Pause(context.Context, *Empty) (*Empty, error) 
 }
 func (UnimplementedPlayerServer) FastForward(context.Context, *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FastForward not implemented")
+}
+func (UnimplementedPlayerServer) Seek(context.Context, *Int) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Seek not implemented")
 }
 func (UnimplementedPlayerServer) Rewind(context.Context, *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Rewind not implemented")
@@ -617,6 +631,24 @@ func _Player_FastForward_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlayerServer).FastForward(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Player_Seek_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Int)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerServer).Seek(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.Player/Seek",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerServer).Seek(ctx, req.(*Int))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -797,6 +829,10 @@ var _Player_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FastForward",
 			Handler:    _Player_FastForward_Handler,
+		},
+		{
+			MethodName: "Seek",
+			Handler:    _Player_Seek_Handler,
 		},
 		{
 			MethodName: "Rewind",

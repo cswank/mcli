@@ -22,6 +22,7 @@ type screen struct {
 	search       *search
 	artistDialog *artistDialog
 	history      *history
+	seeker       *seek
 	volume       *volume
 	historySort  repo.Sort
 	help         *help
@@ -54,6 +55,7 @@ func newScreen(width, height int, cli *client) (*screen, error) {
 
 	go s.clearVolume()
 	s.search = newSearch(width, height, s.doSearch)
+	s.seeker = newSeek(width, height, s.doSeek)
 	s.artistDialog = newArtistDialog(width, height, s.doShowArtist)
 	s.history = newHistory(width, height, s.showHistory)
 	s.keys = s.getKeys()
@@ -124,11 +126,7 @@ func (s *screen) enter(g *ui.Gui, v *ui.View) error {
 		s.body.newResults(results)
 		s.header.header = results.Header
 		s.stack.add(results, c)
-	case "album":
-		s.play.play(r)
-	case "history":
-		s.play.play(r)
-	case "playlist":
+	case "album", "history", "playlist":
 		s.play.play(r)
 	}
 	return nil
@@ -219,6 +217,11 @@ func (s *screen) escapeSearch(g *ui.Gui, v *ui.View) error {
 	return nil
 }
 
+func (s *screen) escapeSeek(g *ui.Gui, v *ui.View) error {
+	s.view = "body"
+	return nil
+}
+
 func (s *screen) goToAlbum(g *ui.Gui, v *ui.View) error {
 	r := s.body.view[s.body.cursor]
 	if r.Album.ID == 0 && r.Artist.ID != 0 {
@@ -296,6 +299,12 @@ func (s *screen) clearVolume() {
 
 func (s *screen) next(g *ui.Gui, v *ui.View) error {
 	s.play.next()
+	s.buffer.clear()
+	return nil
+}
+
+func (s *screen) seek(g *ui.Gui, v *ui.View) error {
+	s.play.seek(95)
 	s.buffer.clear()
 	return nil
 }
@@ -382,6 +391,12 @@ func (s *screen) doShowArtist(id int64, term string) error {
 	return nil
 }
 
+func (s *screen) doSeek(i int) error {
+	s.view = "body"
+	s.client.Seek(i)
+	return g.DeleteView("seek")
+}
+
 func (s *screen) doSearch(searchType, term string) error {
 	if searchType != "" && term == "" {
 		s.view = "search"
@@ -462,6 +477,11 @@ func (s *screen) showHistoryDialog(g *ui.Gui, v *ui.View) error {
 	return nil
 }
 
+func (s *screen) showSeekDialog(g *ui.Gui, v *ui.View) error {
+	s.view = "seek"
+	return nil
+}
+
 func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 	if !s.client.Ping() {
 		// show error message
@@ -506,6 +526,16 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if err := s.history.render(g, v); err != nil {
 				return err
 			}
+		case "seek":
+			g.Cursor = true
+			v, err := g.SetView(s.view, s.seeker.coords.x1, s.seeker.coords.y1, s.seeker.coords.x2, s.seeker.coords.y2, 0)
+			if err != nil && !ui.IsUnknownView(err) {
+				return err
+			}
+
+			if err := s.seeker.render(g, v); err != nil {
+				return err
+			}
 		case "search-type", "search":
 			if s.view == "search" {
 				g.Cursor = true
@@ -530,6 +560,7 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 		default:
 			g.DeleteView("search")
 			g.DeleteView("search-type")
+			g.DeleteView("seek")
 			g.DeleteView("artist-dialog")
 			v, err := g.SetView("header", s.header.coords.x1, s.header.coords.y1, s.header.coords.x2, s.header.coords.y2, 0)
 			if err != nil && !ui.IsUnknownView(err) {

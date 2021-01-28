@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/cswank/beep/flac"
 	"github.com/cswank/mcli/internal/download"
 	"github.com/cswank/mcli/internal/fetch"
 	"github.com/cswank/mcli/internal/history"
@@ -14,6 +13,7 @@ import (
 	"github.com/cswank/mcli/internal/schema"
 	"github.com/cswank/mcli/internal/server"
 	"github.com/cswank/mcli/internal/views"
+	"github.com/faiface/beep/flac"
 	"google.golang.org/grpc"
 	"gopkg.in/cheggaaa/pb.v1"
 )

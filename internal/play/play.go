@@ -17,6 +17,7 @@ type Player interface {
 	Volume(float64) float64
 	Pause()
 	FastForward()
+	Seek(i int)
 	Rewind()
 	Queue() *schema.Results
 	RemoveFromQueue([]int)

@@ -29,6 +29,7 @@ type Local struct {
 	playing       bool
 	sep           string
 	pause         chan bool
+	seek          chan int
 	vol           chan float64
 	volOut        chan float64
 	volume        float64
@@ -82,6 +83,7 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 		pause:       make(chan bool),
 		fastForward: make(chan bool),
 		rewind:      make(chan bool),
+		seek:        make(chan int),
 		vol:         make(chan float64),
 		volOut:      make(chan float64),
 		onDeck:      make(chan song),
@@ -189,6 +191,12 @@ func (l *Local) FastForward() {
 	}
 }
 
+func (l *Local) Seek(i int) {
+	if l.playing {
+		l.seek <- i
+	}
+}
+
 func (l *Local) Rewind() {
 	if l.playing {
 		l.rewind <- true
@@ -273,6 +281,12 @@ func (l *Local) doPlay(s song) error {
 			speaker.Unlock()
 		case <-l.fastForward:
 			done = true
+		case i := <-l.seek:
+			speaker.Lock()
+			t := music.Len() / int(format.SampleRate)
+			pos := music.Len() * i / t
+			music.Seek(pos)
+			speaker.Unlock()
 		case <-l.rewind:
 			music.Close()
 			s.r.Seek(0, 0)
@@ -358,7 +372,7 @@ func (r *progressRead) Close() error {
 
 type songBuffer struct {
 	closed bool
-	buf    io.Reader
+	buf    io.ReadSeeker
 }
 
 func (s *songBuffer) Read(p []byte) (n int, err error) {
@@ -370,8 +384,7 @@ func (s *songBuffer) Read(p []byte) (n int, err error) {
 }
 
 func (s *songBuffer) Seek(offset int64, whence int) (int64, error) {
-	//return s.buf.Seek(offset, whence)
-	return 0, nil
+	return s.buf.Seek(offset, whence)
 }
 
 func (s *songBuffer) Close() error {
@@ -384,7 +397,7 @@ type song struct {
 	r      io.ReadSeeker
 }
 
-func (s *song) reader() io.Reader {
+func (s *song) reader() io.ReadSeeker {
 	return &songBuffer{
 		buf: s.r,
 	}

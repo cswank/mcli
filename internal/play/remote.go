@@ -57,6 +57,13 @@ func (r Remote) Pause() {
 	}
 }
 
+func (r Remote) Seek(i int) {
+	_, err := r.client.Seek(context.Background(), &rpc.Int{Value: int64(i)})
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (r Remote) FastForward() {
 	_, err := r.client.FastForward(context.Background(), &rpc.Empty{})
 	if err != nil {

@@ -19,6 +19,7 @@ service Player {
 	rpc Volume(Float) returns (Float) {}
 	rpc Pause(Empty) returns (Empty) {}
 	rpc FastForward(Empty) returns (Empty) {}
+	rpc Seek(Int) returns (Empty) {}
 	rpc Rewind(Empty) returns (Empty) {}
 	rpc Queue(Empty) returns (Results) {}
 	rpc RemoveFromQueue(Ints) returns (Results) {}
