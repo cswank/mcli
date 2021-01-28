@@ -303,12 +303,6 @@ func (s *screen) next(g *ui.Gui, v *ui.View) error {
 	return nil
 }
 
-func (s *screen) seek(g *ui.Gui, v *ui.View) error {
-	s.play.seek(95)
-	s.buffer.clear()
-	return nil
-}
-
 func (s *screen) rewind(g *ui.Gui, v *ui.View) error {
 	s.play.rewind()
 	s.buffer.clear()
@@ -532,6 +526,8 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 			if err != nil && !ui.IsUnknownView(err) {
 				return err
 			}
+
+			v.Editor = s.seeker
 
 			if err := s.seeker.render(g, v); err != nil {
 				return err

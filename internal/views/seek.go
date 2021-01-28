@@ -43,6 +43,11 @@ func (s *seek) exit(g *ui.Gui, v *ui.View) error {
 	str := strings.TrimSpace(v.Buffer())
 	var i int
 	v.Clear()
+
+	if len(str) == 0 {
+		return nil
+	}
+
 	if strings.Contains(str, ":") {
 		parts := strings.Split(str, ":")
 		min := fmt.Sprintf("%sm", parts[0])
@@ -64,15 +69,19 @@ func (s *seek) exit(g *ui.Gui, v *ui.View) error {
 
 func (s *seek) Edit(v *ui.View, key ui.Key, ch rune, mod ui.Modifier) {
 	in := string(ch)
+	if key == 0 && !strings.Contains("0123456789:", in) {
+		return
+	}
+
 	buf := strings.TrimSpace(v.Buffer())
 	if key == 127 && len(buf) > 0 {
 		v.Clear()
 		buf = buf[:len(buf)-1]
 		v.Write([]byte(col.C1(buf)))
-		v.SetCursor(len(buf), 0)
 	} else {
 		fmt.Fprint(v, col.C1(in))
 		buf = v.Buffer()
-		v.SetCursor(len(buf)-1, 0)
 	}
+
+	v.SetCursor(len(buf), 0)
 }
