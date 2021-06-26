@@ -248,8 +248,16 @@ func (l *Local) doPlay(s song) error {
 		Volume:   l.volume,
 	}
 
+	eq := effects.NewEqualizer(vol, format.SampleRate, effects.MonoEqualizerSections{
+		{F0: 200, Bf: 5, GB: 2, G0: 0, G: 5},
+		{F0: 250, Bf: 5, GB: 2, G0: 0, G: 10},
+		{F0: 300, Bf: 5, GB: 2, G0: 0, G: 12},
+		{F0: 350, Bf: 5, GB: 2, G0: 0, G: 14},
+		{F0: 10000, Bf: 500, GB: 2, G0: 0, G: -90},
+	})
+
 	ctrl := &beep.Ctrl{
-		Streamer: vol,
+		Streamer: eq,
 	}
 
 	speaker.Play(ctrl)

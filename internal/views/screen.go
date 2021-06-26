@@ -26,6 +26,7 @@ type screen struct {
 	volume       *volume
 	historySort  repo.Sort
 	help         *help
+	equalizer    *equalizer
 
 	keys []key
 
@@ -49,6 +50,7 @@ func newScreen(width, height int, cli *client) (*screen, error) {
 		buffer:      newBuffer(width, height, id, cli),
 		header:      newHeader(width, height),
 		help:        newHelp(width, height),
+		equalizer:   newEqualizer(width, height),
 		volume:      newVolume(width, height, cli.Volume(0.0)),
 		volumeEvent: make(chan bool),
 	}
@@ -319,6 +321,16 @@ func (s *screen) hideHelp(g *ui.Gui, v *ui.View) error {
 	return s.help.hide(g, v)
 }
 
+func (s *screen) showEqualizer(g *ui.Gui, v *ui.View) error {
+	s.view = "equalizer"
+	return nil
+}
+
+func (s *screen) hideEqualizer(g *ui.Gui, v *ui.View) error {
+	s.view = "body"
+	return s.equalizer.hide(g, v)
+}
+
 func (s *screen) showManual(g *ui.Gui, v *ui.View) error {
 	s.view = "manual"
 	return nil
@@ -500,6 +512,10 @@ func (s *screen) getLayout(width, height int) func(*ui.Gui) error {
 		switch s.view {
 		case "help":
 			if err := s.help.show(g, s.keys); err != nil {
+				return err
+			}
+		case "equalizer":
+			if err := s.equalizer.show(g, s.keys); err != nil {
 				return err
 			}
 		case "volume":

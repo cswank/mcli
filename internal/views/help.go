@@ -9,7 +9,7 @@ import (
 
 var (
 	helpWidth  = 51
-	helpHeight = 26
+	helpHeight = 27
 )
 
 type help struct {

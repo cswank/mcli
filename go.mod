@@ -15,7 +15,6 @@ require (
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/hajimehoshi/oto v0.6.5 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.4
@@ -32,4 +31,4 @@ require (
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.1 // indirect
 )
 
-replace github.com/faiface/beep => /Users/craig/Projects/beep
+replace github.com/faiface/beep => /Users/craigswank/Projects/beep
