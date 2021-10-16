@@ -11,7 +11,7 @@ require (
 	github.com/awesome-gocui/gocui v0.6.0
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/faiface/beep v1.0.2
+	github.com/faiface/beep v1.1.0
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.1 // indirect
@@ -30,5 +30,3 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.28
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.1 // indirect
 )
-
-replace github.com/faiface/beep => /Users/craigswank/Projects/beep
