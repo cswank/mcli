@@ -47,6 +47,7 @@ func UI(cfg schema.Config) {
 
 	defer close()
 
+	SetupLog(cfg)()
 	if err := views.Start(p, f, h); err != nil {
 		log.Println(err)
 	}
@@ -90,7 +91,15 @@ func Serve(cfg schema.Config) {
 		log.Fatal(err)
 	}
 
-	if err := server.Start(nil, f, h, r, cfg.Pth); err != nil {
+	var p play.Player
+	if cfg.RemotePlay {
+		p, err = play.NewLocal(cfg.Pth, cfg.Home, play.LocalDownload(download.NewLocal(cfg.Pth, r)), play.LocalHistory(h))
+		if err != nil {
+			log.Fatal(cfg.Addr, err)
+		}
+	}
+
+	if err := server.Start(p, f, h, r, cfg.Pth); err != nil {
 		log.Fatal("unable to start server ", err)
 	}
 }

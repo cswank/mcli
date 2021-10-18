@@ -152,6 +152,19 @@ func (l Local) Import(fn func(schema.Progress)) error {
 		}
 	}
 
+	// //TODO: delete database entires that are not on disk anymore
+	// artists, err := l.db.FindArtist("", 0, 100)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// for _, art := range artists {
+	// 	_, ok := m[art.Artist.Name]
+	// 	if ok {
+	// 		continue
+	// 	}
+	// }
+
 	return nil
 }
 

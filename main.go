@@ -38,7 +38,6 @@ func main() {
 	} else if *duration {
 		app.Duration(cfg)
 	} else {
-		defer app.SetupLog(cfg)()
 		app.UI(cfg)
 	}
 }
