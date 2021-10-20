@@ -74,7 +74,7 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 	}
 
 	if err := speaker.Init(44100, 44100/2); err != nil {
-		return nil, fmt.Errorf("uable to init speaker: %s", err)
+		return nil, fmt.Errorf("unable to init speaker: %s", err)
 	}
 
 	l := &Local{

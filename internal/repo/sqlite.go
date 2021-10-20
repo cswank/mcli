@@ -36,44 +36,6 @@ func NewSQL(cfg schema.Config) (*SQLite, error) {
 	}, err
 }
 
-func (s SQLite) DeleteArtist(id string) error {
-	tx, err := s.db.Begin()
-	if err != nil {
-		return err
-	}
-
-	_, err = tx.Exec(`DELETE FROM history h
-JOIN albums a ON a.id = t.album_id
-JOIN tracks t ON t.album_id = a.id
-WHERE a.artist_id = ?;`, id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	_, err = tx.Exec(`DELETE FROM tracks
-JOIN albums a ON a.id = t.album_id
-WHERE a.artist_id = ?;`, id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	_, err = tx.Exec(`DELETE FROM albums WHERE artist_id = ?;`, id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	_, err = s.db.Exec(`DELETE FROM artists WHERE id = ?;`, id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	return tx.Commit()
-}
-
 func (s SQLite) FindArtist(term string, p, ps int) ([]schema.Result, error) {
 	q := `SELECT id, name
 FROM artists
@@ -225,6 +187,44 @@ WHERE t.id = ?;`
 	err := s.db.QueryRow(q, id).Scan(&ar, &al, &t)
 	pth := fmt.Sprintf("%s.flac", filepath.Join(s.pth, ar, al, t))
 	return pth, err
+}
+
+func (s SQLite) DeleteArtist(id string) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM history h
+JOIN albums a ON a.id = t.album_id
+JOIN tracks t ON t.album_id = a.id
+WHERE a.artist_id = ?;`, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM tracks
+JOIN albums a ON a.id = t.album_id
+WHERE a.artist_id = ?;`, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM albums WHERE artist_id = ?;`, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = s.db.Exec(`DELETE FROM artists WHERE id = ?;`, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (s SQLite) Init() error {

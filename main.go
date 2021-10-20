@@ -15,9 +15,10 @@ var (
 
 var (
 	_          = kingpin.New("mcli", "A command-line music player.")
-	srv        = kingpin.Flag("serve", "start the grpc server").Default("false").Bool()
-	initDB     = kingpin.Flag("initdb", "initialize the database").Default("false").Bool()
-	duration   = kingpin.Flag("duration", "parse all songs in the database to get length").Default("false").Bool()
+	_          = kingpin.Command("serve", "start the grpc server")
+	_          = kingpin.Command("initdb", "initialize the database")
+	_          = kingpin.Command("duration", "parse all songs in the database to get length")
+	_          = kingpin.Command("ui", "mci UI").Default()
 	addr       = kingpin.Flag("address", "address of grpc server").Short('a').Envar("MCLI_HOST").String()
 	pth        = kingpin.Flag("music", "path to the flac files").Short('m').Envar("MCLI_MUSIC_LOCATION").String()
 	home       = kingpin.Flag("home", "path to the directory where the database file lives").Default(homeDir).Envar("MCLI_HOME").String()
@@ -27,17 +28,18 @@ var (
 )
 
 func main() {
-	kingpin.Parse()
+	cmd := kingpin.Parse()
 
 	cfg := schema.NewConfig(*addr, *pth, *home, *logout, *db, *remotePlay)
 
-	if *srv {
+	switch cmd {
+	case "serve":
 		app.Serve(cfg)
-	} else if *initDB {
+	case "initdb":
 		app.InitDB(cfg)
-	} else if *duration {
+	case "duration":
 		app.Duration(cfg)
-	} else {
+	default:
 		app.UI(cfg)
 	}
 }
