@@ -15,7 +15,7 @@ var (
 
 var (
 	_          = kingpin.New("mcli", "A command-line music player.")
-	_          = kingpin.Command("serve", "start the grpc server")
+	srv        = kingpin.Command("serve", "start the grpc server")
 	_          = kingpin.Command("initdb", "initialize the database")
 	_          = kingpin.Command("duration", "parse all songs in the database to get length")
 	_          = kingpin.Command("ui", "mci UI").Default()
@@ -25,12 +25,14 @@ var (
 	remotePlay = kingpin.Flag("remote", "play music on the server").Short('r').Default("false").Bool()
 	logout     = kingpin.Flag("log", "log location (for debugging)").Short('l').String()
 	db         = kingpin.Flag("db", "which db?").Short('d').Default("sqlite").Enum("sqlite", "storm")
+
+	speakers = srv.Flag("speakers", "play music on the server").Short('s').Default("true").Bool()
 )
 
 func main() {
 	cmd := kingpin.Parse()
 
-	cfg := schema.NewConfig(*addr, *pth, *home, *logout, *db, *remotePlay)
+	cfg := schema.NewConfig(*addr, *pth, *home, *logout, *db, *remotePlay, speakers)
 
 	switch cmd {
 	case "serve":

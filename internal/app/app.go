@@ -92,7 +92,7 @@ func Serve(cfg schema.Config) {
 	}
 
 	var p play.Player
-	if cfg.RemotePlay {
+	if cfg.Speakers {
 		p, err = play.NewLocal(cfg.Pth, cfg.Home, play.LocalDownload(download.NewLocal(cfg.Pth, r)), play.LocalHistory(h))
 		if err != nil {
 			log.Fatal(cfg.Addr, err)

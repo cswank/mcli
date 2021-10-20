@@ -14,9 +14,11 @@ type Config struct {
 	Log        string
 	DB         string
 	RemotePlay bool
+	Speakers   bool
 }
 
-func NewConfig(addr, pth, home, log, db string, remotePlay bool) Config {
+func NewConfig(addr, pth, home, log, db string, remotePlay bool, speakers *bool) Config {
+	s := speakers != nil && *speakers
 	return Config{
 		Addr:       addr,
 		Pth:        pth,
@@ -24,6 +26,7 @@ func NewConfig(addr, pth, home, log, db string, remotePlay bool) Config {
 		Log:        log,
 		DB:         db,
 		RemotePlay: remotePlay,
+		Speakers:   s,
 	}
 }
 
