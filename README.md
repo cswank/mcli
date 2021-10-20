@@ -38,6 +38,8 @@ If a remote server is required (client configurations 2 and 3 above):
 mcli serve -m /path/to/flac/files --host <dns name or ip address of this machine> --home /path/to/directory/where/mcli/database/lives
 ```
 
+NOTE:  use --speakers=false if this server doesn't play music on its local machine
+
 ## Flac directory layout
 The flac files must be orgainized like $MCLI_MUSIC_LOCATION/artist/album/song.flac
 
