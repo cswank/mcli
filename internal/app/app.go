@@ -76,8 +76,6 @@ func remote(cfg schema.Config) (play.Player, fetch.Fetcher, history.History, fun
 }
 
 func Serve(cfg schema.Config) {
-	SetupLog(cfg)()
-
 	r, err := db(cfg)
 	if err != nil {
 		log.Fatal(err)
