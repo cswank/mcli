@@ -46,8 +46,8 @@ func UI(cfg schema.Config) {
 	}
 
 	defer close()
+	defer SetupLog(cfg)()
 
-	SetupLog(cfg)()
 	if err := views.Start(p, f, h); err != nil {
 		log.Println(err)
 	}

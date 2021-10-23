@@ -43,6 +43,7 @@ type Local struct {
 	currentResult *schema.Result
 	dl            download.Downloader
 	pth           string
+	sampleRate    int
 }
 
 type flacSettings struct {
@@ -89,6 +90,7 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 		onDeck:      make(chan song),
 		volume:      s.Volume,
 		pth:         pth,
+		sampleRate:  44100,
 	}
 
 	for _, opt := range opts {
@@ -221,6 +223,7 @@ func (l *Local) playLoop() {
 		s := <-l.onDeck
 		l.playing = true
 		if err := l.doPlay(s); err != nil {
+			l.nextSongCB(schema.Result{Error: err.Error()})
 			log.Printf("error playing song %+v: %s", s, err)
 		}
 		l.playing = false
@@ -231,6 +234,14 @@ func (l *Local) doPlay(s song) error {
 	music, format, err := flac.Decode(s.reader())
 	if err != nil {
 		return err
+	}
+
+	if int(format.SampleRate) != l.sampleRate {
+		speaker.Close()
+		if err := speaker.Init(format.SampleRate, int(format.SampleRate)/2); err == nil {
+			return fmt.Errorf("unable to init speaker: %s", err)
+		}
+		l.sampleRate = int(format.SampleRate)
 	}
 
 	ln := music.Len()
@@ -248,16 +259,8 @@ func (l *Local) doPlay(s song) error {
 		Volume:   l.volume,
 	}
 
-	eq := effects.NewEqualizer(vol, format.SampleRate, effects.MonoEqualizerSections{
-		{F0: 200, Bf: 5, GB: 2, G0: 0, G: 5},
-		{F0: 250, Bf: 5, GB: 2, G0: 0, G: 10},
-		{F0: 300, Bf: 5, GB: 2, G0: 0, G: 12},
-		{F0: 350, Bf: 5, GB: 2, G0: 0, G: 14},
-		{F0: 10000, Bf: 500, GB: 2, G0: 0, G: -90},
-	})
-
 	ctrl := &beep.Ctrl{
-		Streamer: eq,
+		Streamer: vol,
 	}
 
 	speaker.Play(ctrl)
