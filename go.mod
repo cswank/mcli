@@ -30,3 +30,5 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.28
 	gopkg.in/vmihailenco/msgpack.v2 v2.9.1 // indirect
 )
+
+replace github.com/faiface/beep => /home/craig/Projects/beep

@@ -43,7 +43,7 @@ type Local struct {
 	currentResult *schema.Result
 	dl            download.Downloader
 	pth           string
-	sampleRate    int
+	speakers      map[beep.SampleRate]*speaker.Speaker
 }
 
 type flacSettings struct {
@@ -74,7 +74,8 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 		json.NewEncoder(f).Encode(s)
 	}
 
-	if err := speaker.Init(44100, 44100/2); err != nil {
+	sp, err := speaker.New(44100, 44100/2)
+	if err != nil {
 		return nil, fmt.Errorf("unable to init speaker: %s", err)
 	}
 
@@ -90,7 +91,7 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 		onDeck:      make(chan song),
 		volume:      s.Volume,
 		pth:         pth,
-		sampleRate:  44100,
+		speakers:    map[beep.SampleRate]*speaker.Speaker{44100: sp},
 	}
 
 	for _, opt := range opts {
@@ -236,12 +237,24 @@ func (l *Local) doPlay(s song) error {
 		return err
 	}
 
-	if int(format.SampleRate) != l.sampleRate {
-		speaker.Close()
-		if err := speaker.Init(format.SampleRate, int(format.SampleRate)/2); err == nil {
+	vol := &effects.Volume{
+		Streamer: music,
+		Base:     2,
+		Volume:   l.volume,
+	}
+
+	ctrl := &beep.Ctrl{
+		Streamer: vol,
+	}
+
+	sp, ok := l.speakers[format.SampleRate]
+	if !ok {
+		s, err := speaker.New(format.SampleRate, int(format.SampleRate)/2)
+		if err != nil {
 			return fmt.Errorf("unable to init speaker: %s", err)
 		}
-		l.sampleRate = int(format.SampleRate)
+		l.speakers[format.SampleRate] = s
+		sp = s
 	}
 
 	ln := music.Len()
@@ -253,17 +266,7 @@ func (l *Local) doPlay(s song) error {
 		return fmt.Errorf("unable to save history for result %+v: %s", s.result, err)
 	}
 
-	vol := &effects.Volume{
-		Streamer: music,
-		Base:     2,
-		Volume:   l.volume,
-	}
-
-	ctrl := &beep.Ctrl{
-		Streamer: vol,
-	}
-
-	speaker.Play(ctrl)
+	sp.Play(ctrl)
 
 	var done bool
 	var paused bool
@@ -278,26 +281,26 @@ func (l *Local) doPlay(s song) error {
 				l.playCB(schema.Progress{N: pos, Total: ln})
 			}
 		case v := <-l.vol:
-			speaker.Lock()
+			sp.Lock()
 			if (l.volume < 2.0 && v > 0.0) || (l.volume > -5.0 && v < 0.0) {
 				vol.Volume += v
 				l.volume = vol.Volume
 			}
-			speaker.Unlock()
+			sp.Unlock()
 			l.volOut <- l.volume
 		case <-l.pause:
 			paused = !paused
-			speaker.Lock()
+			sp.Lock()
 			ctrl.Paused = paused
-			speaker.Unlock()
+			sp.Unlock()
 		case <-l.fastForward:
 			done = true
 		case i := <-l.seek:
-			speaker.Lock()
+			sp.Lock()
 			t := music.Len() / int(format.SampleRate)
 			pos := music.Len() * i / t
 			music.Seek(pos)
-			speaker.Unlock()
+			sp.Unlock()
 		case <-l.rewind:
 			music.Close()
 			s.r.Seek(0, 0)
@@ -306,6 +309,7 @@ func (l *Local) doPlay(s song) error {
 	}
 
 	l.currentResult = nil
+	sp.Clear()
 	return music.Close()
 }
 
