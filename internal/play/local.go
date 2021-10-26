@@ -44,6 +44,7 @@ type Local struct {
 	dl            download.Downloader
 	pth           string
 	speakers      map[beep.SampleRate]*speaker.Speaker
+	speaker       *speaker.Speaker
 }
 
 type flacSettings struct {
@@ -92,6 +93,7 @@ func NewLocal(dir, home string, opts ...func(*Local)) (*Local, error) {
 		volume:      s.Volume,
 		pth:         pth,
 		speakers:    map[beep.SampleRate]*speaker.Speaker{44100: sp},
+		speaker:     sp,
 	}
 
 	for _, opt := range opts {
@@ -249,12 +251,13 @@ func (l *Local) doPlay(s song) error {
 
 	sp, ok := l.speakers[format.SampleRate]
 	if !ok {
-		s, err := speaker.New(format.SampleRate, int(format.SampleRate)/2)
+		l.speaker.Pause()
+		newSp, err := speaker.New(format.SampleRate, int(format.SampleRate)/2)
 		if err != nil {
 			return fmt.Errorf("unable to init speaker: %s", err)
 		}
-		l.speakers[format.SampleRate] = s
-		sp = s
+		l.speakers[format.SampleRate] = newSp
+		sp = newSp
 	}
 
 	ln := music.Len()
@@ -303,11 +306,13 @@ func (l *Local) doPlay(s song) error {
 			sp.Unlock()
 		case <-l.rewind:
 			music.Close()
+			sp.Clear()
 			s.r.Seek(0, 0)
 			return l.doPlay(s)
 		}
 	}
 
+	l.playCB(schema.Progress{N: 0, Total: 0})
 	l.currentResult = nil
 	sp.Clear()
 	return music.Close()
