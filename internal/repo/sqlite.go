@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"path/filepath"
 	"strings"
 	"time"
@@ -186,6 +187,7 @@ WHERE t.id = ?;`
 	var ar, al, t string
 	err := s.db.QueryRow(q, id).Scan(&ar, &al, &t)
 	pth := fmt.Sprintf("%s.flac", filepath.Join(s.pth, ar, al, t))
+	log.Printf("Track %s", pth)
 	return pth, err
 }
 

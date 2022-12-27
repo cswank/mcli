@@ -46,6 +46,7 @@ func (r Remote) Volume(v float64) float64 {
 	f, err := r.client.Volume(context.Background(), &rpc.Float{Value: float32(v)})
 	if err != nil {
 		log.Println(err)
+		f = &rpc.Float{}
 	}
 	return float64(f.Value)
 }
